@@ -1,0 +1,6 @@
+exclude = {
+    '/test/',
+    '/.rocks/',
+    '/.luarocks',
+}
+tick = true
