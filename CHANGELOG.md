@@ -1,0 +1,20 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+Initial version of a Jepsen-like framework written in Lua programming language.
+
+### Added
+
+- Compatibility with a Jepsen-history format.
+- Support of Tarantool fibers.
+- Support of Lua coroutines.
+- GH Actions workflows with check, testing, publishing actions.
+- Luarocks spec.
+- Examples with SQLite tests.
+- Generators with `list-append` and `rw-register` operations.
