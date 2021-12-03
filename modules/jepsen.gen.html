@@ -75,7 +75,7 @@
 <p>
 
 
-<p> Example of generator:</p>
+<p> Example of generator that generates two operations <code>w</code> and <code>r</code>:</p>
 
 
 <pre>
@@ -140,27 +140,19 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#duplicate">duplicate ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">The iterator returns values over and over again indefinitely.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#xrepeat">xrepeat ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">An alias for duplicate()</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#replicate">replicate ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">An alias for duplicate()</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#tabulate">tabulate ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">Return <code>fun(0)</code>, <code>fun(1)</code>, <code>fun(2)</code>, ...</td>
 	</tr>
 </table>
 <h2><a href="#Generators__Random_sampling">Generators: Random sampling </a></h2>
@@ -278,60 +270,45 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#filter">filter ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">Return a new iterator of those elements that satisfy the <code>predicate</code>.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#remove_if">remove_if ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">An alias for filter()</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#grep">grep ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">If <code>regexp_or_predicate</code> is string then the parameter is used as a regular
+ expression to build filtering predicate.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#partition">partition ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">The function returns two iterators where elements do and do not satisfy the
+ predicate.</td>
 	</tr>
 </table>
 <h2><a href="#Reducing__Folds">Reducing: Folds </a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#foldl">foldl ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">The function reduces the iterator from left to right using the binary
+ operator <code>accfun</code> and the initial value <code>initval</code>.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#reduce">reduce ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">An alias to gen.foldl.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#length">length ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">Return a number of elements in <code>gen, param, state</code> iterator.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#totable">totable ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">Return a new table (array) from iterated values.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#tomap">tomap ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">Return a new table (map) from iterated values.</td>
 	</tr>
 </table>
 <h2><a href="#Reducing__Predicates">Reducing: Predicates </a></h2>
@@ -432,11 +409,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 <br/>
 
 
-    <h2 class="section-header has-description"><a name="Basic_Functions"></a>Basic Functions </h2>
+    <h2 class="section-header "><a name="Basic_Functions"></a>Basic Functions </h2>
 
-          <div class="section-description">
-           Functions
-          </div>
     <dl class="function">
     <dt>
     <a name = "iter"></a>
@@ -495,11 +469,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Generators__Finite_Generators"></a>Generators: Finite Generators </h2>
+    <h2 class="section-header "><a name="Generators__Finite_Generators"></a>Generators: Finite Generators </h2>
 
-          <div class="section-description">
-           Finite Generators
-          </div>
     <dl class="function">
     <dt>
     <a name = "range"></a>
@@ -516,18 +487,17 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Generators__Infinity_Generators"></a>Generators: Infinity Generators </h2>
+    <h2 class="section-header "><a name="Generators__Infinity_Generators"></a>Generators: Infinity Generators </h2>
 
-          <div class="section-description">
-           Infinity Generators
-          </div>
     <dl class="function">
     <dt>
     <a name = "duplicate"></a>
     <strong>duplicate ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+    The iterator returns values over and over again indefinitely.  All values
+ that passed to the iterator are returned as-is during the iteration.
+ See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
 
 
 
@@ -541,7 +511,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>xrepeat ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+    An alias for duplicate()
+ See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
 
 
 
@@ -555,7 +526,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>replicate ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+    An alias for duplicate()
+ See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
 
 
 
@@ -569,7 +541,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>tabulate ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/generators.html#fun.tabulate">fun.tabulate</a>.
+    Return <code>fun(0)</code>, <code>fun(1)</code>, <code>fun(2)</code>, ...  values indefinitely.
+ See <a href="https://luafun.github.io/generators.html#fun.tabulate">fun.tabulate</a>.
 
 
 
@@ -579,11 +552,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Generators__Random_sampling"></a>Generators: Random sampling </h2>
+    <h2 class="section-header "><a name="Generators__Random_sampling"></a>Generators: Random sampling </h2>
 
-          <div class="section-description">
-           Random sampling
-          </div>
     <dl class="function">
     <dt>
     <a name = "rands"></a>
@@ -600,11 +570,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Slicing__Subsequences"></a>Slicing: Subsequences </h2>
+    <h2 class="section-header "><a name="Slicing__Subsequences"></a>Slicing: Subsequences </h2>
 
-          <div class="section-description">
-           Subsequences
-          </div>
     <dl class="function">
     <dt>
     <a name = "take_n"></a>
@@ -843,7 +810,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>filter ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
+    Return a new iterator of those elements that satisfy the <code>predicate</code>.
+ See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
 
 
 
@@ -857,7 +825,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>remove_if ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
+    An alias for filter()
+ See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
 
 
 
@@ -871,7 +840,10 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>grep ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/filtering.html#fun.grep">fun.grep</a>.
+    If <code>regexp_or_predicate</code> is string then the parameter is used as a regular
+ expression to build filtering predicate.  Otherwise the function is just an
+ alias for gen.filter().
+ See <a href="https://luafun.github.io/filtering.html#fun.grep">fun.grep</a>.
 
 
 
@@ -885,7 +857,9 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>partition ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/filtering.html#fun.partition">fun.partition</a>.
+    The function returns two iterators where elements do and do not satisfy the
+ predicate.
+ See <a href="https://luafun.github.io/filtering.html#fun.partition">fun.partition</a>.
 
 
 
@@ -895,18 +869,17 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Reducing__Folds"></a>Reducing: Folds </h2>
+    <h2 class="section-header "><a name="Reducing__Folds"></a>Reducing: Folds </h2>
 
-          <div class="section-description">
-           Folds
-          </div>
     <dl class="function">
     <dt>
     <a name = "foldl"></a>
     <strong>foldl ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
+    The function reduces the iterator from left to right using the binary
+ operator <code>accfun</code> and the initial value <code>initval</code>.
+ See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
 
 
 
@@ -920,7 +893,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>reduce ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
+    An alias to gen.foldl.
+ See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
 
 
 
@@ -934,7 +908,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>length ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.length">fun.length</a>.
+    Return a number of elements in <code>gen, param, state</code> iterator.
+ See <a href="https://luafun.github.io/reducing.html#fun.length">fun.length</a>.
 
 
 
@@ -948,7 +923,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>totable ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.totable">fun.totable</a>.
+    Return a new table (array) from iterated values.
+ See <a href="https://luafun.github.io/reducing.html#fun.totable">fun.totable</a>.
 
 
 
@@ -962,7 +938,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>tomap ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.tomap">fun.tomap</a>.
+    Return a new table (map) from iterated values.
+ See <a href="https://luafun.github.io/reducing.html#fun.tomap">fun.tomap</a>.
 
 
 
@@ -972,11 +949,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Reducing__Predicates"></a>Reducing: Predicates </h2>
+    <h2 class="section-header "><a name="Reducing__Predicates"></a>Reducing: Predicates </h2>
 
-          <div class="section-description">
-           Predicates
-          </div>
     <dl class="function">
     <dt>
     <a name = "is_prefix_of"></a>
@@ -1155,11 +1129,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </dd>
 </dl>
-    <h2 class="section-header has-description"><a name="Special_generators"></a>Special generators </h2>
+    <h2 class="section-header "><a name="Special_generators"></a>Special generators </h2>
 
-          <div class="section-description">
-           generators
-          </div>
     <dl class="function">
     <dt>
     <a name = "stagger"></a>
@@ -1197,7 +1168,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2021-12-03 12:42:57 </i>
+<i style="float:right;">Last updated 2021-12-03 19:19:17 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
