@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Lua Jepsen API reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>Lua Jepsen</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#lua_jepsen">lua-jepsen </a></li>
+</ul>
+
+
+<h2>Topics</h2>
+<ul class="">
+  <li><strong>README</strong></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/jepsen.checkers.html">jepsen.checkers</a></li>
+  <li><a href="../modules/jepsen.client.html">jepsen.client</a></li>
+  <li><a href="../modules/jepsen.clock.html">jepsen.clock</a></li>
+  <li><a href="../modules/jepsen.gen.html">jepsen.gen</a></li>
+  <li><a href="../modules/jepsen.history.html">jepsen.history</a></li>
+  <li><a href="../modules/jepsen.html">jepsen</a></li>
+  <li><a href="../modules/jepsen.log.html">jepsen.log</a></li>
+  <li><a href="../modules/jepsen.nemesis.html">jepsen.nemesis</a></li>
+  <li><a href="../modules/jepsen.op.html">jepsen.op</a></li>
+  <li><a href="../modules/jepsen.runner.html">jepsen.runner</a></li>
+  <li><a href="../modules/jepsen.utils.html">jepsen.utils</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+
+<p><a href="https://github.com/ligurio/lua-jepsen/actions/workflows/check.yaml"><img src="https://github.com/ligurio/lua-jepsen/actions/workflows/check.yaml/badge.svg" alt="Static analysis"/></a>
+<a href="https://github.com/ligurio/lua-jepsen/actions/workflows/test.yaml"><img src="https://github.com/ligurio/lua-jepsen/actions/workflows/test.yaml/badge.svg" alt="Testing"/></a>
+<a href="https://coveralls.io/github/ligurio/lua-jepsen?branch=dev"><img src="https://coveralls.io/repos/github/ligurio/lua-jepsen/badge.svg?branch=dev" alt="Coverage Status"/></a></p>
+
+<p><a name="lua_jepsen"></a></p>
+<h2>lua-jepsen</h2>
+
+<p>is a framework for distributed systems verification, with fault injection.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+    <li>Lua interpreter: <a href="https://luajit.org/install.html">LuaJIT</a> or LuaJIT-based is
+    recommended.</li>
+    <li><a href="https://github.com/tarantool/checks">checks</a> - easy, terse, readable and
+    fast function arguments type checking.</li>
+    <li><a href="https://luafun.github.io/basic.html">luafun</a> - Lua functional library.</li>
+    <li><a href="https://github.com/mpx/lua-cjson">lua-cjson</a> - fast JSON encoding and
+    decoding module.</li>
+    <li>(optional) <a href="https://keplerproject.github.io/luasql/manual.html">luasql</a> - is
+    a simple interface to a number of database management systems.</li>
+    <li>(optional) <a href="https://github.com/ligurio/unreliablefs">unreliablefs</a> - a
+    FUSE-based fault injection filesystem.</li>
+    <li>(optional) Jepsen-compatible consistency checker. For example
+    <a href="https://github.com/ligurio/elle-cli">elle-cli</a>, based on Jepsen, Elle and
+    Knossos.</li>
+</ul>
+
+<h3>Why?</h3>
+
+<ul>
+    <li><strong>Simple language</strong>. <a href="https://www.lua.org/about.html">Lua</a> is simple, but
+    not simplistic: Lua has a simple, yet powerful syntax which fits on a single
+    page. The semantics are consistent and intuitive.</li>
+    <li><strong>Fast interpreter</strong>. <a href="https://luajit.org/">LuaJIT</a>.</li>
+    <li><strong>Seamless integration with C and C++ source code</strong>. LuaJIT's FFI is a quite
+    fast and simple mechanism allowing to call C functions directly. LuaJIT's FFI
+    is <a href="https://nullprogram.com/blog/2018/05/27/">substantially faster than C</a>.
+    It's about 25% faster than a native C function call to a shared object
+    function.</li>
+    <li><strong>Fast and powerful generators</strong>. Lua functional is a library that allows to
+    build generators with exceptional performance, most of them produce about
+    0.8-1.4M ops per second. In the same time Jepsen generators are slow:
+    "Realistic generator tests yield rates over 20,000 operations/sec, which seems
+    more than sufficient for Jepsen's purposes.". 20k ops/sec is not so much for
+    testing of real production systems.</li>
+    <li><strong>Cooperative multitasking</strong>. Cooperative multitasking is less error-prone
+    than preemptive one. Jepsen library has a problems with multithreading, that
+    Kyle Kingsbury "have never had the chance to dig in and fix".</li>
+    <li><strong>Modern transactional safety checkers</strong>. The main strength of Jepsen is
+    it's transational safety checkers. <code>lua-jepsen</code> provides the same level of
+    confidence as an original Jepsen library because of using
+    <a href="https://github.com/ligurio/elle-cli">elle-cli</a> built on top of Elle, Knossos
+    and Jepsen's consistency checkers.</li>
+</ul>
+
+<h3>Installation</h3>
+
+<ul>
+    <li>Download and setup Lua interpreter, LuaJIT or LuaJIT-based is recommended.</li>
+    <li>Install library using LuaRocks:</li>
+</ul>
+
+
+<pre>
+$ luarocks install <span class="comment">--local --server=https://luarocks.org/dev lua-jepsen</span>
+</pre>
+
+
+<p>NOTE: Installation of modules <code>luafun</code> and <code>lua-cjson</code> is not required when
+Tarantool is used, both modules are built-in there. However these modules are
+included to the rockspec for user's convenience.</p>
+
+<h3>Performance notes</h3>
+
+<ul>
+    <li>Debug mode. By default tests enables type checking, see statements with
+    <code>checks()</code> in source code, and code coverage gathering. These requires using
+    Lua <a href="https://www.lua.org/manual/5.1/manual.html#5.9">debug</a> module, that can significantly slowdown of execution (about 1.6
+    times). You can control it with environment variable <code>DEV</code>, to run tests with
+    disabled type checking and code coverage: <code>DEV=OFF make test</code>.</li>
+    <li>TODO: Tarantool vs LuaJIT vs PUC Rio Lua (fibers vs coroutines, FFI vs pure Lua)</li>
+    <li>Tarantool profiler:</li>
+    <li>enable: <code>require(&apos;jit.p&apos;).start(&apos;f&apos;, &apos;profile.txt&apos;)</code></li>
+    <li>disable: <code>require(&apos;jit.p&apos;).stop()</code></li>
+</ul>
+
+<h3>Hacking</h3>
+
+<pre><code> $ make luacheck
+ $ make test
+</code></pre>
+
+
+<h3>Testing libraries similar to Jepsen</h3>
+
+<ul>
+    <li><a href="https://github.com/jepsen-io/jepsen">jepsen-io/jepsen</a> (Clojure)</li>
+    <li><a href="https://github.com/michaelzenz/jecci">michaelzenz/jecci</a> (Clojure, based on Jepsen)</li>
+    <li><a href="https://github.com/pingcap/chaos">pingcap/chaos</a> (Go)</li>
+    <li><a href="https://github.com/mbsimonovic/jepsen-python">mbsimonovic/jepsen-python</a> (Python)</li>
+    <li><a href="https://ducktape-docs.readthedocs.io/">Ducktape</a> (Python)</li>
+</ul>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2021-12-03 09:52:00 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
