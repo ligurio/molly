@@ -30,6 +30,21 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Basic_Functions">Basic Functions </a></li>
+<li><a href="#Generators__Finite_Generators">Generators: Finite Generators </a></li>
+<li><a href="#Generators__Infinity_Generators">Generators: Infinity Generators </a></li>
+<li><a href="#Generators__Random_sampling">Generators: Random sampling </a></li>
+<li><a href="#Slicing__Subsequences">Slicing: Subsequences </a></li>
+<li><a href="#Indexing">Indexing </a></li>
+<li><a href="#Filtering">Filtering </a></li>
+<li><a href="#Reducing__Folds">Reducing: Folds </a></li>
+<li><a href="#Reducing__Predicates">Reducing: Predicates </a></li>
+<li><a href="#Transformations">Transformations </a></li>
+<li><a href="#Compositions">Compositions </a></li>
+<li><a href="#Special_generators">Special generators </a></li>
+</ul>
 
 
 <h2>Modules</h2>
@@ -85,18 +100,1104 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 </p>
 
 
+<h2><a href="#Basic_Functions">Basic Functions </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#iter">iter ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#each">each ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#for_each">for_each ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#foreach">foreach ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Generators__Finite_Generators">Generators: Finite Generators </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#range">range ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Generators__Infinity_Generators">Generators: Infinity Generators </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#duplicate">duplicate ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#xrepeat">xrepeat ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#replicate">replicate ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tabulate">tabulate ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Generators__Random_sampling">Generators: Random sampling </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#rands">rands ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Slicing__Subsequences">Slicing: Subsequences </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#take_n">take_n ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#take_while">take_while ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#take">take ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#drop_n">drop_n ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#drop_while">drop_while ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#drop">drop ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#span">span ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#split">split ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#split_at">split_at ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Indexing">Indexing </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#index">index ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#index_of">index_of ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#elem_index">elem_index ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#indexes">indexes ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#indices">indices ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#elem_indexes">elem_indexes ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#elem_indices">elem_indices ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Filtering">Filtering </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#filter">filter ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#remove_if">remove_if ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#grep">grep ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#partition">partition ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Reducing__Folds">Reducing: Folds </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#foldl">foldl ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reduce">reduce ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#length">length ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#totable">totable ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#tomap">tomap ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Reducing__Predicates">Reducing: Predicates </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#is_prefix_of">is_prefix_of ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_null">is_null ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#all">all ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#every">every ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#any">any ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#some">some ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Transformations">Transformations </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#map">map ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#enumerate">enumerate ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#intersperse">intersperse ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Compositions">Compositions </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#zip">zip ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cycle">cycle ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#chain">chain ()</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
+<h2><a href="#Special_generators">Special generators </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#stagger">stagger ()</a></td>
+	<td class="summary">Operations from that generator are scheduled at uniformly random intervals
+ between 0 to 2 * (dt seconds).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#time_limit">time_limit ()</a></td>
+	<td class="summary">Stops producing operations when time limit is exceeded.</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
+    <h2 class="section-header has-description"><a name="Basic_Functions"></a>Basic Functions </h2>
+
+          <div class="section-description">
+           Functions
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "iter"></a>
+    <strong>iter ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/basic.html#fun.iter">fun.iter</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "each"></a>
+    <strong>each ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/basic.html#fun.each">fun.each</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "for_each"></a>
+    <strong>for_each ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/basic.html#fun.each">fun.each</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "foreach"></a>
+    <strong>foreach ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/basic.html#fun.each">fun.each</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Generators__Finite_Generators"></a>Generators: Finite Generators </h2>
+
+          <div class="section-description">
+           Finite Generators
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "range"></a>
+    <strong>range ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/generators.html#fun.range">fun.range</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Generators__Infinity_Generators"></a>Generators: Infinity Generators </h2>
+
+          <div class="section-description">
+           Infinity Generators
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "duplicate"></a>
+    <strong>duplicate ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "xrepeat"></a>
+    <strong>xrepeat ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "replicate"></a>
+    <strong>replicate ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tabulate"></a>
+    <strong>tabulate ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/generators.html#fun.tabulate">fun.tabulate</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Generators__Random_sampling"></a>Generators: Random sampling </h2>
+
+          <div class="section-description">
+           Random sampling
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "rands"></a>
+    <strong>rands ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/generators.html#fun.rands">fun.rands</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Slicing__Subsequences"></a>Slicing: Subsequences </h2>
+
+          <div class="section-description">
+           Subsequences
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "take_n"></a>
+    <strong>take_n ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.take_n">fun.take_n</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "take_while"></a>
+    <strong>take_while ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.take_while">fun.take_while</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "take"></a>
+    <strong>take ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.take">fun.take</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "drop_n"></a>
+    <strong>drop_n ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.drop_n">fun.drop_n</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "drop_while"></a>
+    <strong>drop_while ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.drop_while">fun.drop_while</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "drop"></a>
+    <strong>drop ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.drop">fun.drop</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "span"></a>
+    <strong>span ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.span">fun.span</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "split"></a>
+    <strong>split ()</strong>
+    </dt>
+    <dd>
+     See [fun.span](https://luafun.github.io/slicing.html#fun.span.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "split_at"></a>
+    <strong>split_at ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/slicing.html#fun.span">fun.span</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Indexing"></a>Indexing </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "index"></a>
+    <strong>index ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/indexing.html#fun.index">fun.index</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "index_of"></a>
+    <strong>index_of ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/indexing.html#fun.index">fun.index</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "elem_index"></a>
+    <strong>elem_index ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/indexing.html#fun.index">fun.index</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "indexes"></a>
+    <strong>indexes ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "indices"></a>
+    <strong>indices ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "elem_indexes"></a>
+    <strong>elem_indexes ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "elem_indices"></a>
+    <strong>elem_indices ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Filtering"></a>Filtering </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "filter"></a>
+    <strong>filter ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "remove_if"></a>
+    <strong>remove_if ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "grep"></a>
+    <strong>grep ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/filtering.html#fun.grep">fun.grep</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "partition"></a>
+    <strong>partition ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/filtering.html#fun.partition">fun.partition</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Reducing__Folds"></a>Reducing: Folds </h2>
+
+          <div class="section-description">
+           Folds
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "foldl"></a>
+    <strong>foldl ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reduce"></a>
+    <strong>reduce ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "length"></a>
+    <strong>length ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.length">fun.length</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "totable"></a>
+    <strong>totable ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.totable">fun.totable</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "tomap"></a>
+    <strong>tomap ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.tomap">fun.tomap</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Reducing__Predicates"></a>Reducing: Predicates </h2>
+
+          <div class="section-description">
+           Predicates
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "is_prefix_of"></a>
+    <strong>is_prefix_of ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.is_prefix_of">fun.is<em>prefix</em>of</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_null"></a>
+    <strong>is_null ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.is_null">fun.is_null</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "all"></a>
+    <strong>all ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.all">fun.all</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "every"></a>
+    <strong>every ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.all">fun.all</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "any"></a>
+    <strong>any ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.any">fun.any</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "some"></a>
+    <strong>some ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/reducing.html#fun.any">fun.any</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Transformations"></a>Transformations </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "map"></a>
+    <strong>map ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/transformations.html#fun.map">fun.map</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "enumerate"></a>
+    <strong>enumerate ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/transformations.html#fun.enumerate">fun.enumerate</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "intersperse"></a>
+    <strong>intersperse ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/transformations.html#fun.intersperse">fun.intersperse</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Compositions"></a>Compositions </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "zip"></a>
+    <strong>zip ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/compositions.html#fun.zip">fun.zip</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cycle"></a>
+    <strong>cycle ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/compositions.html#fun.cycle">fun.cycle</a>.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "chain"></a>
+    <strong>chain ()</strong>
+    </dt>
+    <dd>
+     See <a href="https://luafun.github.io/compositions.html#fun.chain">fun.chain</a>.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Special_generators"></a>Special generators </h2>
+
+          <div class="section-description">
+           generators
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "stagger"></a>
+    <strong>stagger ()</strong>
+    </dt>
+    <dd>
+    Operations from that generator are scheduled at uniformly random intervals
+ between 0 to 2 * (dt seconds).
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "time_limit"></a>
+    <strong>time_limit ()</strong>
+    </dt>
+    <dd>
+    Stops producing operations when time limit is exceeded.
+
+
+
+
+
+
+
+</dd>
+</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2021-12-03 10:19:51 </i>
+<i style="float:right;">Last updated 2021-12-03 12:39:41 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
