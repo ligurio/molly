@@ -38,10 +38,10 @@
   <li><a href="../modules/jepsen.client.html">jepsen.client</a></li>
   <li><a href="../modules/jepsen.clock.html">jepsen.clock</a></li>
   <li><a href="../modules/jepsen.compat.coroutine.html">jepsen.compat.coroutine</a></li>
-  <li><a href="../modules/jepsen.compat.fiber.html">jepsen.compat.fiber</a></li>
+  <li><strong>jepsen.compat.fiber</strong></li>
   <li><a href="../modules/jepsen.gen.html">jepsen.gen</a></li>
   <li><a href="../modules/jepsen.history.html">jepsen.history</a></li>
-  <li><strong>jepsen</strong></li>
+  <li><a href="../modules/jepsen.html">jepsen</a></li>
   <li><a href="../modules/jepsen.log.html">jepsen.log</a></li>
   <li><a href="../modules/jepsen.nemesis.html">jepsen.nemesis</a></li>
   <li><a href="../modules/jepsen.op.html">jepsen.op</a></li>
@@ -58,17 +58,35 @@
 
 <div id="content">
 
-<h1>Module <code>jepsen</code></h1>
-<p>Lua Jepsen module</p>
+<h1>Module <code>jepsen.compat.fiber</code></h1>
+<p>Module with implementation of threads based on fibers</p>
 <p>
 
+
+<p> Fibers are a unique Tarantool feature - 'green threads' or coroutines that
+ run independently of operating system threads. Fibers nicely illustrate
+ Tarantool's theoretical grounding in the actor model, which is based on the
+ concept of a number of light processes that cooperatively multitask and
+ communicate with one another through messaging. An advantageous feature of
+ Tarantool fibers is that they include local storage.</p>
+
+<p> Tarantool is programmed using Lua, which has its own coroutines, but due to
+ the way that fibers interface with Tarantool's asynchronous event loop, it is
+ better to use fibers rather than Lua coroutines. Fibers work well with all of
+ the non-blocking I/O that is built into Tarantool's application server and
+ fibers yield implicitly to other fibers, whereas this logic would have to be
+ added for coroutines.</p>
+
+<h3>References</h3>
+
+<ul>
+    <li><a href="https://www.tarantool.io/en/doc/latest/reference/reference_lua/fiber/">Tarantool Documentation: Module fiber</a></li>
+    <li><a href="https://www.tarantool.io/en/doc/latest/book/box/atomic/">Tarantool Documentation: Transaction Control</a></li>
+    <li><a href="https://docs.tarantool.dev/en/latest/fiber.html">Tarantool Internals: Fibers</a></li>
+    <li><a href="https://blueprints.launchpad.net/tarantool/+spec/fiber-specialization">Separate roles of fibers that do network I/O and execute requests</a></li>
+    <li><a href="https://stackoverflow.com/questions/36152489/when-to-use-fibers-and-when-to-use-co-routines-in-tarantool">When to use fibers and when to use co-routines in Tarantool?</a></li>
+</ul>
 </p>
-    <h3>Info:</h3>
-    <ul>
-        <li><strong>Copyright</strong>: Sergey Bronnikov, 2021</li>
-        <li><strong>License</strong>: ISC</li>
-        <li><strong>Author</strong>: Sergey Bronnikov</li>
-    </ul>
 
 
 
