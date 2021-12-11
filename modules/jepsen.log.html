@@ -30,6 +30,10 @@
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
 
 
 <h2>Modules</h2>
@@ -65,18 +69,217 @@
 </p>
 
 
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#trace">trace (message)</a></td>
+	<td class="summary">Log message with verbose level 'trace'.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#debug">debug (message)</a></td>
+	<td class="summary">Log message with verbose level 'debug'.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#info">info (message)</a></td>
+	<td class="summary">Log message with verbose level 'info'.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#warn">warn (message)</a></td>
+	<td class="summary">Log message with verbose level 'warn'.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#error">error (message)</a></td>
+	<td class="summary">Log message with verbose level 'error'.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#fatal">fatal (message)</a></td>
+	<td class="summary">Log message with verbose level 'fatal'.</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "trace"></a>
+    <strong>trace (message)</strong>
+    </dt>
+    <dd>
+    Log message with verbose level 'trace'.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">message</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Message.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nil
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "debug"></a>
+    <strong>debug (message)</strong>
+    </dt>
+    <dd>
+    Log message with verbose level 'debug'.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">message</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Message.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nil
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "info"></a>
+    <strong>info (message)</strong>
+    </dt>
+    <dd>
+    Log message with verbose level 'info'.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">message</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Message.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nil
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'jepsen.log'</span>)
+&gt; log.info(<span class="string">'Message'</span>)
+[INFO  <span class="number">2021</span>-<span class="number">12</span>-<span class="number">7</span> <span class="number">13</span>:<span class="number">17</span>:<span class="number">46</span>:<span class="number">073544</span>]: Message</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "warn"></a>
+    <strong>warn (message)</strong>
+    </dt>
+    <dd>
+    Log message with verbose level 'warn'.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">message</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Message.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nil
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'jepsen.log'</span>)
+&gt; log.warn(<span class="string">'Message'</span>)
+[WARN  <span class="number">2021</span>-<span class="number">12</span>-<span class="number">7</span> <span class="number">13</span>:<span class="number">17</span>:<span class="number">46</span>:<span class="number">073544</span>]: Message</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "error"></a>
+    <strong>error (message)</strong>
+    </dt>
+    <dd>
+    Log message with verbose level 'error'.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">message</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Message.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nil
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "fatal"></a>
+    <strong>fatal (message)</strong>
+    </dt>
+    <dd>
+    Log message with verbose level 'fatal'.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">message</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Message.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nil
+    </ol>
+
+
+
+
+</dd>
+</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2021-12-10 12:13:55 </i>
+<i style="float:right;">Last updated 2021-12-11 10:22:57 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
