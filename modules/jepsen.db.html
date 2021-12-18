@@ -43,7 +43,7 @@
   <li><a href="../modules/jepsen.clock.html">jepsen.clock</a></li>
   <li><a href="../modules/jepsen.thread_coroutine.html">jepsen.thread_coroutine</a></li>
   <li><a href="../modules/jepsen.thread_fiber.html">jepsen.thread_fiber</a></li>
-  <li><a href="../modules/jepsen.db.html">jepsen.db</a></li>
+  <li><strong>jepsen.db</strong></li>
   <li><a href="../modules/jepsen.gen.html">jepsen.gen</a></li>
   <li><a href="../modules/jepsen.history.html">jepsen.history</a></li>
   <li><a href="../modules/jepsen.html">jepsen</a></li>
@@ -52,7 +52,7 @@
   <li><a href="../modules/jepsen.op.html">jepsen.op</a></li>
   <li><a href="../modules/jepsen.runner.html">jepsen.runner</a></li>
   <li><a href="../modules/jepsen.thread.html">jepsen.thread</a></li>
-  <li><strong>jepsen.utils</strong></li>
+  <li><a href="../modules/jepsen.utils.html">jepsen.utils</a></li>
 </ul>
 <h2>Topics</h2>
 <ul class="">
@@ -63,30 +63,16 @@
 
 <div id="content">
 
-<h1>Module <code>jepsen.utils</code></h1>
-<p>Helpers.</p>
-<p>
-
-</p>
+<h1>Module <code>jepsen.db</code></h1>
+<p>Module with default DB implementation.</p>
+<p> Allows Jepsen to set up and tear down databases.</p>
 
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#setenv">setenv (key, value)</a></td>
-	<td class="summary">Set and unset environment variable.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#cwd">cwd ()</a></td>
-	<td class="summary">Get current directory.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#chdir">chdir (dir)</a></td>
-	<td class="summary">Change current directory.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#is_tarantool">is_tarantool ()</a></td>
-	<td class="summary">Defines whether we run under Tarantool.</td>
+	<td class="name" nowrap><a href="#new">new ()</a></td>
+	<td class="summary">Function that returns a default db implementation.</td>
 	</tr>
 </table>
 
@@ -98,97 +84,27 @@
 
     <dl class="function">
     <dt>
-    <a name = "setenv"></a>
-    <strong>setenv (key, value)</strong>
+    <a name = "new"></a>
+    <strong>new ()</strong>
     </dt>
     <dd>
-    Set and unset environment variable.
+    Function that returns a default db implementation.
+ Jepsen db must implement following methods:</p>
 
+<ul>
+    <li><strong>setup</strong> - function that set up a database instance</li>
+    <li><strong>teardown</strong> - function that tear down a database instance</li>
+</ul>
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
-         Variable name.
-        </li>
-        <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
-         Variable value.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        true
-    </ol>
-
-    <h3>Raises:</h3>
-    error
-
-
-
-</dd>
-    <dt>
-    <a name = "cwd"></a>
-    <strong>cwd ()</strong>
-    </dt>
-    <dd>
-    Get current directory.
+<p> Default implementation of a DB defines setup and teardown methods with empty
+ implementation that always returns true.
 
 
 
     <h3>Returns:</h3>
     <ol>
 
-        string, absolute path to a current directory
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "chdir"></a>
-    <strong>chdir (dir)</strong>
-    </dt>
-    <dd>
-    Change current directory.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">dir</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
-
-
-
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        boolean
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "is_tarantool"></a>
-    <strong>is_tarantool ()</strong>
-    </dt>
-    <dd>
-    Defines whether we run under Tarantool.
-
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        boolean
+        db
     </ol>
 
 
