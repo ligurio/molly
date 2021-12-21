@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>ljepsen documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ljepsen</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/ljepsen.checker.html">ljepsen.checker</a></li>
+  <li><a href="../modules/ljepsen.client.html">ljepsen.client</a></li>
+  <li><a href="../modules/ljepsen.clock.html">ljepsen.clock</a></li>
+  <li><a href="../modules/ljepsen.thread_coroutine.html">ljepsen.thread_coroutine</a></li>
+  <li><a href="../modules/ljepsen.thread_fiber.html">ljepsen.thread_fiber</a></li>
+  <li><a href="../modules/ljepsen.db.html">ljepsen.db</a></li>
+  <li><a href="../modules/ljepsen.gen.html">ljepsen.gen</a></li>
+  <li><strong>ljepsen.histogram</strong></li>
+  <li><a href="../modules/ljepsen.history.html">ljepsen.history</a></li>
+  <li><a href="../modules/ljepsen.html">ljepsen</a></li>
+  <li><a href="../modules/ljepsen.log.html">ljepsen.log</a></li>
+  <li><a href="../modules/ljepsen.nemesis.html">ljepsen.nemesis</a></li>
+  <li><a href="../modules/ljepsen.op.html">ljepsen.op</a></li>
+  <li><a href="../modules/ljepsen.runner.html">ljepsen.runner</a></li>
+  <li><a href="../modules/ljepsen.thread.html">ljepsen.thread</a></li>
+  <li><a href="../modules/ljepsen.utils.html">ljepsen.utils</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>ljepsen.histogram</code></h1>
+<p>Histogram, typically used for latencies.</p>
+<p> A Histogram that supports recording and analyzing sampled data value counts
+ across a configurable integer value range with configurable value precision
+ within the range. Value precision is expressed as the number of significant
+ digits in the value recording, and provides control over value quantization
+ behavior across the value range and the subsequent value resolution at any
+ given level.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#update">update (k)</a></td>
+	<td class="summary">Update histogram with new value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#calc">calc ()</a></td>
+	<td class="summary">Calculate histogram.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#percentile">percentile (percentile)</a></td>
+	<td class="summary">Calculate the nth percentile</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#totals">totals ()</a></td>
+	<td class="summary">Calculate totals: number of samples, sum and average.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#average">average ()</a></td>
+	<td class="summary">Calculate average.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#min">min ()</a></td>
+	<td class="summary">Calculate minimal value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#max">max ()</a></td>
+	<td class="summary">Calculate maximum value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#stddev">stddev ()</a></td>
+	<td class="summary">Calculate standard deviation.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#quartiles">quartiles ()</a></td>
+	<td class="summary">Calculate quartiles.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#median">median ()</a></td>
+	<td class="summary">Calculate median.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#samples">samples ()</a></td>
+	<td class="summary">Calculate samples.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#print">print (prefix)</a></td>
+	<td class="summary">Print histogram.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#__serialize">__serialize ()</a></td>
+	<td class="summary">Serialize histogram.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "update"></a>
+    <strong>update (k)</strong>
+    </dt>
+    <dd>
+    Update histogram with new value.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">k</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "calc"></a>
+    <strong>calc ()</strong>
+    </dt>
+    <dd>
+    Calculate histogram.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "percentile"></a>
+    <strong>percentile (percentile)</strong>
+    </dt>
+    <dd>
+    Calculate the nth percentile
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">percentile</span>
+         (range 0 to 100)
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "totals"></a>
+    <strong>totals ()</strong>
+    </dt>
+    <dd>
+    Calculate totals: number of samples, sum and average.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "average"></a>
+    <strong>average ()</strong>
+    </dt>
+    <dd>
+    Calculate average.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "min"></a>
+    <strong>min ()</strong>
+    </dt>
+    <dd>
+    Calculate minimal value.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "max"></a>
+    <strong>max ()</strong>
+    </dt>
+    <dd>
+    Calculate maximum value.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "stddev"></a>
+    <strong>stddev ()</strong>
+    </dt>
+    <dd>
+    Calculate standard deviation.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "quartiles"></a>
+    <strong>quartiles ()</strong>
+    </dt>
+    <dd>
+    Calculate quartiles.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "median"></a>
+    <strong>median ()</strong>
+    </dt>
+    <dd>
+    Calculate median.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "samples"></a>
+    <strong>samples ()</strong>
+    </dt>
+    <dd>
+    Calculate samples.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "print"></a>
+    <strong>print (prefix)</strong>
+    </dt>
+    <dd>
+    Print histogram.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prefix</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "__serialize"></a>
+    <strong>__serialize ()</strong>
+    </dt>
+    <dd>
+    Serialize histogram.
+
+
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2021-12-21 08:15:14 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

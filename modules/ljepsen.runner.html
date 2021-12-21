@@ -38,21 +38,22 @@
 
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><a href="../modules/jepsen.checker.html">jepsen.checker</a></li>
-  <li><a href="../modules/jepsen.client.html">jepsen.client</a></li>
-  <li><a href="../modules/jepsen.clock.html">jepsen.clock</a></li>
-  <li><a href="../modules/jepsen.thread_coroutine.html">jepsen.thread_coroutine</a></li>
-  <li><a href="../modules/jepsen.thread_fiber.html">jepsen.thread_fiber</a></li>
-  <li><a href="../modules/jepsen.db.html">jepsen.db</a></li>
-  <li><a href="../modules/jepsen.gen.html">jepsen.gen</a></li>
-  <li><a href="../modules/jepsen.history.html">jepsen.history</a></li>
-  <li><a href="../modules/jepsen.html">jepsen</a></li>
-  <li><a href="../modules/jepsen.log.html">jepsen.log</a></li>
-  <li><a href="../modules/jepsen.nemesis.html">jepsen.nemesis</a></li>
-  <li><a href="../modules/jepsen.op.html">jepsen.op</a></li>
-  <li><strong>jepsen.runner</strong></li>
-  <li><a href="../modules/jepsen.thread.html">jepsen.thread</a></li>
-  <li><a href="../modules/jepsen.utils.html">jepsen.utils</a></li>
+  <li><a href="../modules/ljepsen.checker.html">ljepsen.checker</a></li>
+  <li><a href="../modules/ljepsen.client.html">ljepsen.client</a></li>
+  <li><a href="../modules/ljepsen.clock.html">ljepsen.clock</a></li>
+  <li><a href="../modules/ljepsen.thread_coroutine.html">ljepsen.thread_coroutine</a></li>
+  <li><a href="../modules/ljepsen.thread_fiber.html">ljepsen.thread_fiber</a></li>
+  <li><a href="../modules/ljepsen.db.html">ljepsen.db</a></li>
+  <li><a href="../modules/ljepsen.gen.html">ljepsen.gen</a></li>
+  <li><a href="../modules/ljepsen.histogram.html">ljepsen.histogram</a></li>
+  <li><a href="../modules/ljepsen.history.html">ljepsen.history</a></li>
+  <li><a href="../modules/ljepsen.html">ljepsen</a></li>
+  <li><a href="../modules/ljepsen.log.html">ljepsen.log</a></li>
+  <li><a href="../modules/ljepsen.nemesis.html">ljepsen.nemesis</a></li>
+  <li><a href="../modules/ljepsen.op.html">ljepsen.op</a></li>
+  <li><strong>ljepsen.runner</strong></li>
+  <li><a href="../modules/ljepsen.thread.html">ljepsen.thread</a></li>
+  <li><a href="../modules/ljepsen.utils.html">ljepsen.utils</a></li>
 </ul>
 <h2>Topics</h2>
 <ul class="">
@@ -63,7 +64,7 @@
 
 <div id="content">
 
-<h1>Module <code>jepsen.runner</code></h1>
+<h1>Module <code>ljepsen.runner</code></h1>
 <p>Jepsen runner is an entrance point of Lua Jepsen library.</p>
 <p>
 
@@ -87,17 +88,17 @@
 
 
 <p> Once the system is running, the control node spins up a set of logically
- single-threaded processes (see <a href="../modules/jepsen.thread.html#">jepsen.thread</a>), each with its own client for
+ single-threaded processes (see <a href="../modules/ljepsen.thread.html#">ljepsen.thread</a>), each with its own client for
  the distributed system.</p>
 
-<p> A generator (see <a href="../modules/jepsen.gen.html#">jepsen.gen</a>) generates new operations (see <a href="../modules/jepsen.op.html#">jepsen.op</a>)
+<p> A generator (see <a href="../modules/ljepsen.gen.html#">ljepsen.gen</a>) generates new operations (see <a href="../modules/ljepsen.op.html#">ljepsen.op</a>)
  for each process to perform. Processes then apply those operations to the
- system using their clients, see <a href="../modules/jepsen.client.html#">jepsen.client</a>. The start and end of each
- operation is recorded in a history, see <a href="../modules/jepsen.history.html#">jepsen.history</a>. While performing
- operations, a special nemesis process (see <a href="../modules/jepsen.nemesis.html#">jepsen.nemesis</a>) introduces
+ system using their clients, see <a href="../modules/ljepsen.client.html#">ljepsen.client</a>. The start and end of each
+ operation is recorded in a history, see <a href="../modules/ljepsen.history.html#">ljepsen.history</a>. While performing
+ operations, a special nemesis process (see <a href="../modules/ljepsen.nemesis.html#">ljepsen.nemesis</a>) introduces
  faults into the system - also scheduled by the generator.</p>
 
-<p> Finally, the DB is turn down. Jepsen uses a checker (see <a href="../modules/jepsen.checker.html#">jepsen.checker</a>)
+<p> Finally, the DB is turn down. Jepsen uses a checker (see <a href="../modules/ljepsen.checker.html#">ljepsen.checker</a>)
  to analyze the test's history for correctness, and to generate reports,
  graphs, etc. The test, history, analysis, and any supplementary results are
  written to the filesystem for later review.</p>
@@ -146,13 +147,13 @@
         <ul>
         <li><span class="parameter">client</span>
          Workload client. Learn more about creating clients in
- <a href="../modules/jepsen.client.html#">jepsen.client</a>.
+ <a href="../modules/ljepsen.client.html#">ljepsen.client</a>.
         </li>
         <li><span class="parameter">generator</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          Generator of operations used in test workload.
  Generator must be a table with <code>unwrap()</code> method that returns an iterator
- triplet. You can make generator youself or use <a href="../modules/jepsen.gen.html#">jepsen.gen</a> module.
+ triplet. You can make generator youself or use <a href="../modules/ljepsen.gen.html#">ljepsen.gen</a> module.
         </li>
         <li><span class="parameter">checker</span>
          Function for checking history in workload.
@@ -181,10 +182,10 @@
  obvious. For example, if you want to see the progress of testing as it
  setup, teardown or invokes operations, you can use the 'verbose' option. In
  the beginning, you may find it useful to use 'verbose' at all times; when
- you are more accustomed to <code>ljepsen</code>, you will likely want to use it at
+ you are more accustomed to <a href="../modules/ljepsen.html#">ljepsen</a>, you will likely want to use it at
  certain times but not at others. Disabled by default.
  Take into account that logging to standart output is a slow operation and
- with enabled verbose mode <code>ljepsen</code> logs status of every operation before
+ with enabled verbose mode <a href="../modules/ljepsen.html#">ljepsen</a> logs status of every operation before
  and after it's invocation and this may slowdown overall testing performance
  significantly. It is recommended to disable verbose mode in testing and use
  it only for debugging.
@@ -193,10 +194,10 @@
         <li><span class="parameter">thread_type</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Type of threads used in a test workload.
- Possible values are 'fiber' (see <a href="../modules/jepsen.thread_fiber.html#">jepsen.thread_fiber</a>) and 'coroutine' (see
- <a href="../modules/jepsen.thread_coroutine.html#">jepsen.thread_coroutine</a>), default value is 'fiber' on Tarantool and
+ Possible values are 'fiber' (see <a href="../modules/ljepsen.thread_fiber.html#">ljepsen.thread_fiber</a>) and 'coroutine' (see
+ <a href="../modules/ljepsen.thread_coroutine.html#">ljepsen.thread_coroutine</a>), default value is 'fiber' on Tarantool and
  'coroutine' on LuaJIT. Learn more about possible thread types in
- <a href="../modules/jepsen.thread.html#">jepsen.thread</a>.
+ <a href="../modules/ljepsen.thread.html#">ljepsen.thread</a>.
          (<em>optional</em>)
         </li>
         <li><span class="parameter">time_limit</span>
@@ -224,8 +225,8 @@
 
     <h3>See also:</h3>
     <ul>
-         <li><a href="../modules/jepsen.gen.html#">jepsen.gen</a></li>
-         <li><a href="../modules/jepsen.client.html#">jepsen.client</a></li>
+         <li><a href="../modules/ljepsen.gen.html#">ljepsen.gen</a></li>
+         <li><a href="../modules/ljepsen.client.html#">ljepsen.client</a></li>
     </ul>
 
     <h3>Usage:</h3>
@@ -238,7 +239,7 @@
         <span class="string">'127.0.0.1'</span>
     }
 }
-<span class="keyword">local</span> ok, err = jepsen.run_test({
+<span class="keyword">local</span> ok, err = runner.run_test({
     client = client.new(),
     generator = gen_lib.cycle(gen_lib.iter({ r, w })):take(<span class="number">1000</span>)
 }, test_options)</pre>
@@ -252,7 +253,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2021-12-18 19:33:55 </i>
+<i style="float:right;">Last updated 2021-12-21 08:15:14 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
