@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>ljepsen documentation</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ljepsen</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><strong>sqlite.lua</strong></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/ljepsen.checker.html">ljepsen.checker</a></li>
+  <li><a href="../modules/ljepsen.client.html">ljepsen.client</a></li>
+  <li><a href="../modules/ljepsen.clock.html">ljepsen.clock</a></li>
+  <li><a href="../modules/ljepsen.thread_coroutine.html">ljepsen.thread_coroutine</a></li>
+  <li><a href="../modules/ljepsen.thread_fiber.html">ljepsen.thread_fiber</a></li>
+  <li><a href="../modules/ljepsen.db.html">ljepsen.db</a></li>
+  <li><a href="../modules/ljepsen.gen.html">ljepsen.gen</a></li>
+  <li><a href="../modules/ljepsen.histogram.html">ljepsen.histogram</a></li>
+  <li><a href="../modules/ljepsen.history.html">ljepsen.history</a></li>
+  <li><a href="../modules/ljepsen.html">ljepsen</a></li>
+  <li><a href="../modules/ljepsen.log.html">ljepsen.log</a></li>
+  <li><a href="../modules/ljepsen.nemesis.html">ljepsen.nemesis</a></li>
+  <li><a href="../modules/ljepsen.op.html">ljepsen.op</a></li>
+  <li><a href="../modules/ljepsen.runner.html">ljepsen.runner</a></li>
+  <li><a href="../modules/ljepsen.thread.html">ljepsen.thread</a></li>
+  <li><a href="../modules/ljepsen.utils.html">ljepsen.utils</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>sqlite.lua</h2>
+<pre>
+<span class="keyword">local</span> sqlite3 = <span class="global">require</span>(<span class="string">'lsqlite3'</span>)
+<span class="keyword">local</span> ljepsen = <span class="global">require</span>(<span class="string">'ljepsen'</span>)
+<span class="keyword">local</span> <span class="global">math</span> = <span class="global">require</span>(<span class="string">'math'</span>)
+
+<span class="keyword">local</span> client = ljepsen.client
+<span class="keyword">local</span> clock = ljepsen.clock
+<span class="keyword">local</span> gen_lib = ljepsen.gen
+<span class="keyword">local</span> runner = ljepsen.runner
+
+<span class="comment">-- Function that implements a read opeation, it returns a name of operation and
+</span><span class="comment">-- a value equal to nil because we don't know it before read.
+</span><span class="keyword">local</span> <span class="keyword">function</span> r()
+    <span class="keyword">return</span> {
+        f = <span class="string">'read'</span>,
+        v = <span class="keyword">nil</span>,
+    }
+<span class="keyword">end</span>
+
+<span class="comment">-- Function that implements a write opeation, it returns a name of operation
+</span><span class="comment">-- and random generated number.
+</span><span class="keyword">local</span> <span class="keyword">function</span> w()
+    <span class="keyword">return</span> {
+        f = <span class="string">'write'</span>,
+        v = <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">10</span>),
+    }
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> db = sqlite3.open_memory() <span class="comment">-- open SQLite database in memory.
+</span>db:exec<span class="string">[[ CREATE TABLE test (id, content) ]]</span>
+
+<span class="keyword">local</span> sqlite_rw_register = client.new()
+<span class="comment">-- sqlite_rw_register implements a client that performs two operations on
+</span><span class="comment">-- database: read and write. Method invoke must apply these operations to a
+</span><span class="comment">-- database instance.
+</span>sqlite_rw_register.invoke = <span class="keyword">function</span>(self, op)
+    <span class="keyword">local</span> v = op.v
+    <span class="keyword">local</span> state = <span class="keyword">false</span>
+    <span class="keyword">if</span> op.f == <span class="string">'read'</span> <span class="keyword">then</span>
+        v = db:exec(<span class="string">[[ SELECT content FROM test WHERE id = 1 ]]</span>)
+        state = <span class="keyword">true</span>
+    <span class="keyword">elseif</span> op.f == <span class="string">'write'</span> <span class="keyword">then</span>
+        db:exec(<span class="string">[[ INSERT INTO test VALUES (1, 'Hello, World') ]]</span>)
+        state = <span class="keyword">true</span>
+    <span class="keyword">else</span>
+        <span class="global">error</span>(<span class="string">'Unknown operation'</span>)
+    <span class="keyword">end</span>
+
+    <span class="keyword">return</span> {
+        v = v,
+        f = op.f,
+        process = op.process,
+        time = clock.monotonic(),
+        state = state,
+    }
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> test_options = {
+    <span class="comment">-- Produce files history.{json,txt}.
+</span>    create_reports = <span class="keyword">true</span>,
+    threads = <span class="number">5</span>,
+}
+<span class="keyword">local</span> ok = runner.run_test({
+    client = sqlite_rw_register,
+    generator = gen_lib.cycle(gen_lib.iter({ r, w })):take(<span class="number">1000</span>)
+}, test_options)
+
+<span class="keyword">if</span> ok == <span class="keyword">true</span> <span class="keyword">then</span>
+    <span class="global">print</span>(<span class="string">'Feel free to check history.json with elle-cli.'</span>)
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> changes = db:total_changes()
+<span class="global">assert</span>(changes == <span class="number">504</span>)
+<span class="global">print</span>(<span class="string">'Total changes in SQLite DB:'</span>, changes)
+db:close() <span class="comment">-- close a database handler.</span></pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-02-10 06:35:01 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
