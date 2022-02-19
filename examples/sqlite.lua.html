@@ -79,8 +79,12 @@
 </span><span class="comment">-- a value equal to nil because we don't know it before read.
 </span><span class="keyword">local</span> <span class="keyword">function</span> r()
     <span class="keyword">return</span> {
-        f = <span class="string">'read'</span>,
-        v = <span class="keyword">nil</span>,
+        f = <span class="string">'txn'</span>,
+        value = {{
+            <span class="string">'r'</span>,
+            <span class="string">'x'</span>,
+            <span class="keyword">nil</span>,
+        }},
     }
 <span class="keyword">end</span>
 
@@ -88,8 +92,12 @@
 </span><span class="comment">-- and random generated number.
 </span><span class="keyword">local</span> <span class="keyword">function</span> w()
     <span class="keyword">return</span> {
-        f = <span class="string">'write'</span>,
-        v = <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">10</span>),
+        f = <span class="string">'txn'</span>,
+        value = {{
+            <span class="string">'w'</span>,
+            <span class="string">'x'</span>,
+            <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">100</span>),
+        }}
     }
 <span class="keyword">end</span>
 
@@ -97,58 +105,58 @@
 </span>db:exec<span class="string">[[ CREATE TABLE test (id, content) ]]</span>
 
 <span class="keyword">local</span> sqlite_rw_register = client.new()
+
 <span class="comment">-- sqlite_rw_register implements a client that performs two operations on
-</span><span class="comment">-- database: read and write. Method invoke must apply these operations to a
+</span><span class="comment">-- database: read and write. Method 'invoke' must apply these operations to a
 </span><span class="comment">-- database instance.
 </span>sqlite_rw_register.invoke = <span class="keyword">function</span>(self, op)
-    <span class="keyword">local</span> v = op.v
-    <span class="keyword">local</span> state = <span class="keyword">false</span>
-    <span class="keyword">if</span> op.f == <span class="string">'read'</span> <span class="keyword">then</span>
-        v = db:exec(<span class="string">[[ SELECT content FROM test WHERE id = 1 ]]</span>)
-        state = <span class="keyword">true</span>
-    <span class="keyword">elseif</span> op.f == <span class="string">'write'</span> <span class="keyword">then</span>
-        db:exec(<span class="string">[[ INSERT INTO test VALUES (1, 'Hello, World') ]]</span>)
-        state = <span class="keyword">true</span>
+    <span class="keyword">local</span> val = op.value[<span class="number">1</span>]
+    <span class="keyword">if</span> val[<span class="number">1</span>] == <span class="string">'r'</span> <span class="keyword">then</span>
+        val[<span class="number">3</span>] = db:exec(<span class="string">[[ SELECT content FROM test WHERE id = 1 ]]</span>)
+    <span class="keyword">elseif</span> val[<span class="number">1</span>] == <span class="string">'w'</span> <span class="keyword">then</span>
+        db:exec(<span class="global">string</span>.format(<span class="string">'INSERT INTO test VALUES (1, %d)'</span>, val[<span class="number">3</span>]))
     <span class="keyword">else</span>
         <span class="global">error</span>(<span class="string">'Unknown operation'</span>)
     <span class="keyword">end</span>
 
     <span class="keyword">return</span> {
-        v = v,
+        value = { val },
         f = op.f,
         process = op.process,
-        state = state,
     }
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> test_options = {
-    <span class="comment">-- Produce files history.{json,txt}.
+    <span class="comment">-- Keep reports with history in files history.{json,txt}.
 </span>    create_reports = <span class="keyword">true</span>,
-    threads = <span class="number">5</span>,
+    threads = <span class="number">1</span>,
 }
 <span class="keyword">local</span> ok = runner.run_test({
     client = sqlite_rw_register,
-    generator = gen_lib.cycle(gen_lib.iter({ r, w })):take(<span class="number">1000</span>)
+    generator = gen_lib.cycle(gen_lib.iter({ r, w })):take(<span class="number">5</span>)
 }, test_options)
 
 <span class="keyword">if</span> ok == <span class="keyword">true</span> <span class="keyword">then</span>
-    <span class="global">print</span>(<span class="string">'Feel free to check history.json with elle-cli.'</span>)
+    <span class="global">print</span>(<span class="string">'Feel free to check history.json with elle-cli:'</span>)
+    <span class="global">print</span>(<span class="string">'java -jar elle-cli-0.1.1-standalone.jar --model elle-rw-register history.json'</span>)
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> changes = db:total_changes()
-<span class="global">assert</span>(changes == <span class="number">504</span>)
+<span class="global">assert</span>(changes == <span class="number">2</span>, <span class="global">string</span>.format(<span class="string">'Number of operations is wrong (%d vs 2)'</span>, changes))
 <span class="global">print</span>(<span class="string">'Total changes in SQLite DB:'</span>, changes)
 db:close() <span class="comment">-- Close a database handler.
 </span>
-<span class="global">os</span>.remove(<span class="string">'history.json'</span>)
-<span class="global">os</span>.remove(<span class="string">'history.txt'</span>)</pre>
+<span class="keyword">if</span> <span class="global">os</span>.getenv(<span class="string">'DEV'</span>) ~= <span class="string">'ON'</span> <span class="keyword">then</span>
+    <span class="global">os</span>.remove(<span class="string">'history.json'</span>)
+    <span class="global">os</span>.remove(<span class="string">'history.txt'</span>)
+<span class="keyword">end</span></pre>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-02-19 08:28:07 </i>
+<i style="float:right;">Last updated 2022-02-19 14:52:45 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
