@@ -76,125 +76,11 @@
 <h3>Clients</h3>
 
 <ul>
-    <li><strong>append</strong> checks for dependency cycles in append/read transactions.</li>
+    <li><strong>rw-register</strong> concurrent atomic updates to a shared register.</li>
+    <li><strong>list-append</strong> operations are either appends or reads. Detects cycles in
+    histories where operations are transactions over named lists lists.</li>
     <li><strong>bank</strong> concurrent transfers between rows of a shared table.</li>
-    <li><strong>bank-multitable</strong> multi-table variant of the bank test.</li>
-    <li><strong>long-fork</strong> distinguishes between parallel snapshot isolation and standard SI.</li>
-    <li><strong>monotonic</strong> looks for contradictory orders over increment-only registers.</li>
-    <li><strong>register</strong> concurrent atomic updates to a shared register.</li>
-    <li><strong>sequential</strong> looks for serializable yet non-sequential orders on
-    independent registers.</li>
-    <li><strong>set</strong> concurrent unique appends to a single table.</li>
-    <li><strong>set-cas</strong> appends elements via compare-and-set to a single row.</li>
-    <li><strong>table</strong> checks for a race condition in table creation.</li>
-    <li><strong>txn-cycle</strong> looks for write-read dependency cycles over read-write
-    registers.</li>
 </ul>
-
-<h3>Monotonic</h3>
-
-<p> Monotonic: a counter which increments over time.</p>
-
-<p> Claim: successive reads of that value by any single client should
- observe monotonically increasing transaction timestamps and values.
- Required for: monotonicity.</p>
-
-<p> Verifies that clients observe monotonic state and timestamps when
- performing current reads, and that reads of past timestamps observe
- monotonic state.</p>
-
-<p> The monotonic tests verify that transaction timestamps are consistent
- with logical transaction order. In a transaction, we find the maximum
- value in a table, select the transaction timestamp, and then insert a
- row with a value one greater than the maximum, along with the current
- timestamp, the node, process, and table numbers. When sorted by
- timestamp, we expect that the values inserted should monotonically
- increase, so long as transaction timestamps are consistent with the
- database's effective serialization order.</p>
-
-<p> For our monotonic state, we'll use a register, implemented as an
- instance with a single value. That register will be incremented by <code>inc</code>
- calls, starting at 0.</p>
-
-
-<pre>
-{:<span class="global">type</span> :invoke, :f :inc, :value <span class="keyword">nil</span>}
-</pre>
-
-<p> which returns</p>
-
-
-<pre>
-{:<span class="global">type</span> :invoke, :f inc, :value [ts, v]}
-</pre>
-
-<p> Meaning that we set the value to v at time ts. Meanwhile, we'll execute
- reads like:</p>
-
-
-<pre>
-{:<span class="global">type</span> :invoke, :f :read, :value [ts, <span class="keyword">nil</span>]}
-</pre>
-
-<p> which means we should read the register at time <code>ts</code>, returning</p>
-
-
-<pre>
-{:<span class="global">type</span> :ok, :f :read, :value [ts, v]}.
-</pre>
-
-<p> If the timestamp is nil, we read at the current time, and return the
- timestamp we executed at.</p>
-
-<h3>Multimonotonic</h3>
-
-<p> <!--
- https://github.com/jepsen-io/jepsen/blob/7f3d0b1ca20b27681f3af10124a8b2d2d98c8e18/tidb/src/tidb/monotonic.clj#L37-L87
- https://github.com/fauna/jepsen/blob/b5c3b20d27166ca87796b48077ac17feec2937f9/src/jepsen/faunadb/monotonic.clj
- --></p>
-
-<p> Similar to the monotonic test, this test takes an increment-only
- register and looks for cases where reads flow backwards. Unlike the
- monotonic test, we try to maximize performance (and our chances to
- observe nonmonotonicity) by sacrificing some generality: all updates to
- a given register happen in a single worker, and are performed as blind
- writes to avoid triggering OCC read locks which lower throughput.</p>
-
-<h3>Sequential</h3>
-
-<p> Sequential: in one process, perform two write transactions (<code>write_1</code> then
- <code>write_2</code>), concurrently read in the reverse order.</p>
-
-<p> Claim: no instances where <code>write_2</code> is present before <code>write_1</code> should be
- discovered. Required for: sequential Consistency.</p>
-
-<p> To do this, we establish a set of registers, each comprised of a key and
- a value. On each register separately, we perform a series of increment
- operations, mixed with reads of that register. Since our transactions
- only interact with single keys, snapshot isolation implies
- serializability. Since the value of a register can only increase over
- time, we expect that for any given process, and for any given register
- read by that process, the value of that register should monotonically
- increase.</p>
-
-<p> Sequential consistency requires that the orders of operations observed by
- each individual client be consistent with one another. We evaluate
- sequential consistency by having one process perform two transactions, each
- inserting a different key, and, concurrently, reading those keys in the
- reverse order using a second process:</p>
-
-
-<pre>
-T1: w(x, <span class="number">1</span>)
-T2: w(y, <span class="number">1</span>)
-T3: r(y)
-T4: r(x)
-</pre>
-
-<p> A serializable system could allow x and y to be inserted in either order,
- and likewise, could evaluate the reads at any point in time: reads could see
- neither, only x, only y, or both. A sequentially consistent system, however,
- can never observe y alone, since the same process inserted x prior to y.</p>
 
 <h3>Bank</h3>
 
@@ -230,71 +116,6 @@ T4: r(x)
 <p> Claim: the total of all accounts should be consistent. Required for:
  snapshot isolation.</p>
 
-<h3>Long fork</h3>
-
-<p> Long Fork: non-intersecting transactions are run concurrently.</p>
-
-<p> Claim: transactions happen in some specific order for future reads.
- Prohibited in: snapshot isolation (Prefix property). Allowed in:
- parallel snapshot isolation.</p>
-
-<p> For performance reasons, some database systems implement parallel
- snapshot isolation, rather than standard snapshot isolation. Parallel
- snapshot isolation allows an anomaly prevented by standard SI: a long
- fork, in which non-conflicting write transactions may be visible in
- incompatible orders. As an example, consider four transactions over an
- empty initial state:</p>
-
-
-<pre>
-(write x <span class="number">1</span>)
-(write y <span class="number">1</span>)
-(read x <span class="keyword">nil</span>) (read y <span class="number">1</span>)
-(read x <span class="number">1</span>) (read y <span class="keyword">nil</span>)
-</pre>
-
-<p> Here, we insert two records, x and y. In a serializable system, one
- record should have been inserted before the other. However, transaction
- 3 observes y inserted before x, and transaction 4 observes x inserted
- before y. These observations are incompatible with a total order of
- inserts.</p>
-
-<p> To test for this behavior, we insert a sequence of unique keys, and
- concurrently query for small batches of those keys, hoping to observe a
- pair of states in which the implicit order of insertion conflicts.</p>
-
-<p> Long fork is an anomaly prohibited by snapshot isolation, but allowed by
- the slightly weaker model parallel snapshot isolation. In a long fork,
- updates to independent keys become visible to reads in a way that isn't
- consistent with a total order of those updates. For instance:</p>
-
-
-<pre>
-T1: w(x, <span class="number">1</span>)
-T2: w(y, <span class="number">1</span>)
-T3: r(x, <span class="number">1</span>), r(y, <span class="keyword">nil</span>)
-T4: r(x, <span class="keyword">nil</span>), r(y, <span class="number">1</span>)
-</pre>
-
-<p> Under snapshot isolation, T1 and T2 may execute concurrently, because
- their write sets don't intersect. However, every transaction should
- observe a snapshot consistent with applying those writes in some order.
- Here, T3 implies T1 happened before T2, but T4 implies the opposite. We
- run an n-key generalization of these transactions continuously in our
- long fork test, and look for cases where some keys are updated out of
- order.</p>
-
-<p> In snapshot isolated systems, reads should observe a state consistent
- with a total order of transactions. A long fork anomaly occurs when a
- pair of reads observes contradictory orders of events on distinct
- records - for instance, T1 observing record x before record y was
- created, and T2 observing y before x. In the long fork test, we insert
- unique rows into a table, and query small groups of those rows, looking
- for cases where two reads observe incompatible orders.</p>
-
-<p> Looks for instances of long fork: a snapshot isolation violation involving
- incompatible orders of writes to disparate objects.</p>
-
 <h3>Append</h3>
 
 <p> The <em>append</em> test models the database as a collection of named lists,
@@ -310,95 +131,12 @@ T4: r(x, <span class="keyword">nil</span>), r(y, <span class="number">1</span>)
  whatever the present value of the given list is). We detect cycles in these
  transactions using Jepsen's cycle-detection system.</p>
 
-<h3>G2</h3>
-
-<p> G2 checks for a type of phantom anomaly prevented by serializability:
- anti-dependency cycles involving predicate reads.</p>
-
-<p> We can also test for the presence of anti-dependency cycles in pairs of
- transactions, which should be prevented under serializability. These
- cycles, termed "G2", are one of the anomalies described by Atul Adya in
- his 1999 thesis on transactional consistency. It involves a cycle in the
- transaction dependency graph, where one transaction overwrites a value a
- different transaction has read. For instance:</p>
-
-
-<pre>
-T1: r(x), w(y)
-T2: r(y), w(x)
-</pre>
-
-<p> could interleave like so:</p>
-
-
-<pre>
-T1: r(x)
-T2: r(y)
-T1: w(y)
-T2: w(x)
-T1: commit
-T2: commit
-</pre>
-
-<p> This violates serializability because the value of a key could have
- changed since the transaction first read it. However, G2 doesn't just
- apply to individual keys - it covers predicates as well. For example, we
- can take two tables...</p>
-
-
-<pre>
-CREATE TABLE a (
-  id    INT PRIMARY KEY,
-  key   INT,
-  value INT);
-CREATE TABLE b (
-  id    INT PRIMARY KEY,
-  key   INT,
-  value INT);
-</pre>
-
-<p> where <code>id</code> is a globally unique identifier, and key denotes a particular
- instance of a test. Our transactions select all rows for a specific key, in
- either table, matching some predicate:</p>
-
-
-<pre>
-SELECT * FROM a WHERE
-  key = <span class="number">5</span> AND value % <span class="number">3</span> = <span class="number">0</span>;
-SELECT * FROM b WHERE
-  key = <span class="number">5</span> AND value % <span class="number">3</span> = <span class="number">0</span>;
-</pre>
-
-<p> If we find any rows matching these queries, we abort. If there are no
- matching rows, we insert (in one transaction, to a, in the other, to b),
- a row which would fall under that predicate:</p>
-
-
-<pre>
-INSERT INTO a VALUES (<span class="number">123</span>, <span class="number">5</span>, <span class="number">30</span>);
-</pre>
-
-<p> In a serializable history, these transactions must appear to execute
- sequentially, which implies that one sees the other's insert. Therefore,
- at most one of these transactions may succeed. Indeed, this seems to
- hold: we have never observed a case in which both of these transactions
- committed successfully. However, a closely related test, monotonic, does
- reveal a serializability violation - we'll talk about that shortly.</p>
-
 <h3>Register</h3>
 
-<p> Register: read, writes, and compare-and-swap operations on registers.</p>
+<p> Register: read and writes operations on registers.</p>
 
-<p> Claim: the operations should be linearizable (according to Knossos).
+<p> Claim: the operations should be linearizable.
  Required for: snapshot isolation.</p>
-
-<h3>Set</h3>
-
-<p> Set: unique integers inserted as rows in a table.</p>
-
-<p> Claim: concurrent reads should include all present values at any given
- time and at any later time. Note: a stricter variant requires immediate
- visibility instead of allowing stale reads.</p>
 </p>
     <h3>See also:</h3>
     <ul>
@@ -466,7 +204,7 @@ cl.invoke = <span class="keyword">function</span>(op)
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-02-15 17:33:07 </i>
+<i style="float:right;">Last updated 2022-02-19 08:28:07 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
