@@ -34,7 +34,8 @@
 
 <h2>Examples</h2>
 <ul class="nowrap">
-  <li><strong>sqlite.lua</strong></li>
+  <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
+  <li><strong>sqlite-list-append.lua</strong></li>
 </ul>
 <h2>Modules</h2>
 <ul class="nowrap">
@@ -64,7 +65,7 @@
 
 <div id="content">
 
-    <h2>sqlite.lua</h2>
+    <h2>sqlite-list-append.lua</h2>
 <pre>
 <span class="keyword">local</span> sqlite3 = <span class="global">require</span>(<span class="string">'lsqlite3'</span>)
 <span class="keyword">local</span> ljepsen = <span class="global">require</span>(<span class="string">'ljepsen'</span>)
@@ -75,46 +76,73 @@
 <span class="keyword">local</span> gen_lib = ljepsen.gen
 <span class="keyword">local</span> runner = ljepsen.runner
 
-<span class="comment">-- Function that implements a read opeation, it returns a name of operation and
-</span><span class="comment">-- a value equal to nil because we don't know it before read.
-</span><span class="keyword">local</span> <span class="keyword">function</span> r()
+<span class="comment">-- A partial test, including a generator and checker. You’ll need to provide a
+</span><span class="comment">-- client which can understand operations of the form:
+</span><span class="comment">--
+</span><span class="comment">-- {:type :invoke, :f :txn, :value [[:r 3 nil] [:append 3 2] [:r 3]]}
+</span><span class="comment">-- and return completions like:
+</span><span class="comment">-- {:type :invoke, :f :txn, :value [[:r 3 [1]] [:append 3 2] [:r 3 [1 2]]]}
+</span>
+<span class="comment">--[[
+Values are lists of integers. Each operation performs a transaction,
+comprised of micro-operations which are either reads of some value (returning
+the entire list) or appends (adding a single number to whatever the present
+value of the given list is). We detect cycles in these transactions using
+Jepsen's cycle-detection system.
+]]</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> op_read()
     <span class="keyword">return</span> {
         f = <span class="string">'txn'</span>,
-        value = {{
-            <span class="string">'r'</span>,
-            <span class="string">'x'</span>,
-            <span class="keyword">nil</span>,
-        }},
+        value = {
+            {
+                <span class="string">'r'</span>,
+                <span class="number">1</span>,
+                <span class="keyword">nil</span>,
+            }
+        },
     }
 <span class="keyword">end</span>
 
-<span class="comment">-- Function that implements a write opeation, it returns a name of operation
-</span><span class="comment">-- and random generated number.
-</span><span class="keyword">local</span> <span class="keyword">function</span> w()
+<span class="keyword">local</span> <span class="keyword">function</span> op_append()
     <span class="keyword">return</span> {
         f = <span class="string">'txn'</span>,
         value = {{
-            <span class="string">'w'</span>,
-            <span class="string">'x'</span>,
+            <span class="string">'append'</span>,
+            <span class="number">1</span>,
             <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">100</span>),
         }}
     }
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> db = sqlite3.open_memory() <span class="comment">-- Open SQLite database in memory.
-</span>db:exec<span class="string">[[ CREATE TABLE test (id, content) ]]</span>
+</span>db:exec<span class="string">[[ CREATE TABLE IF NOT EXISTS test (id INT NOT NULL PRIMARY KEY, sk INT NOT NULL, val TEXT) ]]</span>
 
-<span class="keyword">local</span> sqlite_rw_register = client.new()
+<span class="keyword">local</span> sqlite_list_append = client.new()
 
-<span class="comment">-- sqlite_rw_register implements a client that performs two operations on
-</span><span class="comment">-- database: read and write. Method 'invoke' must apply these operations to a
-</span><span class="comment">-- database instance.
-</span>sqlite_rw_register.invoke = <span class="keyword">function</span>(self, op)
-    <span class="keyword">local</span> val = op.value[<span class="number">1</span>]
-    <span class="keyword">if</span> val[<span class="number">1</span>] == <span class="string">'r'</span> <span class="keyword">then</span>
-        val[<span class="number">3</span>] = db:exec(<span class="string">[[ SELECT content FROM test WHERE id = 1 ]]</span>)
-    <span class="keyword">elseif</span> val[<span class="number">1</span>] == <span class="string">'w'</span> <span class="keyword">then</span>
-        db:exec(<span class="global">string</span>.format(<span class="string">'INSERT INTO test VALUES (1, %d)'</span>, val[<span class="number">3</span>]))
+<span class="comment">--[[
+
+CREATE TABLE IF NOT EXISTS t3 (id INT NOT NULL PRIMARY KEY, sk INT NOT NULL, val TEXT);
+UPDATE t3 SET val = 3 WHERE id = 3;
+SELECT val FROM t3 WHERE id = 3;
+INSERT INTO t3 (id, sk, val) VALUES (3, 3, 3);
+
+]]</span>
+
+<span class="comment">-- Description in ./yugabyte/src/yugabyte/ysql/append_table.clj
+</span>
+sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
+    <span class="comment">-- [[:r 3 nil] [:append 3 2] [:r 3]]
+</span>    <span class="keyword">local</span> val = op.value[<span class="number">1</span>]
+    <span class="global">print</span>(<span class="global">require</span>(<span class="string">'log'</span>).info(val))
+    <span class="keyword">local</span> key = val[<span class="number">2</span>]
+    <span class="keyword">local</span> op_type = val[<span class="number">2</span>]
+    <span class="global">print</span>(<span class="string">'key and op'</span>, key, op)
+    <span class="keyword">if</span> op_type == <span class="string">'r'</span> <span class="keyword">then</span>
+        val[<span class="number">3</span>] = db:exec(<span class="global">string</span>.format(<span class="string">'SELECT val FROM test WHERE id = %d'</span>, key))
+    <span class="keyword">elseif</span> op_type == <span class="string">'append'</span> <span class="keyword">then</span>
+        db:exec(<span class="global">string</span>.format(<span class="string">'UPDATE test SET val = %d WHERE id = %d'</span>, val[<span class="number">3</span>], key))
+        db:exec(<span class="global">string</span>.format(<span class="string">'INSERT INTO test VALUES (%d, %d)'</span>, key, val[<span class="number">3</span>]))
     <span class="keyword">else</span>
         <span class="global">error</span>(<span class="string">'Unknown operation'</span>)
     <span class="keyword">end</span>
@@ -127,18 +155,19 @@
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> test_options = {
-    <span class="comment">-- Keep reports with history in files history.{json,txt}.
-</span>    create_reports = <span class="keyword">true</span>,
+    create_reports = <span class="keyword">true</span>,
     threads = <span class="number">1</span>,
 }
 <span class="keyword">local</span> ok = runner.run_test({
-    client = sqlite_rw_register,
-    generator = gen_lib.cycle(gen_lib.iter({ r, w })):take(<span class="number">5</span>)
+    client = sqlite_list_append,
+    generator = gen_lib.cycle(gen_lib.iter({
+        op_read, op_append
+    })):take(<span class="number">5</span>)
 }, test_options)
 
 <span class="keyword">if</span> ok == <span class="keyword">true</span> <span class="keyword">then</span>
     <span class="global">print</span>(<span class="string">'Feel free to check history.json with elle-cli:'</span>)
-    <span class="global">print</span>(<span class="string">'java -jar elle-cli-0.1.1-standalone.jar --model elle-rw-register history.json'</span>)
+    <span class="global">print</span>(<span class="string">'java -jar elle-cli-0.1.1-standalone.jar --model elle-list-append history.json'</span>)
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> changes = db:total_changes()
@@ -156,7 +185,7 @@ db:close() <span class="comment">-- Close a database handler.
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-02-19 15:06:38 </i>
+<i style="float:right;">Last updated 2022-02-20 07:41:46 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
