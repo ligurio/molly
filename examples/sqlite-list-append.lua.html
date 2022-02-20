@@ -69,68 +69,33 @@
 <pre>
 <span class="keyword">local</span> sqlite3 = <span class="global">require</span>(<span class="string">'lsqlite3'</span>)
 <span class="keyword">local</span> ljepsen = <span class="global">require</span>(<span class="string">'ljepsen'</span>)
-<span class="keyword">local</span> <span class="global">math</span> = <span class="global">require</span>(<span class="string">'math'</span>)
 <span class="keyword">local</span> <span class="global">os</span> = <span class="global">require</span>(<span class="string">'os'</span>)
 
+<span class="keyword">local</span> checker = ljepsen.checker
 <span class="keyword">local</span> client = ljepsen.client
-<span class="keyword">local</span> gen_lib = ljepsen.gen
 <span class="keyword">local</span> runner = ljepsen.runner
 
-<span class="comment">-- A partial test, including a generator and checker. You’ll need to provide a
-</span><span class="comment">-- client which can understand operations of the form:
-</span><span class="comment">--
-</span><span class="comment">-- {:type :invoke, :f :txn, :value [[:r 3 nil] [:append 3 2] [:r 3]]}
-</span><span class="comment">-- and return completions like:
-</span><span class="comment">-- {:type :invoke, :f :txn, :value [[:r 3 [1]] [:append 3 2] [:r 3 [1 2]]]}
-</span>
 <span class="comment">--[[
 Values are lists of integers. Each operation performs a transaction,
 comprised of micro-operations which are either reads of some value (returning
 the entire list) or appends (adding a single number to whatever the present
 value of the given list is). We detect cycles in these transactions using
 Jepsen's cycle-detection system.
-]]</span>
-
-<span class="keyword">local</span> <span class="keyword">function</span> op_read()
-    <span class="keyword">return</span> {
-        f = <span class="string">'txn'</span>,
-        value = {
-            {
-                <span class="string">'r'</span>,
-                <span class="number">1</span>,
-                <span class="keyword">nil</span>,
-            }
-        },
-    }
-<span class="keyword">end</span>
-
-<span class="keyword">local</span> <span class="keyword">function</span> op_append()
-    <span class="keyword">return</span> {
-        f = <span class="string">'txn'</span>,
-        value = {{
-            <span class="string">'append'</span>,
-            <span class="number">1</span>,
-            <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">100</span>),
-        }}
-    }
-<span class="keyword">end</span>
-
-<span class="keyword">local</span> db = sqlite3.open_memory() <span class="comment">-- Open SQLite database in memory.
-</span>db:exec<span class="string">[[ CREATE TABLE IF NOT EXISTS test (id INT NOT NULL PRIMARY KEY, sk INT NOT NULL, val TEXT) ]]</span>
-
-<span class="keyword">local</span> sqlite_list_append = client.new()
-
-<span class="comment">--[[
 
 CREATE TABLE IF NOT EXISTS t3 (id INT NOT NULL PRIMARY KEY, sk INT NOT NULL, val TEXT);
 UPDATE t3 SET val = 3 WHERE id = 3;
 SELECT val FROM t3 WHERE id = 3;
 INSERT INTO t3 (id, sk, val) VALUES (3, 3, 3);
 
+Description in ./yugabyte/src/yugabyte/ysql/append_table.clj
+
 ]]</span>
 
-<span class="comment">-- Description in ./yugabyte/src/yugabyte/ysql/append_table.clj
-</span>
+<span class="keyword">local</span> db = sqlite3.open_memory() <span class="comment">-- Open SQLite database in memory.
+</span>db:exec<span class="string">[[ CREATE TABLE IF NOT EXISTS test (id INT NOT NULL PRIMARY KEY, sk INT NOT NULL, val TEXT) ]]</span>
+
+<span class="keyword">local</span> sqlite_list_append = client.new()
+
 sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
     <span class="comment">-- [[:r 3 nil] [:append 3 2] [:r 3]]
 </span>    <span class="keyword">local</span> val = op.value[<span class="number">1</span>]
@@ -160,14 +125,11 @@ sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
 }
 <span class="keyword">local</span> ok = runner.run_test({
     client = sqlite_list_append,
-    generator = gen_lib.cycle(gen_lib.iter({
-        op_read, op_append
-    })):take(<span class="number">5</span>)
+    generator = checker.list_append_gen,
 }, test_options)
 
-<span class="keyword">if</span> ok == <span class="keyword">true</span> <span class="keyword">then</span>
-    <span class="global">print</span>(<span class="string">'Feel free to check history.json with elle-cli:'</span>)
-    <span class="global">print</span>(<span class="string">'java -jar elle-cli-0.1.1-standalone.jar --model elle-list-append history.json'</span>)
+<span class="keyword">if</span> <span class="keyword">not</span> ok <span class="keyword">then</span>
+    <span class="global">print</span>(<span class="string">'Test is failed.'</span>)
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> changes = db:total_changes()
@@ -185,7 +147,7 @@ db:close() <span class="comment">-- Close a database handler.
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-02-20 08:03:49 </i>
+<i style="float:right;">Last updated 2022-02-20 08:10:08 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
