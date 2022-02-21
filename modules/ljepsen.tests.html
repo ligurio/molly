@@ -48,10 +48,10 @@
   <li><a href="../modules/ljepsen.history.html">ljepsen.history</a></li>
   <li><a href="../modules/ljepsen.html">ljepsen</a></li>
   <li><a href="../modules/ljepsen.log.html">ljepsen.log</a></li>
-  <li><strong>ljepsen.nemesis</strong></li>
+  <li><a href="../modules/ljepsen.nemesis.html">ljepsen.nemesis</a></li>
   <li><a href="../modules/ljepsen.op.html">ljepsen.op</a></li>
   <li><a href="../modules/ljepsen.runner.html">ljepsen.runner</a></li>
-  <li><a href="../modules/ljepsen.tests.html">ljepsen.tests</a></li>
+  <li><strong>ljepsen.tests</strong></li>
   <li><a href="../modules/ljepsen.thread.html">ljepsen.thread</a></li>
   <li><a href="../modules/ljepsen.utils.html">ljepsen.utils</a></li>
 </ul>
@@ -69,19 +69,9 @@
 
 <div id="content">
 
-<h1>Module <code>ljepsen.nemesis</code></h1>
-<p>Module with nemeses.</p>
+<h1>Module <code>ljepsen.tests</code></h1>
+<p>Tests</p>
 <p>
-
-
-<p> A nemesis is a process that will be fed operations from a generator process
- and then take action against the system accordingly.</p>
-
-
-<pre>
-{:<span class="global">type</span> :info, :f :start, :process :nemesis, :time <span class="number">5326396898</span>, :index <span class="number">169</span>}
-{:<span class="global">type</span> :info, :f :start, :process :nemesis, :time <span class="number">5328551016</span>, :index <span class="number">170</span>}
-</pre>
 
 </p>
 
@@ -89,12 +79,12 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#noop">noop ()</a></td>
-	<td class="summary">Nemesis that do nothing.</td>
+	<td class="name" nowrap><a href="#rw_register_gen">rw_register_gen ()</a></td>
+	<td class="summary">Write/Read operations generator.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#unreliablefs">unreliablefs ()</a></td>
-	<td class="summary">Nemesis with filesystem error injections.</td>
+	<td class="name" nowrap><a href="#list_append_gen">list_append_gen ()</a></td>
+	<td class="summary">List-Append operations generator.</td>
 	</tr>
 </table>
 
@@ -106,18 +96,18 @@
 
     <dl class="function">
     <dt>
-    <a name = "noop"></a>
-    <strong>noop ()</strong>
+    <a name = "rw_register_gen"></a>
+    <strong>rw_register_gen ()</strong>
     </dt>
     <dd>
-    Nemesis that do nothing.
+    Write/Read operations generator.
 
 
 
     <h3>Returns:</h3>
     <ol>
 
-        None
+        table
     </ol>
 
 
@@ -125,20 +115,18 @@
 
 </dd>
     <dt>
-    <a name = "unreliablefs"></a>
-    <strong>unreliablefs ()</strong>
+    <a name = "list_append_gen"></a>
+    <strong>list_append_gen ()</strong>
     </dt>
     <dd>
-    Nemesis with filesystem error injections.
- Based on unreliablefs fault injection file system.
- See <a href="https://github.com/ligurio/unreliablefs">unreliablefs</a>.
+    List-Append operations generator.
 
 
 
     <h3>Returns:</h3>
     <ol>
 
-        None
+        table
     </ol>
 
 
