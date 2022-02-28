@@ -66,6 +66,14 @@
 
     <h2>sqlite-list-append.lua</h2>
 <pre>
+<span class="comment">-- https://www.sqlite.org/threadsafe.html
+</span><span class="comment">-- https://www.sqlite.org/atomiccommit.html
+</span><span class="comment">-- https://www.sqlite.org/pragma.html#pragma_synchronous
+</span><span class="comment">-- https://www.sqlite.org/lang_select.html
+</span><span class="comment">-- https://www.sqlite.org/lang_datefunc.html
+</span><span class="comment">-- https://www.sqlite.org/lang_transaction.html
+</span><span class="comment">-- https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
+</span>
 <span class="keyword">local</span> sqlite3 = <span class="global">require</span>(<span class="string">'lsqlite3'</span>)
 <span class="keyword">local</span> ljepsen = <span class="global">require</span>(<span class="string">'ljepsen'</span>)
 <span class="keyword">local</span> <span class="global">os</span> = <span class="global">require</span>(<span class="string">'os'</span>)
@@ -74,58 +82,53 @@
 <span class="keyword">local</span> client = ljepsen.client
 <span class="keyword">local</span> runner = ljepsen.runner
 
-<span class="comment">--[[
-Values are lists of integers. Each operation performs a transaction,
-comprised of micro-operations which are either reads of some value (returning
-the entire list) or appends (adding a single number to whatever the present
-value of the given list is). We detect cycles in these transactions using
-Jepsen's cycle-detection system.
-
-Lists are encoded as rows in a table; key names are table names, and the set
-of all rows determines the list contents.
-
-This test requires a way to order table contents.
-]]</span>
-
-<span class="keyword">local</span> db = sqlite3.open_memory() <span class="comment">-- Open SQLite database in memory.
-</span>
 <span class="global">print</span>(<span class="string">'SQLite version:'</span>, sqlite3.version())
 <span class="global">print</span>(<span class="string">'lsqlite3 library version:'</span>, sqlite3.lversion())
 
+<span class="keyword">local</span> db = sqlite3.open_memory() <span class="comment">-- Open SQLite database in memory.
+</span>
 <span class="keyword">if</span> <span class="global">os</span>.getenv(<span class="string">'DEV'</span>) == <span class="string">'ON'</span> <span class="keyword">then</span>
     db:trace(<span class="keyword">function</span>(_, sql)
         <span class="global">print</span>(<span class="string">'SQLite trace:'</span>, sql)
     <span class="keyword">end</span>)
 <span class="keyword">end</span>
 
-<span class="keyword">local</span> sqlite_list_append = client.new()
-
 <span class="global">assert</span>(sqlite3.OK == db:exec(<span class="string">'CREATE TABLE list_append (key INT NOT NULL, val INT)'</span>))
 
 <span class="keyword">local</span> sqlite_insert_stmt = <span class="global">assert</span>(db:prepare(<span class="string">'INSERT INTO list_append VALUES (?, ?)'</span>))
 
 <span class="keyword">local</span> <span class="keyword">function</span> insert(key, val)
-    sqlite_insert_stmt:bind_values(key, val)
-    sqlite_insert_stmt:step()
+    <span class="keyword">local</span> ok = sqlite_insert_stmt:bind_values(key, val)
+    <span class="keyword">if</span> ok ~= sqlite3.OK <span class="keyword">then</span>
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    <span class="keyword">end</span>
+    ok = sqlite_insert_stmt:step()
+    <span class="keyword">if</span> ok ~= sqlite3.DONE <span class="keyword">then</span>
+        <span class="keyword">return</span> <span class="keyword">false</span>
+    <span class="keyword">end</span>
     sqlite_insert_stmt:reset()
+
+    <span class="keyword">return</span> <span class="keyword">true</span>
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> sqlite_select_stmt = <span class="global">assert</span>(db:prepare(<span class="string">'SELECT key, val FROM list_append ORDER BY key'</span>))
 
 <span class="keyword">local</span> <span class="keyword">function</span> <span class="global">select</span>(key)
-    <span class="keyword">local</span> t = {}
+    <span class="keyword">local</span> values = {}
     <span class="keyword">for</span> row <span class="keyword">in</span> sqlite_select_stmt:nrows() <span class="keyword">do</span>
         <span class="keyword">if</span> row.key == key <span class="keyword">then</span>
-            <span class="global">table</span>.insert(t, row.val)
+            <span class="global">table</span>.insert(values, row.val)
         <span class="keyword">end</span>
     <span class="keyword">end</span>
 
-    <span class="keyword">return</span> t
+    <span class="keyword">return</span> values
 <span class="keyword">end</span>
 
 <span class="keyword">local</span> MOP_TYPE = <span class="number">1</span>
 <span class="keyword">local</span> MOP_KEY = <span class="number">2</span>
 <span class="keyword">local</span> MOP_VAL = <span class="number">3</span>
+
+<span class="keyword">local</span> sqlite_list_append = client.new()
 
 sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
     <span class="keyword">local</span> mop = op.value[<span class="number">1</span>] <span class="comment">-- TODO: Support more than one mop in operation.
@@ -134,7 +137,10 @@ sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
     <span class="keyword">if</span> mop[MOP_TYPE] == <span class="string">'r'</span> <span class="keyword">then</span>
         mop[MOP_VAL] = <span class="global">select</span>(mop_key)
     <span class="keyword">elseif</span> mop[MOP_TYPE] == <span class="string">'append'</span> <span class="keyword">then</span>
-        insert(mop_key, mop[MOP_VAL])
+        <span class="keyword">local</span> ok = insert(mop_key, mop[MOP_VAL])
+        <span class="keyword">if</span> ok == <span class="keyword">false</span> <span class="keyword">then</span>
+            <span class="global">type</span> = <span class="string">'fail'</span>
+        <span class="keyword">end</span>
     <span class="keyword">else</span>
         <span class="global">error</span>(<span class="string">'Unknown operation'</span>)
     <span class="keyword">end</span>
@@ -160,11 +166,16 @@ sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
     <span class="global">print</span>(<span class="string">'Test has failed.'</span>)
 <span class="keyword">end</span>
 
+sqlite_insert_stmt:finalize()
+sqlite_select_stmt:finalize()
+
 <span class="keyword">local</span> changes = db:total_changes()
 <span class="global">assert</span>(changes == <span class="number">50</span>, <span class="global">string</span>.format(<span class="string">'Number of operations is wrong (%d vs 50)'</span>, changes))
 <span class="global">print</span>(<span class="string">'Total changes in SQLite DB:'</span>, changes)
-db:close() <span class="comment">-- Close a database handler.
-</span>
+
+<span class="comment">-- Teardown.
+</span>db:close()
+
 <span class="keyword">if</span> <span class="global">os</span>.getenv(<span class="string">'DEV'</span>) ~= <span class="string">'ON'</span> <span class="keyword">then</span>
     <span class="global">os</span>.remove(<span class="string">'history.json'</span>)
     <span class="global">os</span>.remove(<span class="string">'history.txt'</span>)
@@ -175,7 +186,7 @@ db:close() <span class="comment">-- Close a database handler.
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-02-27 19:23:23 </i>
+<i style="float:right;">Last updated 2022-02-28 08:27:44 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
