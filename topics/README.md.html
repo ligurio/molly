@@ -3,7 +3,7 @@
 <html>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <head>
-    <title>ljepsen documentation</title>
+    <title>Molly documentation</title>
     <link rel="stylesheet" href="../ldoc.css" type="text/css" />
 </head>
 <body>
@@ -24,7 +24,7 @@
 
 <div id="navigation">
 <br/>
-<h1>ljepsen</h1>
+<h1>molly</h1>
 
 <ul>
   <li><a href="../index.html">Index</a></li>
@@ -32,7 +32,7 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#ljepsen">ljepsen </a></li>
+<li><a href="#Molly">Molly </a></li>
 </ul>
 
 
@@ -42,21 +42,21 @@
 </ul>
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><a href="../modules/ljepsen.client.html">ljepsen.client</a></li>
-  <li><a href="../modules/ljepsen.clock.html">ljepsen.clock</a></li>
-  <li><a href="../modules/ljepsen.thread_coroutine.html">ljepsen.thread_coroutine</a></li>
-  <li><a href="../modules/ljepsen.thread_fiber.html">ljepsen.thread_fiber</a></li>
-  <li><a href="../modules/ljepsen.db.html">ljepsen.db</a></li>
-  <li><a href="../modules/ljepsen.gen.html">ljepsen.gen</a></li>
-  <li><a href="../modules/ljepsen.history.html">ljepsen.history</a></li>
-  <li><a href="../modules/ljepsen.html">ljepsen</a></li>
-  <li><a href="../modules/ljepsen.log.html">ljepsen.log</a></li>
-  <li><a href="../modules/ljepsen.nemesis.html">ljepsen.nemesis</a></li>
-  <li><a href="../modules/ljepsen.op.html">ljepsen.op</a></li>
-  <li><a href="../modules/ljepsen.runner.html">ljepsen.runner</a></li>
-  <li><a href="../modules/ljepsen.tests.html">ljepsen.tests</a></li>
-  <li><a href="../modules/ljepsen.thread.html">ljepsen.thread</a></li>
-  <li><a href="../modules/ljepsen.utils.html">ljepsen.utils</a></li>
+  <li><a href="../modules/molly.client.html">molly.client</a></li>
+  <li><a href="../modules/molly.clock.html">molly.clock</a></li>
+  <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
+  <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Examples</h2>
 <ul class="nowrap">
@@ -68,12 +68,12 @@
 
 <div id="content">
 
-    <a href="https://github.com/ligurio/ljepsen/actions/workflows/check.yaml"><img src="https://github.com/ligurio/ljepsen/actions/workflows/check.yaml/badge.svg" alt="Static analysis"/></a>
-<a href="https://github.com/ligurio/ljepsen/actions/workflows/test.yaml"><img src="https://github.com/ligurio/ljepsen/actions/workflows/test.yaml/badge.svg" alt="Testing"/></a>
-<a href="https://coveralls.io/github/ligurio/ljepsen?branch=dev"><img src="https://coveralls.io/repos/github/ligurio/ljepsen/badge.svg?branch=dev" alt="Coverage Status"/></a></p>
+    <a href="https://github.com/ligurio/molly/actions/workflows/check.yaml"><img src="https://github.com/ligurio/molly/actions/workflows/check.yaml/badge.svg" alt="Static analysis"/></a>
+<a href="https://github.com/ligurio/molly/actions/workflows/test.yaml"><img src="https://github.com/ligurio/molly/actions/workflows/test.yaml/badge.svg" alt="Testing"/></a>
+<a href="https://coveralls.io/github/ligurio/molly?branch=dev"><img src="https://coveralls.io/repos/github/ligurio/molly/badge.svg?branch=dev" alt="Coverage Status"/></a></p>
 
-<p><a name="ljepsen"></a></p>
-<h2>ljepsen</h2>
+<p><a name="Molly"></a></p>
+<h2>Molly</h2>
 
 <p>is a framework for distributed systems verification, with fault injection.</p>
 
@@ -86,8 +86,6 @@
     <li><a href="https://luafun.github.io/">luafun</a> - Lua functional library.</li>
     <li><a href="https://github.com/mpx/lua-cjson">lua-cjson</a> - Lua library for fast JSON
     encoding and decoding.</li>
-    <li>(optional) <a href="https://github.com/ligurio/unreliablefs">unreliablefs</a> - a
-    FUSE-based fault injection filesystem.</li>
     <li>(optional) Jepsen-compatible consistency checker. For example
     <a href="https://github.com/ligurio/elle-cli">elle-cli</a>, based on Jepsen, Elle and
     Knossos.</li>
@@ -95,7 +93,7 @@
 
 <h3>Documentation</h3>
 
-<p>See documentation in https://ligurio.github.io/ljepsen/.</p>
+<p>See documentation in https://ligurio.github.io/molly/.</p>
 
 <h3>Examples</h3>
 
@@ -142,7 +140,7 @@ history.json        <span class="keyword">true</span>
     is <a href="https://nullprogram.com/blog/2018/05/27/">substantially faster than C</a>.
     It's about 25% faster than a native C function call to a shared object
     function.</li>
-    <li><strong>Fast and powerful generators</strong>. <a href="../modules/ljepsen.html#">ljepsen</a> uses Lua functional library that
+    <li><strong>Fast and powerful generators</strong>. <a href="../modules/molly.html#">molly</a> uses Lua functional library that
     allows to build generators with exceptional performance, most of them produce
     about 0.8-1.4M ops per second. In the same time Jepsen generators are slow:
     "Realistic generator tests yield rates over 20,000 operations/sec, which
@@ -152,7 +150,7 @@ history.json        <span class="keyword">true</span>
     than preemptive one. Jepsen library has a problems with multithreading, that
     Kyle Kingsbury "have never had the chance to dig in and fix".</li>
     <li><strong>Modern transactional safety checkers</strong>. The main strength of Jepsen is
-    it's transational safety checkers. <a href="../modules/ljepsen.html#">ljepsen</a> provides the same level of
+    it's transational safety checkers. <a href="../modules/molly.html#">molly</a> provides the same level of
     confidence as an original Jepsen library because of using
     <a href="https://github.com/ligurio/elle-cli">elle-cli</a> built on top of Elle, Knossos
     and Jepsen's consistency checkers.</li>
@@ -169,7 +167,7 @@ history.json        <span class="keyword">true</span>
 
 
 <pre>
-$ luarocks install <span class="comment">--local --server=https://luarocks.org/dev ljepsen</span>
+$ luarocks install <span class="comment">--local --server=https://luarocks.org/dev molly</span>
 </pre>
 
 
@@ -179,7 +177,7 @@ included to the rockspec for user's convenience.</p>
 
 <h3>Hacking</h3>
 
-<p>For developing <a href="../modules/ljepsen.html#">ljepsen</a> you need to install: either LuaJIT or LuaJIT-based
+<p>For developing <a href="../modules/molly.html#">molly</a> you need to install: either LuaJIT or LuaJIT-based
 and <a href="https://github.com/luarocks/luarocks/wiki/Download">LuaRocks</a>.</p>
 
 
@@ -204,7 +202,7 @@ $ make test
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-05-18 14:28:21 </i>
+<i style="float:right;">Last updated 2022-05-21 14:23:38 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
