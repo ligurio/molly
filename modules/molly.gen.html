@@ -49,7 +49,6 @@
 
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><a href="../modules/checks.html">checks</a></li>
   <li><a href="../modules/molly.client.html">molly.client</a></li>
   <li><a href="../modules/molly.clock.html">molly.clock</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
@@ -132,37 +131,27 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 <h2><a href="#Basic_Functions">Basic Functions </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#iter">iter ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#iter">iter (object)</a></td>
+	<td class="summary">Make an iterator from the iterable object.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#each">each ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#each">each (function, iterator)</a></td>
+	<td class="summary">Execute the function <code>fun</code> for each iteration value.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#for_each">for_each ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">An alias for each().</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#foreach">foreach ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="summary">An alias for each().</td>
 	</tr>
 </table>
 <h2><a href="#Generators__Finite_Generators">Generators: Finite Generators </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#range">range ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#range">range ([start], stop[, step])</a></td>
+	<td class="summary">The iterator to create arithmetic progressions.</td>
 	</tr>
 </table>
 <h2><a href="#Generators__Infinity_Generators">Generators: Infinity Generators </a></h2>
@@ -303,7 +292,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#remove_if">remove_if ()</a></td>
-	<td class="summary">An alias for filter()</td>
+	<td class="summary">An alias for filter().</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#grep">grep ()</a></td>
@@ -403,16 +392,13 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 <h2><a href="#Compositions">Compositions </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#zip">zip ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#zip">zip (...)</a></td>
+	<td class="summary">Return a new iterator where i-th return value contains the i-th element
+ from each of the iterators.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#cycle">cycle ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#cycle">cycle (iterator)</a></td>
+	<td class="summary">A cycled version of an iterator.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#chain">chain ()</a></td>
@@ -420,17 +406,39 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 </td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cycle_times">cycle_times ()</a></td>
+	<td class="summary">Cycles between several generators on a rotating schedule.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mix">mix ()</a></td>
+	<td class="summary">(TODO) A random mixture of several generators.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#flip_flop">flip_flop (a, b)</a></td>
+	<td class="summary">(TODO) Emits an operation from generator A, then B, then A again, then B again,
+ etc.</td>
+	</tr>
 </table>
 <h2><a href="#Special_generators">Special generators </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#stagger">stagger ()</a></td>
-	<td class="summary">Operations from that generator are scheduled at uniformly random intervals
- between 0 to 2 * (dt seconds).</td>
+	<td class="name" nowrap><a href="#log">log ()</a></td>
+	<td class="summary">(TODO) A generator which, when asked for an operation, logs a message and yields
+  nil.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#time_limit">time_limit ()</a></td>
-	<td class="summary">Stops producing operations when time limit is exceeded.</td>
+	<td class="name" nowrap><a href="#stagger">stagger (dt)</a></td>
+	<td class="summary">(TODO) Operations from that generator are scheduled at uniformly random intervals
+ between <code>0</code> to <code>2 * (dt seconds)</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#time_limit">time_limit (duration)</a></td>
+	<td class="summary">Stops generating items when time limit is exceeded.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#yield">yield (duration)</a></td>
+	<td class="summary">(TODO) Yields on producing N-th item.</td>
 	</tr>
 </table>
 
@@ -443,30 +451,97 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <dl class="function">
     <dt>
     <a name = "iter"></a>
-    <strong>iter ()</strong>
+    <strong>iter (object)</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/basic.html#fun.iter">fun.iter</a>.
+    Make an iterator from the iterable object.
+ See <a href="https://luafun.github.io/basic.html#fun.iter">fun.iter</a>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">object</span>
+
+<ul>
+    <li>an iterable object (map, array, string).</li>
+</ul>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator triplet
+    </ol>
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="comment">---
+</span>...
 
+tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+b
+a
+c
+<span class="comment">---
+</span>...
 
-
+tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter(<span class="string">"abc"</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+a
+b
+c
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
 </dd>
     <dt>
     <a name = "each"></a>
-    <strong>each ()</strong>
+    <strong>each (function, iterator)</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/basic.html#fun.each">fun.each</a>.
+    Execute the function <code>fun</code> for each iteration value.
+ See <a href="https://luafun.github.io/basic.html#fun.each">fun.each</a>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">function</span>
 
 
 
+        </li>
+        <li><span class="parameter">iterator</span>
 
 
 
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        none
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tarantool&gt; gen.each(<span class="global">print</span>, { a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})
+b       <span class="number">2</span>
+a       <span class="number">1</span>
+c       <span class="number">3</span>
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
 </dd>
     <dt>
@@ -474,7 +549,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>for_each ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/basic.html#fun.each">fun.each</a>.
+    An alias for each().
+ See <a href="../modules/molly.gen.html#each">gen.each</a>.
 
 
 
@@ -488,7 +564,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>foreach ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/basic.html#fun.each">fun.each</a>.
+    An alias for each().
+ See <a href="../modules/molly.gen.html#each">gen.each</a>.
 
 
 
@@ -503,16 +580,66 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <dl class="function">
     <dt>
     <a name = "range"></a>
-    <strong>range ()</strong>
+    <strong>range ([start], stop[, step])</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/generators.html#fun.range">fun.range</a>.
+    The iterator to create arithmetic progressions.
+ Iteration values are generated within closed interval <code>[start, stop]</code> (i.e.
+ <code>stop</code> is included). If the <code>start</code> argument is omitted, it defaults to 1 (<code>stop
+ &gt; 0</code>) or to -1 (<code>stop &lt; 0</code>). If the <code>step</code> argument is omitted, it defaults to 1
+ (<code>start &lt;= stop</code>) or to -1 (<code>start &gt; stop</code>). If <code>step</code> is positive, the last
+ element is the largest <code>start + i * step</code> less than or equal to <code>stop</code>; if <code>step</code>
+ is negative, the last element is the smallest <code>start + i * step</code> greater than
+ or equal to <code>stop</code>. <code>step</code> must not be zero (or else an error is raised).
+ <code>range(0)</code> returns empty iterator.
+ See <a href="https://luafun.github.io/generators.html#fun.range">fun.range</a>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">start</span>
+            <span class="types"><span class="type">number</span></span>
+         – an endpoint of the interval.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">stop</span>
+            <span class="types"><span class="type">number</span></span>
+         – an endpoint of the interval.
+        </li>
+        <li><span class="parameter">step</span>
+            <span class="types"><span class="type">number</span></span>
+         – a step.
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="number">4</span>
+<span class="number">5</span>
+<span class="number">6</span>
+<span class="comment">---
+</span>...
 
-
-
+tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">3</span>
+<span class="number">5</span>
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
 </dd>
 </dl>
@@ -533,6 +660,15 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tarantool&gt; gen.each(<span class="global">print</span>, gen.take(<span class="number">3</span>, gen.duplicate(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)))
+a       b       c
+a       b       c
+a       b       c
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
 </dd>
     <dt>
@@ -541,7 +677,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     </dt>
     <dd>
     An alias for duplicate().
- See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+ See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a>.
 
 
 
@@ -556,7 +692,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     </dt>
     <dd>
     An alias for duplicate().
- See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
+ See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a>.
 
 
 
@@ -854,8 +990,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <strong>remove_if ()</strong>
     </dt>
     <dd>
-    An alias for filter()
- See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
+    An alias for filter().
+ See <a href="../modules/molly.gen.html#filter">gen.filter</a>.
 
 
 
@@ -923,7 +1059,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     </dt>
     <dd>
     An alias to gen.foldl.
- See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
+ See <a href="../modules/molly.gen.html#foldl">gen.foldl</a>.
 
 
 
@@ -1117,13 +1253,32 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <dl class="function">
     <dt>
     <a name = "zip"></a>
-    <strong>zip ()</strong>
+    <strong>zip (...)</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/compositions.html#fun.zip">fun.zip</a>.
+    Return a new iterator where i-th return value contains the i-th element
+ from each of the iterators.  The returned iterator is truncated in length to
+ the length of the shortest iterator. For multi-return iterators only the
+ first variable is used.
+ See <a href="https://luafun.github.io/compositions.html#fun.zip">fun.zip</a>.
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
 
+<ul>
+    <li>iterators to "zip".</li>
+</ul>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
 
 
 
@@ -1131,13 +1286,36 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 </dd>
     <dt>
     <a name = "cycle"></a>
-    <strong>cycle ()</strong>
+    <strong>cycle (iterator)</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/compositions.html#fun.cycle">fun.cycle</a>.
+    A cycled version of an iterator.
+ Make a new iterator that returns elements from <code>{gen, param, state}</code> iterator
+ until the end and then "restart" iteration using a saved clone of <code>{gen,
+ param, state}</code>. The returned iterator is constant space and no return values
+ are buffered. Instead of that the function make a clone of the source <code>{gen,
+ param, state}</code> iterator. Therefore, the source iterator must be pure
+ functional to make an indentical clone. Infinity iterators are supported,
+ but are not recommended.
+ See <a href="https://luafun.github.io/compositions.html#fun.cycle">fun.cycle</a>.
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">iterator</span>
 
+<ul>
+    <li>an iterator.</li>
+</ul>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
 
 
 
@@ -1157,20 +1335,128 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
 
 </dd>
+    <dt>
+    <a name = "cycle_times"></a>
+    <strong>cycle_times ()</strong>
+    </dt>
+    <dd>
+    Cycles between several generators on a rotating schedule.  Takes a flat
+  series of [time, generator] pairs.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mix"></a>
+    <strong>mix ()</strong>
+    </dt>
+    <dd>
+    (TODO) A random mixture of several generators.  Takes a collection of generators
+ and chooses between them uniformly.</p>
+
+<p> To be precise, a mix behaves like a sequence of one-time, randomly selected
+ generators from the given collection. This is efficient and prevents
+ multiple generators from competing for the next slot, making it hard to
+ control the mixture of operations.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "flip_flop"></a>
+    <strong>flip_flop (a, b)</strong>
+    </dt>
+    <dd>
+    (TODO) Emits an operation from generator A, then B, then A again, then B again,
+ etc.  Stops as soon as any gen is exhausted.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">a</span>
+            <span class="types"><span class="type">number</span></span>
+         generator A.
+        </li>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span></span>
+         generator B.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+
+</dd>
 </dl>
     <h2 class="section-header "><a name="Special_generators"></a>Special generators </h2>
 
     <dl class="function">
     <dt>
-    <a name = "stagger"></a>
-    <strong>stagger ()</strong>
+    <a name = "log"></a>
+    <strong>log ()</strong>
     </dt>
     <dd>
-    Operations from that generator are scheduled at uniformly random intervals
- between 0 to 2 * (dt seconds).
+    (TODO) A generator which, when asked for an operation, logs a message and yields
+  nil.  Occurs only once; use <code>repeat</code> to repeat.
 
 
 
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "stagger"></a>
+    <strong>stagger (dt)</strong>
+    </dt>
+    <dd>
+    (TODO) Operations from that generator are scheduled at uniformly random intervals
+ between <code>0</code> to <code>2 * (dt seconds)</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dt</span>
+            <span class="types"><span class="type">number</span></span>
+         Number of seconds.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
 
 
 
@@ -1178,13 +1464,69 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 </dd>
     <dt>
     <a name = "time_limit"></a>
-    <strong>time_limit ()</strong>
+    <strong>time_limit (duration)</strong>
     </dt>
     <dd>
-    Stops producing operations when time limit is exceeded.
+    Stops generating items when time limit is exceeded.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">duration</span>
+            <span class="types"><span class="type">number</span></span>
+         Number of seconds.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tarantool&gt;  <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.time_limit(gen.range(<span class="number">1</span>, <span class="number">100</span>), <span class="number">0.0001</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="number">4</span>
+<span class="number">5</span>
+<span class="number">6</span>
+<span class="number">7</span>
+<span class="number">8</span>
+<span class="number">9</span>
+<span class="number">10</span>
+<span class="number">11</span>
+<span class="number">12</span>
+<span class="comment">---
+</span>...</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "yield"></a>
+    <strong>yield (duration)</strong>
+    </dt>
+    <dd>
+    (TODO) Yields on producing N-th item.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">duration</span>
+            <span class="types"><span class="type">number</span></span>
+         Number of seconds.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
 
 
 
@@ -1197,7 +1539,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-05-25 16:51:26 </i>
+<i style="float:right;">Last updated 2022-05-30 18:42:10 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
