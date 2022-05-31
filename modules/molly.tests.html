@@ -98,11 +98,11 @@
 
 
 <pre>
-{ index = <span class="number">2</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">255</span> <span class="number">8</span> } { <span class="string">"r"</span> <span class="number">253</span> json.NULL }}}
+{ index = <span class="number">2</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">255</span> <span class="number">8</span> } { <span class="string">"r"</span> <span class="number">253</span> null}}}
 { index = <span class="number">3</span>, <span class="global">type</span> = <span class="string">"ok"</span>,     value = {{ <span class="string">"append"</span> <span class="number">255</span> <span class="number">8</span> } { <span class="string">"r"</span> <span class="number">253</span> { <span class="number">1</span> <span class="number">3</span> <span class="number">4</span> }}}}
-{ index = <span class="number">4</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">256</span> <span class="number">4</span> } { <span class="string">"r"</span> <span class="number">255</span> json.NULL } { <span class="string">"r"</span> <span class="number">256</span> <span class="keyword">nil</span> } { <span class="string">"r"</span> <span class="number">253</span> json.NULL }}}
+{ index = <span class="number">4</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">256</span> <span class="number">4</span> } { <span class="string">"r"</span> <span class="number">255</span> null } { <span class="string">"r"</span> <span class="number">256</span> <span class="keyword">nil</span> } { <span class="string">"r"</span> <span class="number">253</span> null }}}
 { index = <span class="number">5</span>, <span class="global">type</span> = <span class="string">"ok"</span>,     value = {{ <span class="string">"append"</span> <span class="number">256</span> <span class="number">4</span> } { <span class="string">"r"</span> <span class="number">255</span> { <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">8</span> }} { <span class="string">"r"</span> <span class="number">256</span> { <span class="number">1</span> <span class="number">2</span> <span class="number">4</span> }} {{ <span class="string">"r"</span> <span class="number">253</span> { <span class="number">1</span> <span class="number">3</span> <span class="number">4</span> }}}}
-{ index = <span class="number">6</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">250</span> <span class="number">10</span> } { <span class="string">"r"</span> <span class="number">253</span> json.NULL }{ <span class="string">"r"</span> <span class="number">255</span> json.NULL } { <span class="string">"append"</span> <span class="number">256</span> <span class="number">3</span> }}}
+{ index = <span class="number">6</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">250</span> <span class="number">10</span> } { <span class="string">"r"</span> <span class="number">253</span> null }{ <span class="string">"r"</span> <span class="number">255</span> null } { <span class="string">"append"</span> <span class="number">256</span> <span class="number">3</span> }}}
 </pre>
 
 <p> A partial test, including a generator and checker. You’ll need to provide a
@@ -110,7 +110,7 @@
 
 
 <pre>
-{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="number">3</span>, json.NULL } { <span class="string">"append"</span>, <span class="number">3</span> <span class="number">2</span> } { <span class="string">"r"</span> <span class="number">3</span> }}}
+{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="number">3</span>, null } { <span class="string">"append"</span>, <span class="number">3</span> <span class="number">2</span> } { <span class="string">"r"</span> <span class="number">3</span> }}}
 </pre>
 
 <p> and return completions like:</p>
@@ -153,7 +153,7 @@
 <pre>
 { <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"w"</span>, <span class="string">"x"</span>, <span class="number">1</span> }},   process = <span class="number">0</span>, index = <span class="number">1</span>}
 { <span class="global">type</span> = <span class="string">"ok"</span>,     f = <span class="string">"txn"</span>, value = {{ <span class="string">"w"</span>, <span class="string">"x"</span>, <span class="number">1</span> }},   process = <span class="number">0</span>, index = <span class="number">2</span>}
-{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="string">"x"</span>, json.NULL }}, process = <span class="number">0</span>, index = <span class="number">3</span>}
+{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="string">"x"</span>, null }}, process = <span class="number">0</span>, index = <span class="number">3</span>}
 { <span class="global">type</span> = <span class="string">"ok"</span>,     f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="string">"x"</span>, <span class="number">2</span> }},   process = <span class="number">0</span>, index = <span class="number">4</span>}
 </pre>
 
@@ -208,6 +208,24 @@
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tarantool&gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
+tarantool&gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
+tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> tests.rw_register_gen() <span class="keyword">do</span> log.info(v()) <span class="keyword">end</span>
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",58]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",80]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",46]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",19]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",66]]</span>}
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
 </dd>
     <dt>
@@ -264,6 +282,24 @@
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">tarantool&gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
+tarantool&gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
+tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> tests.list_append_gen() <span class="keyword">do</span> log.info(v()) <span class="keyword">end</span>
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",3,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,1]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,2]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",1,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",2,3]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,4]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",2,5]]</span>}
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
 </dd>
 </dl>
@@ -273,7 +309,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-05-31 09:57:56 </i>
+<i style="float:right;">Last updated 2022-05-31 10:17:13 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
