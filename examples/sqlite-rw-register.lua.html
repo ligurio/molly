@@ -77,7 +77,7 @@
 <span class="global">print</span>(<span class="string">'SQLite version:'</span>, sqlite3.version())
 <span class="global">print</span>(<span class="string">'lsqlite3 library version:'</span>, sqlite3.lversion())
 
-<span class="keyword">local</span> <span class="keyword">function</span> insert(stmt, key, val) <span class="comment">-- luacheck: no unused
+<span class="keyword">local</span> <span class="keyword">function</span> call_insert(stmt, key, val) <span class="comment">-- luacheck: no unused
 </span>    <span class="global">assert</span>(stmt:isopen() == <span class="keyword">true</span>, <span class="string">'statement has been finalized'</span>)
     <span class="keyword">local</span> ok = stmt:bind_values(key, val)
     <span class="keyword">if</span> ok ~= sqlite3.OK <span class="keyword">then</span>
@@ -92,7 +92,7 @@
     <span class="keyword">return</span> <span class="keyword">true</span>
 <span class="keyword">end</span>
 
-<span class="keyword">local</span> <span class="keyword">function</span> <span class="global">select</span>(stmt, key) <span class="comment">-- luacheck: no unused
+<span class="keyword">local</span> <span class="keyword">function</span> call_select(stmt, key) <span class="comment">-- luacheck: no unused
 </span>    <span class="global">assert</span>(stmt:isopen() == <span class="keyword">true</span>, <span class="string">'statement has been finalized'</span>)
     <span class="keyword">local</span> val, ok
     <span class="keyword">if</span> stmt:bind_values(key) ~= sqlite3.OK <span class="keyword">then</span>
@@ -109,18 +109,19 @@
     <span class="keyword">return</span> ok, val
 <span class="keyword">end</span>
 
-<span class="comment">-- <code>sqlite_rw_register</code> implements a client that performs two operations on
-</span><span class="comment">-- database: read and write. Method <code>invoke</code> must apply these operations to a
+<span class="comment">-- <code>sqlite_rw_register</code> is a client that performs on database two operations:
+</span><span class="comment">-- <code>read</code> and <code>write</code>. Method <code>invoke</code> must apply these operations to a
 </span><span class="comment">-- database instance.
 </span><span class="keyword">local</span> sqlite_rw_register = molly.client.new()
 
 sqlite_rw_register.open = <span class="keyword">function</span>(self)
     self.db = <span class="global">assert</span>(sqlite3.open_memory(), <span class="string">'database handle is nil'</span>)
-    <span class="comment">-- See explanation in https://www.sqlite.org/pragma.html
+    <span class="comment">-- For explanation see https://www.sqlite.org/pragma.html
 </span>    <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA journal_mode = WAL'</span>))
     <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA synchronous = normal'</span>))
     <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA mmap_size = 30000000000'</span>))
     <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA page_size = 32768'</span>))
+
     <span class="comment">--self.insert_stmt = assert(self.db:prepare('INSERT INTO rw_register VALUES (?, ?)'), 'statement prepare')
 </span>    <span class="comment">--self.select_stmt = assert(self.db:prepare('SELECT val FROM rw_register WHERE id = ?'), 'statement prepare')
 </span>    <span class="keyword">return</span> <span class="keyword">true</span>
@@ -142,7 +143,7 @@ sqlite_rw_register.invoke = <span class="keyword">function</span>(self, op)
     <span class="keyword">if</span> val[OP_TYPE] == <span class="string">'r'</span> <span class="keyword">then</span>
         <span class="comment">--[[
         assert(self.select_stmt:isopen() == true, 'statement has been finalized')
-        local ok, v = select(self.select_stmt, KEY_ID)
+        local ok, v = call_select(self.select_stmt, KEY_ID)
         val[OP_VAL] = v
         if ok == false then
             type = 'fail'
@@ -151,7 +152,7 @@ sqlite_rw_register.invoke = <span class="keyword">function</span>(self, op)
         val[OP_VAL] = self.db:exec(<span class="global">string</span>.format(<span class="string">'SELECT val FROM rw_register WHERE id = %d'</span>, KEY_ID))
     <span class="keyword">elseif</span> val[OP_TYPE] == <span class="string">'w'</span> <span class="keyword">then</span>
         <span class="comment">--assert(self.insert_stmt:isopen() == true, 'statement has been finalized')
-</span>        <span class="comment">--local ok = insert(self.insert_stmt, KEY_ID, val[OP_VAL])
+</span>        <span class="comment">--local ok = call_insert(self.insert_stmt, KEY_ID, val[OP_VAL])
 </span>        <span class="keyword">local</span> ok = self.db:exec(<span class="global">string</span>.format(<span class="string">'INSERT INTO rw_register VALUES (?, ?)'</span>, KEY_ID, val[OP_VAL]))
         <span class="keyword">if</span> ok == <span class="keyword">false</span> <span class="keyword">then</span>
             <span class="global">type</span> = <span class="string">'fail'</span>
@@ -209,7 +210,7 @@ sqlite_rw_register.close = <span class="keyword">function</span>(self)
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-05-31 10:17:13 </i>
+<i style="float:right;">Last updated 2022-06-01 06:55:26 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
