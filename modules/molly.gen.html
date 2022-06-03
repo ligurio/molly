@@ -383,17 +383,17 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 	<td class="summary">A cycled version of an iterator.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#chain">chain ()</a></td>
-	<td class="summary">
-
-</td>
+	<td class="name" nowrap><a href="#chain">chain (...)</a></td>
+	<td class="summary">Make an iterator that returns elements from the first iterator until it is
+ exhausted, then proceeds to the next iterator, until all of the iterators are
+ exhausted.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#cycle_times">cycle_times (iterators)</a></td>
+	<td class="name" nowrap><a href="#cycle_times">cycle_times (...)</a></td>
 	<td class="summary">(TODO) Cycles between several generators on a rotating schedule.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#mix">mix ()</a></td>
+	<td class="name" nowrap><a href="#mix">mix (...)</a></td>
 	<td class="summary">(TODO) A random mixture of several generators.</td>
 	</tr>
 	<tr>
@@ -450,28 +450,28 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <h3>Returns:</h3>
     <ol>
 
-        an iterator triplet
+        an iterator
     </ol>
 
 
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+        <pre class="example">&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
 <span class="number">1</span>
 <span class="number">2</span>
 <span class="number">3</span>
 <span class="comment">---
 </span>...
 
-tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
 b
 a
 c
 <span class="comment">---
 </span>...
 
-tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter(<span class="string">"abc"</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter(<span class="string">"abc"</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
 a
 b
 c
@@ -498,7 +498,9 @@ c
         </li>
         <li><span class="parameter">iterator</span>
 
-
+<ul>
+    <li>an iterator or iterable object</li>
+</ul>
 
         </li>
     </ul>
@@ -513,7 +515,7 @@ c
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">tarantool&gt; gen.each(<span class="global">print</span>, { a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})
+        <pre class="example">&gt; gen.each(<span class="global">print</span>, { a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})
 b       <span class="number">2</span>
 a       <span class="number">1</span>
 c       <span class="number">3</span>
@@ -601,7 +603,7 @@ c       <span class="number">3</span>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+        <pre class="example">&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
 <span class="number">1</span>
 <span class="number">2</span>
 <span class="number">3</span>
@@ -611,7 +613,7 @@ c       <span class="number">3</span>
 <span class="comment">---
 </span>...
 
-tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
 <span class="number">1</span>
 <span class="number">3</span>
 <span class="number">5</span>
@@ -640,7 +642,7 @@ tarantool&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">tarantool&gt; gen.each(<span class="global">print</span>, gen.take(<span class="number">3</span>, gen.duplicate(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)))
+        <pre class="example">&gt; gen.each(<span class="global">print</span>, gen.take(<span class="number">3</span>, gen.duplicate(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)))
 a       b       c
 a       b       c
 a       b       c
@@ -1255,7 +1257,7 @@ a       b       c
         <li><span class="parameter">...</span>
 
 <ul>
-    <li>iterators to "zip".</li>
+    <li>an iterators</li>
 </ul>
 
         </li>
@@ -1292,7 +1294,7 @@ a       b       c
         <li><span class="parameter">iterator</span>
 
 <ul>
-    <li>an iterator.</li>
+    <li>an iterator</li>
 </ul>
 
         </li>
@@ -1310,21 +1312,56 @@ a       b       c
 </dd>
     <dt>
     <a name = "chain"></a>
-    <strong>chain ()</strong>
+    <strong>chain (...)</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/compositions.html#fun.chain">fun.chain</a>.
+    Make an iterator that returns elements from the first iterator until it is
+ exhausted, then proceeds to the next iterator, until all of the iterators are
+ exhausted.  Used for treating consecutive iterators as a single iterator.
+ Infinity iterators are supported, but are not recommended.
+ See <a href="https://luafun.github.io/compositions.html#fun.chain">fun.chain</a>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+
+<ul>
+    <li>an iterators</li>
+</ul>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator, a consecutive iterator from sources (left from right).
+    </ol>
 
 
 
-
-
-
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; fun.each(<span class="global">print</span>, fun.chain(fun.range(<span class="number">5</span>, <span class="number">1</span>, -<span class="number">1</span>), fun.range(<span class="number">1</span>, <span class="number">5</span>)))
+<span class="number">5</span>
+<span class="number">4</span>
+<span class="number">3</span>
+<span class="number">2</span>
+<span class="number">1</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="number">4</span>
+<span class="number">5</span>
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
 </dd>
     <dt>
     <a name = "cycle_times"></a>
-    <strong>cycle_times (iterators)</strong>
+    <strong>cycle_times (...)</strong>
     </dt>
     <dd>
     (TODO) Cycles between several generators on a rotating schedule.
@@ -1333,9 +1370,11 @@ a       b       c
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">iterators</span>
+        <li><span class="parameter">...</span>
 
-
+<ul>
+    <li>an iterators</li>
+</ul>
 
         </li>
     </ul>
@@ -1352,7 +1391,7 @@ a       b       c
 </dd>
     <dt>
     <a name = "mix"></a>
-    <strong>mix ()</strong>
+    <strong>mix (...)</strong>
     </dt>
     <dd>
     (TODO) A random mixture of several generators.  Takes a collection of generators
@@ -1364,6 +1403,16 @@ a       b       c
  control the mixture of operations.
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+
+<ul>
+    <li>an iterators</li>
+</ul>
+
+        </li>
+    </ul>
 
     <h3>Returns:</h3>
     <ol>
@@ -1483,7 +1532,7 @@ a       b       c
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">tarantool&gt;  <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.time_limit(gen.range(<span class="number">1</span>, <span class="number">100</span>), <span class="number">0.0001</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+        <pre class="example">&gt;  <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.time_limit(gen.range(<span class="number">1</span>, <span class="number">100</span>), <span class="number">0.0001</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
 <span class="number">1</span>
 <span class="number">2</span>
 <span class="number">3</span>
@@ -1508,7 +1557,7 @@ a       b       c
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-06-02 15:13:41 </i>
+<i style="float:right;">Last updated 2022-06-03 19:58:30 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
