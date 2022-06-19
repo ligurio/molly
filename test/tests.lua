@@ -1,5 +1,5 @@
 --
--- Unit and integrations tests for Molly
+-- Unit and integrations tests for Molly.
 --
 
 require('test.coverage').enable()

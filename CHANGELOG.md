@@ -20,3 +20,5 @@ Initial version of Jepsen-like framework written in Lua programming language.
 - Add Luarocks spec.
 - Add examples with SQLite tests.
 - Add list-append and rw-register operation generators.
+
+[0.1.0]: https://github.com/ligurio/elle-cli/compare/dd0c1874...0.1.0

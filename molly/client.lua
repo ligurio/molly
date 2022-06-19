@@ -67,7 +67,7 @@ local function invoke(thread_id, opts)
         return false, err
     end
 
-    -- TODO: Add barrier here
+    -- TODO: Add barrier here.
 
     local gen, param, state = ops_generator:unwrap()
     shared_gen_state = state
@@ -87,7 +87,7 @@ local function invoke(thread_id, opts)
         require('fiber').yield()
     end
 
-    -- TODO: Add barrier here
+    -- TODO: Add barrier here.
 
     log.debug('Tearing down DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.teardown, client)
@@ -147,7 +147,7 @@ local client_mt = {
 --
 -- @return client
 -- @usage
--- local client = require('molly.client').new()
+-- local client = require('molly').client.new()
 -- client.invoke = function(op)
 --     return true
 -- end
@@ -162,5 +162,5 @@ end
 return {
     new = new,
 
-    invoke = invoke,        -- wrapper for user-defined invoke
+    invoke = invoke,        -- A wrapper for user-defined invoke.
 }
