@@ -1,4 +1,4 @@
----- Module with helpers to use with clocks, time and date.
+-- Module with helpers to use with clocks, time and date.
 -- @module molly.clock
 
 local is_tarantool = require('molly.utils').is_tarantool
@@ -15,7 +15,7 @@ else
     clock = require('molly.compat.clock_ffi')
 end
 
---- Sleep for the specified number of seconds. `clock.sleep` works as
+-- Sleep for the specified number of seconds. `clock.sleep` works as
 -- `fiber.sleep` when Tarantool is used, because with fibers it additionally
 -- yields control to the scheduler, see
 -- [Tarantool documentation](https://www.tarantool.io/en/doc/latest/reference/reference_lua/fiber/#fiber-sleep).
@@ -24,7 +24,7 @@ end
 --
 -- @function sleep
 
---- The processor time. Derived from C function
+-- The processor time. Derived from C function
 -- `clock_gettime(CLOCK_PROCESS_CPUTIME_ID)`. This is the best function to use
 -- with benchmarks that need to calculate how much time has been spent within a
 -- CPU.
@@ -37,7 +37,7 @@ end
 --
 -- @function proc
 
---- The monotonic time. Derived from C function `clock_gettime(CLOCK_MONOTONIC)`.
+-- The monotonic time. Derived from C function `clock_gettime(CLOCK_MONOTONIC)`.
 -- Monotonic time is similar to wall clock time but is not affected by changes
 -- to or from daylight saving time, or by changes done by a user. This is the
 -- best function to use with benchmarks that need to calculate elapsed time.
@@ -49,7 +49,7 @@ end
 --
 -- @function monotonic
 
---- The monotonic time. Derived from C function `clock_gettime(CLOCK_MONOTONIC)`.
+-- The monotonic time. Derived from C function `clock_gettime(CLOCK_MONOTONIC)`.
 -- Monotonic time is similar to wall clock time but is not affected by changes
 -- to or from daylight saving time, or by changes done by a user. This is the
 -- best function to use with benchmarks that need to calculate elapsed time.
@@ -61,7 +61,7 @@ end
 --
 -- @function monotonic64
 
---- Get datetime with milliseconds.
+-- Get datetime with milliseconds.
 -- @return string, string with datetime with milliseconds precision.
 -- @usage
 -- > local clock = require('molly.clock')

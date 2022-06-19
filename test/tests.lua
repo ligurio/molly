@@ -12,17 +12,17 @@ local helpers = require('test.helpers')
 
 local molly = require('molly')
 
-local client = molly.client
-local clock = molly.clock
+local client = require('molly.client')
+local clock = require('molly.clock')
 local gen_lib = molly.gen
-local history = molly.history
+local history = require('molly.history')
+local json = require('molly.json')
 local log = molly.log
-local op_lib = molly.op
+local op_lib = require('molly.op')
 local runner = molly.runner
 local tests = molly.tests
-local threadpool = molly.threadpool
+local threadpool = require('molly.threadpool')
 local utils = molly.utils
-local json = require('molly.json')
 
 local seed = os.time()
 math.randomseed(seed)

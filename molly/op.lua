@@ -63,7 +63,7 @@
 local dev_checks = require('molly.dev_checks')
 local pprint = require('molly.json').encode
 
---- Define whether operation is in planned state.
+-- Define whether operation is in planned state.
 -- @table op Operation.
 -- @return boolean
 --
@@ -73,7 +73,7 @@ local function is_planned(op)
     return op.type == 'invoke'
 end
 
---- Define whether operation is in completed state.
+-- Define whether operation is in completed state.
 -- @table op Operation.
 -- @return boolean
 --
@@ -84,7 +84,7 @@ local function is_completed(op)
            op.type == 'fail'
 end
 
---- Get a string representation of operation.
+-- Get a string representation of operation.
 -- @table op Operation.
 -- @return string
 --

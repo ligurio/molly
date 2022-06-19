@@ -7,7 +7,7 @@ local json = require('molly.json')
 local op = require('molly.op')
 local utils = require('molly.utils')
 
---- Get a string representation of history.
+-- Get a string representation of history.
 -- @return string
 -- @function to_txt
 local function to_txt(self)
@@ -22,7 +22,7 @@ local function to_txt(self)
     return history_str
 end
 
---- Get a string representation of history encoded to JSON.
+-- Get a string representation of history encoded to JSON.
 -- @return string
 -- @function to_json
 local function to_json(self)
@@ -38,7 +38,7 @@ local function to_json(self)
     return res
 end
 
---- Get a table with completed operations in a history.
+-- Get a table with completed operations in a history.
 -- @return table
 -- @function ops_completed
 local function ops_completed(self)
@@ -47,7 +47,7 @@ local function ops_completed(self)
     return gen.filter(op.is_completed, self.history):length()
 end
 
---- Get a table with planned operations in a history.
+-- Get a table with planned operations in a history.
 -- @return table
 -- @function ops_planned
 local function ops_planned(self)
@@ -56,7 +56,7 @@ local function ops_planned(self)
     return gen.filter(op.is_planned, self.history):length()
 end
 
---- Add an operation to a history.
+-- Add an operation to a history.
 -- @return true
 -- @function add
 local function add(self, operation)
@@ -77,7 +77,7 @@ local mt = {
     },
 }
 
---- Create a new history object.
+-- Create a new history object.
 -- @return history
 -- @function new
 local function new()
