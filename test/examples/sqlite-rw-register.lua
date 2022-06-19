@@ -125,7 +125,7 @@ local test_options = {
 
 local ok, err = molly.runner.run_test({
     client = sqlite_rw_register,
-    generator = molly.tests.rw_register_gen(5000),
+    generator = molly.tests.rw_register_gen():take(100),
 }, test_options)
 
 if not ok then
