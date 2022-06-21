@@ -91,43 +91,37 @@
  performs a transaction, comprised of micro-operations which are either reads
  of some value (returning the entire list) or appends (adding a single number
  to whatever the present value of the given list is). We detect cycles in
- these transactions using Molly's cycle-detection system.</p>
+ these transactions using Elle's cycle-detection system.</p>
 
 <p> Generator <a href="../modules/molly.tests.html#list_append_gen">molly.tests.list_append_gen</a> produces an operations
  compatible with Molly:</p>
 
 
 <pre>
-{ index = <span class="number">2</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">255</span> <span class="number">8</span> } { <span class="string">"r"</span> <span class="number">253</span> null}}}
-{ index = <span class="number">3</span>, <span class="global">type</span> = <span class="string">"ok"</span>,     value = {{ <span class="string">"append"</span> <span class="number">255</span> <span class="number">8</span> } { <span class="string">"r"</span> <span class="number">253</span> { <span class="number">1</span> <span class="number">3</span> <span class="number">4</span> }}}}
-{ index = <span class="number">4</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">256</span> <span class="number">4</span> } { <span class="string">"r"</span> <span class="number">255</span> null } { <span class="string">"r"</span> <span class="number">256</span> <span class="keyword">nil</span> } { <span class="string">"r"</span> <span class="number">253</span> null }}}
-{ index = <span class="number">5</span>, <span class="global">type</span> = <span class="string">"ok"</span>,     value = {{ <span class="string">"append"</span> <span class="number">256</span> <span class="number">4</span> } { <span class="string">"r"</span> <span class="number">255</span> { <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">8</span> }} { <span class="string">"r"</span> <span class="number">256</span> { <span class="number">1</span> <span class="number">2</span> <span class="number">4</span> }} {{ <span class="string">"r"</span> <span class="number">253</span> { <span class="number">1</span> <span class="number">3</span> <span class="number">4</span> }}}}
-{ index = <span class="number">6</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span> <span class="number">250</span> <span class="number">10</span> } { <span class="string">"r"</span> <span class="number">253</span> null }{ <span class="string">"r"</span> <span class="number">255</span> null } { <span class="string">"append"</span> <span class="number">256</span> <span class="number">3</span> }}}
+{ index = <span class="number">2</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span>, <span class="number">255</span>, <span class="number">8</span> } { <span class="string">"r"</span>, <span class="number">253</span>, null }}}
+{ index = <span class="number">3</span>, <span class="global">type</span> = <span class="string">"ok"</span>,     value = {{ <span class="string">"append"</span>, <span class="number">255</span>, <span class="number">8</span> } { <span class="string">"r"</span>, <span class="number">253</span>, { <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span> }}}}
+{ index = <span class="number">4</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span>, <span class="number">256</span>, <span class="number">4</span> } { <span class="string">"r"</span>, <span class="number">255</span>, null } { <span class="string">"r"</span>, <span class="number">256</span>, <span class="keyword">nil</span> } { <span class="string">"r"</span>, <span class="number">253</span>, null }}}
+{ index = <span class="number">5</span>, <span class="global">type</span> = <span class="string">"ok"</span>,     value = {{ <span class="string">"append"</span>, <span class="number">256</span>, <span class="number">4</span> } { <span class="string">"r"</span>, <span class="number">255</span>, { <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">8</span> }} { <span class="string">"r"</span>, <span class="number">256</span>, { <span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span> }} {{ <span class="string">"r"</span>, <span class="number">253</span>, { <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span> }}}}
+{ index = <span class="number">6</span>, <span class="global">type</span> = <span class="string">"invoke"</span>, value = {{ <span class="string">"append"</span>, <span class="number">250</span>, <span class="number">10</span> } { <span class="string">"r"</span>, <span class="number">253</span>, null }{ <span class="string">"r"</span>, <span class="number">255</span>, null } { <span class="string">"append"</span>, <span class="number">256</span>, <span class="number">3</span> }}}
 </pre>
 
-<p> A partial test, including a generator and checker. You’ll need to provide a
+<p> A partial test, including a generator and checker. You'll need to provide a
  client which can understand operations of the form:</p>
 
 
 <pre>
-{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="number">3</span>, null } { <span class="string">"append"</span>, <span class="number">3</span> <span class="number">2</span> } { <span class="string">"r"</span> <span class="number">3</span> }}}
+{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="number">3</span>, null } { <span class="string">"append"</span>, <span class="number">3</span>, <span class="number">2</span> } { <span class="string">"r"</span>, <span class="number">3</span>, null }}}
 </pre>
 
 <p> and return completions like:</p>
 
 
 <pre>
-{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="number">3</span> { <span class="number">1</span> }} { <span class="string">"append"</span>, <span class="number">3</span> <span class="number">2</span> } { <span class="string">"r"</span> <span class="number">3</span> { <span class="number">1</span> <span class="number">2</span> }}}}
+{ <span class="global">type</span> = <span class="string">"invoke"</span>, f = <span class="string">"txn"</span>, value = {{ <span class="string">"r"</span>, <span class="number">3</span>, { <span class="number">1</span> }} { <span class="string">"append"</span>, <span class="number">3</span>, <span class="number">2</span> } { <span class="string">"r"</span>, <span class="number">3</span>, { <span class="number">1</span>, <span class="number">2</span> }}}}
 </pre>
 
 <p> where the key <code>3</code> identifies some list, whose value is initially <code>[1]</code>, and
  becomes <code>[1 2]</code>.</p>
-
-<p> Values are lists of integers. Each operation performs a transaction,
- comprised of micro-operations which are either reads of some value (returning
- the entire list) or appends (adding a single number to whatever the present
- value of the given list is). We detect cycles in these transactions using
- Molly's cycle-detection system.</p>
 
 <p> Lists are encoded as rows in a table; key names are table names, and the set
  of all rows determines the list contents.</p>
@@ -168,11 +162,11 @@
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#rw_register_gen">rw_register_gen (num_ops)</a></td>
+	<td class="name" nowrap><a href="#rw_register_gen">rw_register_gen ()</a></td>
 	<td class="summary">Write/Read operations generator.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#list_append_gen">list_append_gen (num_ops[, opts])</a></td>
+	<td class="name" nowrap><a href="#list_append_gen">list_append_gen ([opts])</a></td>
 	<td class="summary">List-Append operations generator.</td>
 	</tr>
 </table>
@@ -186,19 +180,12 @@
     <dl class="function">
     <dt>
     <a name = "rw_register_gen"></a>
-    <strong>rw_register_gen (num_ops)</strong>
+    <strong>rw_register_gen ()</strong>
     </dt>
     <dd>
     Write/Read operations generator.
 
 
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">num_ops</span>
-            <span class="types"><span class="type">number</span></span>
-         A number of produced operations. Default is 10.
-        </li>
-    </ul>
 
     <h3>Returns:</h3>
     <ol>
@@ -230,7 +217,7 @@
 </dd>
     <dt>
     <a name = "list_append_gen"></a>
-    <strong>list_append_gen (num_ops[, opts])</strong>
+    <strong>list_append_gen ([opts])</strong>
     </dt>
     <dd>
     List-Append operations generator. </p>
@@ -241,10 +228,6 @@
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">num_ops</span>
-            <span class="types"><span class="type">number</span></span>
-         A number of produced operations. Default is 10.
-        </li>
         <li><span class="parameter">opts</span> Table with options.
         <ul>
         <li><span class="parameter">key_count</span>
@@ -256,19 +239,19 @@
         <li><span class="parameter">min_txn_len</span>
             <span class="types"><span class="type">number</span></span>
          Minimum number of operations per txn. Default
- is 1. TODO: Option is not implemented.
+ is 1.
          (<em>optional</em>)
         </li>
         <li><span class="parameter">max_txn_len</span>
             <span class="types"><span class="type">number</span></span>
          Maximum number of operations per txn. Default
- is 2. TODO: Option is not implemented.
+ is 2.
          (<em>optional</em>)
         </li>
         <li><span class="parameter">max_writes_per_key</span>
             <span class="types"><span class="type">number</span></span>
          Maximum number of operations per key.
- Default is 32. TODO: option is not implemented.
+ Default is 32.
          (<em>optional</em>)
         </li>
         </li></ul>
@@ -309,7 +292,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-06-03 19:58:30 </i>
+<i style="float:right;">Last updated 2022-06-21 08:40:53 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
