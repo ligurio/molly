@@ -5,7 +5,6 @@ local dev_checks = require('molly.dev_checks')
 local gen = require('molly.gen')
 local json = require('molly.json')
 local op = require('molly.op')
-local utils = require('molly.utils')
 
 -- Get a string representation of history.
 -- @return string
@@ -28,14 +27,7 @@ end
 local function to_json(self)
     dev_checks('<history>')
 
-    -- Workaround for a problem with SIGSEGV on running regression tests with
-    -- LuaJIT, see #1.
-    local res = ""
-    if utils.is_tarantool() == true then
-        res = json.encode(self.history)
-    end
-
-    return res
+    return json.encode(self.history)
 end
 
 -- Get a table with completed operations in a history.

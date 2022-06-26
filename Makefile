@@ -12,13 +12,15 @@ CLEANUP_FILES += ${LUACOV_REPORT}
 CLEANUP_FILES += history.txt
 CLEANUP_FILES += history.json
 
-LUNIT_TESTS ?= test/tests.lua
+TEST_FILES ?= test/tests.lua
 
 TARANTOOL_BIN ?= /usr/bin/tarantool
 LUAJIT_BIN ?= /usr/bin/luajit
 
 LUA_PATH ?= "?/init.lua;./?.lua;$(shell luarocks path --lr-path)"
 LUA_CPATH ?= "$(shell luarocks path --lr-cpath)"
+
+DEV ?= OFF
 
 all: check test
 
@@ -31,7 +33,6 @@ deps: deps-runtime deps-dev
 
 deps-dev:
 	@echo "Setup development dependencies"
-	@luarocks install --local lunitx 0.8-1
 	@luarocks install --local luacheck 0.25.0
 	@luarocks install --local luacov 0.13.0
 	@luarocks install --local cluacov 0.1.1
@@ -65,11 +66,11 @@ test-example:
 
 test-tarantool:
 	@echo "Run regression tests with Tarantool"
-	@$(TARANTOOL_BIN) $(LUNIT_TESTS)
+	@DEV=$(DEV) $(TARANTOOL_BIN) $(TEST_FILES)
 
 test-luajit:
 	@echo "Run regression tests with LuaJIT"
-	LUA_PATH=$(LUA_PATH) LUA_CPATH=$(LUA_CPATH) $(LUAJIT_BIN) $(LUNIT_TESTS)
+	@DEV=$(DEV) LUA_PATH=$(LUA_PATH) LUA_CPATH=$(LUA_CPATH) $(LUAJIT_BIN) $(TEST_FILES)
 
 test: test-tarantool test-luajit
 

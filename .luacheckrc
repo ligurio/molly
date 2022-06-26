@@ -15,6 +15,8 @@ ignore = {
     "143/table",
     -- Unused argument <self>.
     "212/self",
+    -- Shadowing an upvalue.
+    "431",
 }
 
 files["molly/tests.lua"] = {
@@ -32,5 +34,6 @@ include_files = {
 
 exclude_files = {
     '.rocks',
+    'test/tap.lua',
     '3rd-party-tests',
 }

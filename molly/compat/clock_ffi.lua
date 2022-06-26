@@ -38,7 +38,6 @@ function clock.sleep(time)
     ts[0].tv_sec = math.floor(time / 1000)
     ts[0].tv_nsec = (time % 1000) * 1000000
     ffi.C.clock_nanosleep(1, 0, ts, nil)
-    return ts
 end
 
 function clock.monotonic()

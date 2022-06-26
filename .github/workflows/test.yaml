@@ -43,10 +43,10 @@ jobs:
 
       - name: Run tests with Tarantool and send coverage to Coveralls.io
         if: matrix.LUA == 'tarantool'
-        run: make coveralls
+        run: DEV=ON make coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run tests with LuaJIT (${{ matrix.LUA }})
         if: matrix.LUA != 'tarantool'
-        run: LUAJIT_BIN=$(pwd)/.lua/bin/luajit make test-luajit
+        run: LUAJIT_BIN=$(pwd)/.lua/bin/luajit DEV=ON make test-luajit
