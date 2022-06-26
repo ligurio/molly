@@ -40,7 +40,7 @@ local function create(self, ...)
     if fiber_obj:status() ~= 'dead' then
         fiber_obj:set_joinable(true)
         fiber_obj:name(('thread id %d'):format(self.thread_id))
-        fiber_obj:wakeup() -- needed for backward compatibility with 1.7
+        fiber_obj:wakeup() -- Needed for backward compatibility with 1.7.
         rawset(self, 'fiber_obj', fiber_obj)
     end
 
