@@ -22,7 +22,7 @@ jobs:
         if: matrix.LUA == 'tarantool'
         uses: tarantool/setup-tarantool@v1
         with:
-          tarantool-version: 2.10
+          tarantool-version: '2.10'
 
       - name: Setup LuaJIT (${{ matrix.LUA }})
         if: matrix.LUA != 'tarantool'
