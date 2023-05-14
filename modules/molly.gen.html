@@ -48,28 +48,28 @@
 
 
 <h2>Modules</h2>
-<ul class="nowrap">
-  <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><strong>molly.gen</strong></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.log.html">molly.log</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
   <li><a href="../modules/molly.utils.html">molly.utils</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><strong>molly.gen</strong></li>
+  <li><a href="../modules/molly.client.html">molly.client</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.log.html">molly.log</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="">
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="nowrap">
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -99,18 +99,16 @@
 
 <p> Example of generator that generates two operations <code>w</code> and <code>r</code>:</p>
 
+<pre><code>local w = function() return { f = 'w', v = math.random(1, 10) } end
+local r = function() return { f = 'r', v = nil } end
+gen.rands(0, 2):map(function(x)
+                        return (x == 0 and r()) or
+                               (x == 1 and w()))
+                    end):take(100)
 
-<pre>
-<span class="keyword">local</span> w = <span class="keyword">function</span>() <span class="keyword">return</span> { f = <span class="string">'w'</span>, v = <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">10</span>) } <span class="keyword">end</span>
-<span class="keyword">local</span> r = <span class="keyword">function</span>() <span class="keyword">return</span> { f = <span class="string">'r'</span>, v = <span class="keyword">nil</span> } <span class="keyword">end</span>
-gen.rands(<span class="number">0</span>, <span class="number">2</span>):map(<span class="keyword">function</span>(x)
-                        <span class="keyword">return</span> (x == <span class="number">0</span> <span class="keyword">and</span> r()) <span class="keyword">or</span>
-                               (x == <span class="number">1</span> <span class="keyword">and</span> w()))
-                    <span class="keyword">end</span>):take(<span class="number">100</span>)
-
-<span class="keyword">local</span> w = <span class="keyword">function</span>(x) <span class="keyword">return</span> { f = <span class="string">'w'</span>, v = x } <span class="keyword">end</span>
-gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</span>):take(<span class="number">50</span>))
-</pre>
+local w = function(x) return { f = 'w', v = x } end
+gen.map(w, gen.rands(1, 10):take(50))
+</code></pre>
 
 <h3>References:</h3>
 
@@ -120,11 +118,8 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
     <li><a href="http://lua-users.org/wiki/IteratorsTutorial">Lua iterators tutorial</a></li>
     <li><a href="http://jepsen-io.github.io/jepsen/jepsen.generator.html">Jepsen generators in a nutshell</a></li>
 </ul>
+
 </p>
-    <h3>See also:</h3>
-    <ul>
-         <a href="../modules/molly.op.html#">molly.op</a>
-    </ul>
 
 
 <h2><a href="#Basic_Functions">Basic Functions </a></h2>
@@ -281,7 +276,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#grep">grep ()</a></td>
-	<td class="summary">If <code>regexp_or_predicate</code> is string then the parameter is used as a regular
+	<td class="summary">If <code>regexp<em>or</em>predicate</code> is string then the parameter is used as a regular
  expression to build filtering predicate.</td>
 	</tr>
 	<tr>
@@ -423,7 +418,7 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 <br/>
 
 
-    <h2 class="section-header "><a name="Basic_Functions"></a>Basic Functions </h2>
+    <h2><a name="Basic_Functions"></a>Basic Functions </h2>
 
     <dl class="function">
     <dt>
@@ -456,26 +451,27 @@ gen.map(w, gen.rands(<span class="number">1</span>, <span class="number">10</spa
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
-<span class="number">1</span>
-<span class="number">2</span>
-<span class="number">3</span>
-<span class="comment">---
-</span>...
+        <pre class="example">
+ &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+ <span class="number">1</span>
+ <span class="number">2</span>
+ <span class="number">3</span>
+ <span class="comment">---
+</span> ...
 
-&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
-b
-a
-c
-<span class="comment">---
-</span>...
+ &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+ b
+ a
+ c
+ <span class="comment">---
+</span> ...
 
-&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter(<span class="string">"abc"</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
-a
-b
-c
-<span class="comment">---
-</span>...</pre>
+ &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter(<span class="string">"abc"</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+ a
+ b
+ c
+ <span class="comment">---
+</span> ...</pre>
     </ul>
 
 </dd>
@@ -514,12 +510,14 @@ c
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">&gt; gen.each(<span class="global">print</span>, { a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})
-b       <span class="number">2</span>
-a       <span class="number">1</span>
-c       <span class="number">3</span>
-<span class="comment">---
-</span>...</pre>
+        <pre class="example">
+
+ &gt; gen.each(<span class="global">print</span>, { a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})
+ b       <span class="number">2</span>
+ a       <span class="number">1</span>
+ c       <span class="number">3</span>
+ <span class="comment">---
+</span> ...</pre>
     </ul>
 
 </dd>
@@ -529,7 +527,7 @@ c       <span class="number">3</span>
     </dt>
     <dd>
     An alias for each().
- See <a href="../modules/molly.gen.html#each">gen.each</a>.
+ See <a href="../modules/molly.gen.html#each">gen.each</a> .
 
 
 
@@ -544,7 +542,7 @@ c       <span class="number">3</span>
     </dt>
     <dd>
     An alias for each().
- See <a href="../modules/molly.gen.html#each">gen.each</a>.
+ See <a href="../modules/molly.gen.html#each">gen.each</a> .
 
 
 
@@ -554,7 +552,7 @@ c       <span class="number">3</span>
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Generators__Finite_Generators"></a>Generators: Finite Generators </h2>
+    <h2><a name="Generators__Finite_Generators"></a>Generators: Finite Generators </h2>
 
     <dl class="function">
     <dt>
@@ -565,8 +563,8 @@ c       <span class="number">3</span>
     The iterator to create arithmetic progressions.
  Iteration values are generated within closed interval <code>[start, stop]</code> (i.e.
  <code>stop</code> is included). If the <code>start</code> argument is omitted, it defaults to 1 (<code>stop
- &gt; 0</code>) or to -1 (<code>stop &lt; 0</code>). If the <code>step</code> argument is omitted, it defaults to 1
- (<code>start &lt;= stop</code>) or to -1 (<code>start &gt; stop</code>). If <code>step</code> is positive, the last
+ > 0</code>) or to -1 (<code>stop &lt; 0</code>). If the <code>step</code> argument is omitted, it defaults to 1
+ (<code>start &lt;= stop</code>) or to -1 (<code>start > stop</code>). If <code>step</code> is positive, the last
  element is the largest <code>start + i * step</code> less than or equal to <code>stop</code>; if <code>step</code>
  is negative, the last element is the smallest <code>start + i * step</code> greater than
  or equal to <code>stop</code>. <code>step</code> must not be zero (or else an error is raised).
@@ -579,7 +577,6 @@ c       <span class="number">3</span>
         <li><span class="parameter">start</span>
             <span class="types"><span class="type">number</span></span>
          – an endpoint of the interval.
-         (<em>optional</em>)
         </li>
         <li><span class="parameter">stop</span>
             <span class="types"><span class="type">number</span></span>
@@ -588,7 +585,6 @@ c       <span class="number">3</span>
         <li><span class="parameter">step</span>
             <span class="types"><span class="type">number</span></span>
          – a step.
-         (<em>optional</em>)
         </li>
     </ul>
 
@@ -602,27 +598,28 @@ c       <span class="number">3</span>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
-<span class="number">1</span>
-<span class="number">2</span>
-<span class="number">3</span>
-<span class="number">4</span>
-<span class="number">5</span>
-<span class="number">6</span>
-<span class="comment">---
-</span>...
+        <pre class="example">
+ &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+ <span class="number">1</span>
+ <span class="number">2</span>
+ <span class="number">3</span>
+ <span class="number">4</span>
+ <span class="number">5</span>
+ <span class="number">6</span>
+ <span class="comment">---
+</span> ...
 
-&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
-<span class="number">1</span>
-<span class="number">3</span>
-<span class="number">5</span>
-<span class="comment">---
-</span>...</pre>
+ &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+ <span class="number">1</span>
+ <span class="number">3</span>
+ <span class="number">5</span>
+ <span class="comment">---
+</span> ...</pre>
     </ul>
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Generators__Infinity_Generators"></a>Generators: Infinity Generators </h2>
+    <h2><a name="Generators__Infinity_Generators"></a>Generators: Infinity Generators </h2>
 
     <dl class="function">
     <dt>
@@ -641,12 +638,13 @@ c       <span class="number">3</span>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">&gt; gen.each(<span class="global">print</span>, gen.take(<span class="number">3</span>, gen.duplicate(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)))
-a       b       c
-a       b       c
-a       b       c
-<span class="comment">---
-</span>...</pre>
+        <pre class="example">
+ &gt; gen.each(<span class="global">print</span>, gen.take(<span class="number">3</span>, gen.duplicate(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)))
+ a       b       c
+ a       b       c
+ a       b       c
+ <span class="comment">---
+</span> ...</pre>
     </ul>
 
 </dd>
@@ -656,7 +654,7 @@ a       b       c
     </dt>
     <dd>
     An alias for duplicate().
- See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a>.
+ See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a> .
 
 
 
@@ -671,7 +669,7 @@ a       b       c
     </dt>
     <dd>
     An alias for duplicate().
- See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a>.
+ See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a> .
 
 
 
@@ -696,7 +694,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Generators__Random_sampling"></a>Generators: Random sampling </h2>
+    <h2><a name="Generators__Random_sampling"></a>Generators: Random sampling </h2>
 
     <dl class="function">
     <dt>
@@ -704,7 +702,8 @@ a       b       c
     <strong>rands ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/generators.html#fun.rands">fun.rands</a>.
+
+ See <a href="https://luafun.github.io/generators.html#fun.rands">fun.rands</a>.
 
 
 
@@ -714,7 +713,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Slicing__Subsequences"></a>Slicing: Subsequences </h2>
+    <h2><a name="Slicing__Subsequences"></a>Slicing: Subsequences </h2>
 
     <dl class="function">
     <dt>
@@ -722,7 +721,8 @@ a       b       c
     <strong>take_n ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/slicing.html#fun.take_n">fun.take_n</a>.
+
+ See <a href="https://luafun.github.io/slicing.html#fun.take_n">fun.take_n</a>.
 
 
 
@@ -736,7 +736,8 @@ a       b       c
     <strong>take_while ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/slicing.html#fun.take_while">fun.take_while</a>.
+
+ See <a href="https://luafun.github.io/slicing.html#fun.take_while">fun.take_while</a>.
 
 
 
@@ -750,7 +751,8 @@ a       b       c
     <strong>take ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/slicing.html#fun.take">fun.take</a>.
+
+ See <a href="https://luafun.github.io/slicing.html#fun.take">fun.take</a>.
 
 
 
@@ -764,7 +766,8 @@ a       b       c
     <strong>drop_n ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/slicing.html#fun.drop_n">fun.drop_n</a>.
+
+ See <a href="https://luafun.github.io/slicing.html#fun.drop_n">fun.drop_n</a>.
 
 
 
@@ -778,7 +781,8 @@ a       b       c
     <strong>drop_while ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/slicing.html#fun.drop_while">fun.drop_while</a>.
+
+ See <a href="https://luafun.github.io/slicing.html#fun.drop_while">fun.drop_while</a>.
 
 
 
@@ -792,7 +796,8 @@ a       b       c
     <strong>drop ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/slicing.html#fun.drop">fun.drop</a>.
+
+ See <a href="https://luafun.github.io/slicing.html#fun.drop">fun.drop</a>.
 
 
 
@@ -806,7 +811,8 @@ a       b       c
     <strong>span ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/slicing.html#fun.span">fun.span</a>.
+
+ See <a href="https://luafun.github.io/slicing.html#fun.span">fun.span</a>.
 
 
 
@@ -846,7 +852,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Indexing"></a>Indexing </h2>
+    <h2><a name="Indexing"></a>Indexing </h2>
 
     <dl class="function">
     <dt>
@@ -854,7 +860,8 @@ a       b       c
     <strong>index ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/indexing.html#fun.index">fun.index</a>.
+
+ See <a href="https://luafun.github.io/indexing.html#fun.index">fun.index</a>.
 
 
 
@@ -898,7 +905,8 @@ a       b       c
     <strong>indexes ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
+
+ See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
 
 
 
@@ -953,7 +961,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Filtering"></a>Filtering </h2>
+    <h2><a name="Filtering"></a>Filtering </h2>
 
     <dl class="function">
     <dt>
@@ -977,7 +985,7 @@ a       b       c
     </dt>
     <dd>
     An alias for filter().
- See <a href="../modules/molly.gen.html#filter">gen.filter</a>.
+ See <a href="../modules/molly.gen.html#filter">gen.filter</a> .
 
 
 
@@ -991,7 +999,7 @@ a       b       c
     <strong>grep ()</strong>
     </dt>
     <dd>
-    If <code>regexp_or_predicate</code> is string then the parameter is used as a regular
+    If <code>regexp<em>or</em>predicate</code> is string then the parameter is used as a regular
  expression to build filtering predicate.  Otherwise the function is just an
  alias for gen.filter().
  See <a href="https://luafun.github.io/filtering.html#fun.grep">fun.grep</a>.
@@ -1020,7 +1028,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Reducing__Folds"></a>Reducing: Folds </h2>
+    <h2><a name="Reducing__Folds"></a>Reducing: Folds </h2>
 
     <dl class="function">
     <dt>
@@ -1045,7 +1053,7 @@ a       b       c
     </dt>
     <dd>
     An alias to foldl().
- See <a href="../modules/molly.gen.html#foldl">gen.foldl</a>.
+ See <a href="../modules/molly.gen.html#foldl">gen.foldl</a> .
 
 
 
@@ -1100,7 +1108,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Reducing__Predicates"></a>Reducing: Predicates </h2>
+    <h2><a name="Reducing__Predicates"></a>Reducing: Predicates </h2>
 
     <dl class="function">
     <dt>
@@ -1108,7 +1116,8 @@ a       b       c
     <strong>is_prefix_of ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.is_prefix_of">fun.is<em>prefix</em>of</a>.
+
+ See <a href="https://luafun.github.io/reducing.html#fun.is_prefix_of">fun.is<em>prefix</em>of</a>.
 
 
 
@@ -1122,7 +1131,8 @@ a       b       c
     <strong>is_null ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.is_null">fun.is_null</a>.
+
+ See <a href="https://luafun.github.io/reducing.html#fun.is_null">fun.is_null</a>.
 
 
 
@@ -1136,7 +1146,8 @@ a       b       c
     <strong>all ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.all">fun.all</a>.
+
+ See <a href="https://luafun.github.io/reducing.html#fun.all">fun.all</a>.
 
 
 
@@ -1165,7 +1176,8 @@ a       b       c
     <strong>any ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/reducing.html#fun.any">fun.any</a>.
+
+ See <a href="https://luafun.github.io/reducing.html#fun.any">fun.any</a>.
 
 
 
@@ -1190,7 +1202,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Transformations"></a>Transformations </h2>
+    <h2><a name="Transformations"></a>Transformations </h2>
 
     <dl class="function">
     <dt>
@@ -1198,7 +1210,8 @@ a       b       c
     <strong>map ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/transformations.html#fun.map">fun.map</a>.
+
+ See <a href="https://luafun.github.io/transformations.html#fun.map">fun.map</a>.
 
 
 
@@ -1212,7 +1225,8 @@ a       b       c
     <strong>enumerate ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/transformations.html#fun.enumerate">fun.enumerate</a>.
+
+ See <a href="https://luafun.github.io/transformations.html#fun.enumerate">fun.enumerate</a>.
 
 
 
@@ -1226,7 +1240,8 @@ a       b       c
     <strong>intersperse ()</strong>
     </dt>
     <dd>
-     See <a href="https://luafun.github.io/transformations.html#fun.intersperse">fun.intersperse</a>.
+
+ See <a href="https://luafun.github.io/transformations.html#fun.intersperse">fun.intersperse</a>.
 
 
 
@@ -1236,7 +1251,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Compositions"></a>Compositions </h2>
+    <h2><a name="Compositions"></a>Compositions </h2>
 
     <dl class="function">
     <dt>
@@ -1342,19 +1357,20 @@ a       b       c
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">&gt; fun.each(<span class="global">print</span>, fun.chain(fun.range(<span class="number">5</span>, <span class="number">1</span>, -<span class="number">1</span>), fun.range(<span class="number">1</span>, <span class="number">5</span>)))
-<span class="number">5</span>
-<span class="number">4</span>
-<span class="number">3</span>
-<span class="number">2</span>
-<span class="number">1</span>
-<span class="number">1</span>
-<span class="number">2</span>
-<span class="number">3</span>
-<span class="number">4</span>
-<span class="number">5</span>
-<span class="comment">---
-</span>...</pre>
+        <pre class="example">
+ &gt; fun.each(<span class="global">print</span>, fun.chain(fun.range(<span class="number">5</span>, <span class="number">1</span>, -<span class="number">1</span>), fun.range(<span class="number">1</span>, <span class="number">5</span>)))
+ <span class="number">5</span>
+ <span class="number">4</span>
+ <span class="number">3</span>
+ <span class="number">2</span>
+ <span class="number">1</span>
+ <span class="number">1</span>
+ <span class="number">2</span>
+ <span class="number">3</span>
+ <span class="number">4</span>
+ <span class="number">5</span>
+ <span class="comment">---
+</span> ...</pre>
     </ul>
 
 </dd>
@@ -1455,7 +1471,7 @@ a       b       c
 
 </dd>
 </dl>
-    <h2 class="section-header "><a name="Special_generators"></a>Special generators </h2>
+    <h2><a name="Special_generators"></a>Special generators </h2>
 
     <dl class="function">
     <dt>
@@ -1531,21 +1547,22 @@ a       b       c
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">&gt;  <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.time_limit(gen.range(<span class="number">1</span>, <span class="number">100</span>), <span class="number">0.0001</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
-<span class="number">1</span>
-<span class="number">2</span>
-<span class="number">3</span>
-<span class="number">4</span>
-<span class="number">5</span>
-<span class="number">6</span>
-<span class="number">7</span>
-<span class="number">8</span>
-<span class="number">9</span>
-<span class="number">10</span>
-<span class="number">11</span>
-<span class="number">12</span>
-<span class="comment">---
-</span>...</pre>
+        <pre class="example">
+ &gt;  <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.time_limit(gen.range(<span class="number">1</span>, <span class="number">100</span>), <span class="number">0.0001</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+ <span class="number">1</span>
+ <span class="number">2</span>
+ <span class="number">3</span>
+ <span class="number">4</span>
+ <span class="number">5</span>
+ <span class="number">6</span>
+ <span class="number">7</span>
+ <span class="number">8</span>
+ <span class="number">9</span>
+ <span class="number">10</span>
+ <span class="number">11</span>
+ <span class="number">12</span>
+ <span class="comment">---
+</span> ...</pre>
     </ul>
 
 </dd>
@@ -1555,8 +1572,7 @@ a       b       c
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2023-05-14 13:53:06 </i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

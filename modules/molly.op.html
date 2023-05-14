@@ -33,28 +33,28 @@
 
 
 <h2>Modules</h2>
-<ul class="nowrap">
-  <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.log.html">molly.log</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><strong>molly.op</strong></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
   <li><a href="../modules/molly.utils.html">molly.utils</a></li>
+  <li><strong>molly.op</strong></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.client.html">molly.client</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.log.html">molly.log</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="">
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="nowrap">
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -77,14 +77,12 @@
 <p> An observed history should be a list of operations in real-time order, where
  each operation is a map of the form:</p>
 
-
-<pre>
-{
-    <span class="global">type</span>    One of <span class="backtick"><code>invoke</code></span>, <span class="backtick"><code>ok</code></span>, <span class="backtick"><code>info</code></span>, <span class="backtick"><code>fail</code></span>.
-    process A logical identifier <span class="keyword">for</span> a single thread of execution.
-    value   A transaction; structure <span class="keyword">and</span> semantics vary.
-}
-</pre>
+<pre><code> {
+     type    One of &lt;code&gt;invoke&lt;/code&gt;, &lt;code&gt;ok&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;fail&lt;/code&gt;.
+     process A logical identifier for a single thread of execution.
+     value   A transaction; structure and semantics vary.
+ }
+</code></pre>
 
 <p> Each process should perform alternating <code>invoke</code> and <code>ok</code>, <code>info</code>, <code>fail</code>
  operations. <code>ok</code> indicates the operation definitely committed. <code>fail</code>
@@ -106,38 +104,33 @@
 <p>  For example an operation with 'read' action, value is 'nil' because it is
   unknown before invoking of operation:</p>
 
-
-<pre>
-{
-    f = <span class="string">'read'</span>,
-    value = <span class="keyword">nil</span>,
+<pre><code>{
+    f = 'read',
+    value = nil,
 }
 
-<span class="number">4</span>  ok       read       {<span class="number">0</span> <span class="number">5</span>, <span class="number">1</span> <span class="number">10</span>, <span class="number">2</span> <span class="number">12</span>, <span class="number">8</span> <span class="number">10</span>, <span class="number">9</span> <span class="number">17</span>}
-<span class="number">4</span>  invoke   read       <span class="keyword">nil</span>
-<span class="number">3</span>  ok       read       {<span class="number">0</span> <span class="number">5</span>, <span class="number">1</span> <span class="number">9</span>, <span class="number">2</span> <span class="number">12</span>, <span class="number">3</span> <span class="number">10</span>, <span class="number">4</span> <span class="number">11</span>}
-<span class="number">3</span>  invoke   read       <span class="keyword">nil</span>
-</pre>
+4  ok       read       {0 5, 1 10, 2 12, 8 10, 9 17}
+4  invoke   read       nil
+3  ok       read       {0 5, 1 9, 2 12, 3 10, 4 11}
+3  invoke   read       nil
+</code></pre>
 
 <p>  or operation with 'transfer' action for test that transfers money between
   accounts:</p>
 
-
-<pre>
-{
-    f = <span class="string">'transfer'</span>,
+<pre><code>{
+    f = 'transfer',
     value = {
-        from = <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">10</span>),
-        to = <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">10</span>),
-        amount = <span class="global">math</span>.random(<span class="number">1</span>, <span class="number">100</span>),
+        from = math.random(1, 10),
+        to = math.random(1, 10),
+        amount = math.random(1, 100),
     }
 }
 
-<span class="number">3</span>  ok       transfer   {from = <span class="number">8</span>, to = <span class="number">2</span>, amount = <span class="number">3</span>}
-<span class="number">0</span>  ok       transfer   {from = <span class="number">1</span>, to = <span class="number">9</span>, amount = <span class="number">1</span>}
-<span class="number">0</span>  invoke   transfer   {from = <span class="number">3</span>, to = <span class="number">9</span>, amount = <span class="number">5</span>}
-</pre>
-
+3  ok       transfer   {from = 8, to = 2, amount = 3}
+0  ok       transfer   {from = 1, to = 9, amount = 1}
+0  invoke   transfer   {from = 3, to = 9, amount = 5}
+</code></pre>
 </p>
 
 
@@ -151,8 +144,7 @@
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2023-05-14 13:53:06 </i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

@@ -30,28 +30,28 @@
 
 
 <h2>Modules</h2>
-<ul class="nowrap">
-  <li><a href="modules/molly.client.html">molly.client</a></li>
-  <li><a href="modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
-  <li><a href="modules/molly.db.html">molly.db</a></li>
-  <li><a href="modules/molly.gen.html">molly.gen</a></li>
-  <li><a href="modules/molly.history.html">molly.history</a></li>
-  <li><a href="modules/molly.html">molly</a></li>
-  <li><a href="modules/molly.log.html">molly.log</a></li>
-  <li><a href="modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="modules/molly.op.html">molly.op</a></li>
-  <li><a href="modules/molly.runner.html">molly.runner</a></li>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="modules/molly.history.html">molly.history</a></li>
   <li><a href="modules/molly.utils.html">molly.utils</a></li>
+  <li><a href="modules/molly.op.html">molly.op</a></li>
+  <li><a href="modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="modules/molly.client.html">molly.client</a></li>
+  <li><a href="modules/molly.html">molly</a></li>
+  <li><a href="modules/molly.db.html">molly.db</a></li>
+  <li><a href="modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
+  <li><a href="modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="modules/molly.log.html">molly.log</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="">
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="nowrap">
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
   <li><a href="examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -66,60 +66,60 @@
 <h2>Modules</h2>
 <table class="module_list">
 	<tr>
-		<td class="name"  nowrap><a href="modules/molly.client.html">molly.client</a></td>
-		<td class="summary">Module with default Molly client.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.thread_coroutine.html">molly.thread_coroutine</a></td>
-		<td class="summary">Module with implementation of threads based on coroutines.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.thread_fiber.html">molly.thread_fiber</a></td>
-		<td class="summary">Module with implementation of threads based on fibers.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.db.html">molly.db</a></td>
-		<td class="summary">Module with default DB implementation.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.gen.html">molly.gen</a></td>
-		<td class="summary">Module with functions for generators.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.history.html">molly.history</a></td>
-		<td class="summary">Module with functions that processes history of operations.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.html">molly</a></td>
-		<td class="summary">Framework for distributed system's verification, with fault injection.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.log.html">molly.log</a></td>
-		<td class="summary">Module with functions for logging.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.nemesis.html">molly.nemesis</a></td>
-		<td class="summary">Module with nemeses.</td>
-	</tr>
-	<tr>
-		<td class="name"  nowrap><a href="modules/molly.op.html">molly.op</a></td>
-		<td class="summary">Module with helpers that processes operations.</td>
+		<td class="name"  nowrap><a href="modules/molly.tests.html">molly.tests</a></td>
+		<td class="summary">Module with test generators and checkers.</td>
 	</tr>
 	<tr>
 		<td class="name"  nowrap><a href="modules/molly.runner.html">molly.runner</a></td>
 		<td class="summary">Module with main functions that runs tests.</td>
 	</tr>
 	<tr>
-		<td class="name"  nowrap><a href="modules/molly.tests.html">molly.tests</a></td>
-		<td class="summary">Module with test generators and checkers.</td>
+		<td class="name"  nowrap><a href="modules/molly.history.html">molly.history</a></td>
+		<td class="summary">Module with functions that processes history of operations.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.utils.html">molly.utils</a></td>
+		<td class="summary">Helpers.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.op.html">molly.op</a></td>
+		<td class="summary">Module with helpers that processes operations.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.gen.html">molly.gen</a></td>
+		<td class="summary">Module with functions for generators.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.client.html">molly.client</a></td>
+		<td class="summary">Module with default Molly client.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.html">molly</a></td>
+		<td class="summary">Framework for distributed system's verification, with fault injection.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.db.html">molly.db</a></td>
+		<td class="summary">Module with default DB implementation.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.thread_fiber.html">molly.thread_fiber</a></td>
+		<td class="summary">Module with implementation of threads based on fibers.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.thread_coroutine.html">molly.thread_coroutine</a></td>
+		<td class="summary">Module with implementation of threads based on coroutines.</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/molly.nemesis.html">molly.nemesis</a></td>
+		<td class="summary">Module with nemeses.</td>
 	</tr>
 	<tr>
 		<td class="name"  nowrap><a href="modules/molly.thread.html">molly.thread</a></td>
 		<td class="summary">Module with thread implementation.</td>
 	</tr>
 	<tr>
-		<td class="name"  nowrap><a href="modules/molly.utils.html">molly.utils</a></td>
-		<td class="summary">Helpers.</td>
+		<td class="name"  nowrap><a href="modules/molly.log.html">molly.log</a></td>
+		<td class="summary">Module with functions for logging.</td>
 	</tr>
 </table>
 <h2>Topics</h2>
@@ -144,8 +144,7 @@
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2023-05-14 13:53:06 </i>
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
