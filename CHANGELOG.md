@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Removed
+
+### Fixed
+
+[Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
+
+## 0.1.0
+
 Initial version of a Jepsen-like framework written in Lua programming language.
 
 ### Added
