@@ -228,6 +228,14 @@ local function list_append_gen(opts)
     param.min_txn_len = opts.min_txn_len or 1
     param.max_txn_len = opts.max_txn_len or 2
     param.max_writes_per_key = opts.max_writes_per_key or 32
+
+    assert(type(param.max_txn_len) == 'number', 'max_txn_len must be a number')
+    assert(type(param.min_txn_len) == 'number', 'min_txn_len must be a number')
+    assert(type(param.max_writes_per_key) == 'number',
+           'max_writes_per_key must be a number')
+    assert(param.min_txn_len < param.max_txn_len,
+           'max_txn_len must be bigger than min_txn_len')
+
     return gen_lib.wrap(list_append_op, param, 0)
 end
 
