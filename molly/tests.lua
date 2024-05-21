@@ -220,7 +220,7 @@ end
 --
 -- @function list_append_gen
 local function list_append_gen(opts)
-    dev_checks('?number', '?table')
+    dev_checks('?table')
 
     opts = opts or {}
     local param = {}
