@@ -149,9 +149,9 @@ end
 local function counter()
     local i = 0
     return function()
-               i = i + 1
-               return i
-           end
+        i = i + 1
+        return i
+    end
 end
 
 local c = counter()
