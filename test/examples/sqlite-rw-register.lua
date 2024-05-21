@@ -9,7 +9,7 @@ local os = require('os')
 print('SQLite version:', sqlite3.version())
 print('lsqlite3 library version:', sqlite3.lversion())
 
-local function call_insert(stmt, key, val) -- luacheck: no unused
+local function sqlite_insert(stmt, key, val)
     assert(stmt:isopen() == true, 'statement has been finalized')
     local ok = stmt:bind_values(key, val)
     if ok ~= sqlite3.OK then
@@ -24,7 +24,7 @@ local function call_insert(stmt, key, val) -- luacheck: no unused
     return true
 end
 
-local function call_select(stmt, key) -- luacheck: no unused
+local function sqlite_select(stmt, key)
     assert(stmt:isopen() == true, 'statement has been finalized')
     local val, ok
     if stmt:bind_values(key) ~= sqlite3.OK then
@@ -54,13 +54,14 @@ sqlite_rw_register.open = function(self)
     assert(sqlite3.OK == self.db:exec('PRAGMA mmap_size = 30000000000'))
     assert(sqlite3.OK == self.db:exec('PRAGMA page_size = 32768'))
 
-    --self.insert_stmt = assert(self.db:prepare('INSERT INTO rw_register VALUES (?, ?)'), 'statement prepare')
-    --self.select_stmt = assert(self.db:prepare('SELECT val FROM rw_register WHERE id = ?'), 'statement prepare')
     return true
 end
 
 sqlite_rw_register.setup = function(self)
     assert(sqlite3.OK == self.db:exec('CREATE TABLE IF NOT EXISTS rw_register (id, val)'))
+    self.insert_stmt = assert(self.db:prepare('INSERT INTO rw_register VALUES (?, ?)'), 'statement prepare')
+    self.select_stmt = assert(self.db:prepare('SELECT val FROM rw_register WHERE id = ?'), 'statement prepare')
+
     return true
 end
 
@@ -73,19 +74,15 @@ sqlite_rw_register.invoke = function(self, op)
     local val = op.value[1]
     local type = 'ok'
     if val[OP_TYPE] == 'r' then
-        --[[
         assert(self.select_stmt:isopen() == true, 'statement has been finalized')
-        local ok, v = call_select(self.select_stmt, KEY_ID)
+        local ok, v = sqlite_select(self.select_stmt, KEY_ID)
         val[OP_VAL] = v
         if ok == false then
             type = 'fail'
         end
-        ]]
-        val[OP_VAL] = self.db:exec(string.format('SELECT val FROM rw_register WHERE id = %d', KEY_ID))
     elseif val[OP_TYPE] == 'w' then
-        --assert(self.insert_stmt:isopen() == true, 'statement has been finalized')
-        --local ok = call_insert(self.insert_stmt, KEY_ID, val[OP_VAL])
-        local ok = self.db:exec(string.format('INSERT INTO rw_register VALUES (?, ?)', KEY_ID, val[OP_VAL]))
+        assert(self.insert_stmt:isopen() == true, 'statement has been finalized')
+        local ok = sqlite_insert(self.insert_stmt, KEY_ID, val[OP_VAL])
         if ok == false then
             type = 'fail'
         end
