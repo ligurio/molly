@@ -586,7 +586,7 @@ methods.stagger = stagger
 -- @function time_limit
 local time_limit = (function(fn)
     return function(self, arg1)
-	return fn(arg1, self.gen, self.param, self.state)
+        return fn(arg1, self.gen, self.param, self.state)
     end
 end)(function(timeout, gen, param, state)
     if type(timeout) ~= 'number' or timeout == 0 then
@@ -602,7 +602,7 @@ end)(function(timeout, gen, param, state)
             time_is_exceed = get_time() - start_time >= duration
             return gen_x(param_x, state_x)
         end
-	return nil_gen(nil, nil)
+        return nil_gen(nil, nil)
     end, {gen, param, timeout, 0}, state)
 end)
 methods.time_limit = time_limit
