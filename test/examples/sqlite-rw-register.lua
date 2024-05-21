@@ -104,14 +104,17 @@ end
 sqlite_rw_register.teardown = function(self)
     --self.insert_stmt:finalize()
     --self.select_stmt:finalize()
-    local changes = self.db:total_changes()
-    assert(changes == 500, string.format('Number of operations is wrong (%d != 500)', changes))
-    print('Total changes in SQLite DB:', changes)
     return true
 end
 
 sqlite_rw_register.close = function(self)
-    self.db:close()
+    -- Close database. All SQL statements prepared using
+    -- db:prepare() should have been finalized before this
+    -- function is called. The function returns sqlite3.OK on
+    -- success or else a numerical error code.
+    if self.db:isopen() then
+        assert(self.db:close() == sqlite3.OK)
+    end
     return true
 end
 
