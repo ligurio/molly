@@ -58,12 +58,14 @@ local function invoke(thread_id, opts)
     log.debug('Opening connection by thread %d to DB (%s)', thread_id, addr)
     local ok, err = pcall(client.open, client, addr)
     if not ok then
+        log.info('ERROR: %s', err)
         return false, err
     end
 
     log.debug('Setting up DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.setup, client)
     if not ok then
+        log.info('ERROR: %s', err)
         return false, err
     end
 
@@ -92,12 +94,14 @@ local function invoke(thread_id, opts)
     log.debug('Tearing down DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.teardown, client)
     if not ok then
+        log.info('ERROR: %s', err)
         return false, err
     end
 
     log.debug('Closing connection to DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.close, client)
     if not ok then
+        log.info('ERROR: %s', err)
         return false, err
     end
 
