@@ -184,7 +184,7 @@ test:test('tests.list_append_gen', function(test)
     test:plan(2)
 
     local gen, param, state = tests.list_append_gen()
-    local val = gen(param, state)
+    local _, val = gen(param, state)
     local mop = val.value[1]
     local op_type = mop[OP_TYPE]
     local op_val = mop[OP_VAL]

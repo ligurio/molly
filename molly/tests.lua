@@ -174,7 +174,7 @@ local function list_append_op(param)
             table.insert(mops, mop_append(param.key_count))
         end
     end
-    return setmetatable({
+    return 0, setmetatable({
         f = 'txn',
         value = mops,
     }, {

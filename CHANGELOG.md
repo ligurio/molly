@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Executing `close` method in a `Client` instance (#2).
+- list-append generator (#3).
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
