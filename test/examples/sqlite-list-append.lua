@@ -107,7 +107,7 @@ local test_options = {
 }
 local ok, err = molly.runner.run_test({
     client = sqlite_list_append,
-    generator = molly.tests.list_append_gen()
+    generator = molly.gen.time_limit(molly.tests.list_append_gen(), 0.05)
 }, test_options)
 
 if not ok then
