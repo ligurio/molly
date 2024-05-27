@@ -89,6 +89,6 @@ You are ready to make patches!
 
 ### License
 
-Copyright © 2021-2023 [Sergey Bronnikov](https://bronevichok.ru/)
+Copyright © 2021-2024 [Sergey Bronnikov](https://bronevichok.ru/)
 
 Distributed under the ISC License.
