@@ -63,7 +63,7 @@ end
 -- @string message Message.
 -- @return nil
 -- @usage
--- > local log = require('jepsen.log')
+-- > local log = require('molly.log')
 -- > log.warn('Message')
 -- [WARN  2021-12-7 13:17:46:073544]: Message
 --
