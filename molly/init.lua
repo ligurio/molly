@@ -2,7 +2,7 @@
 -- @module molly
 -- @author Sergey Bronnikov
 -- @license ISC
--- @copyright Sergey Bronnikov, 2021-2022
+-- @copyright Sergey Bronnikov, 2021-2024
 
 local client = require('molly.client')
 local db = require('molly.db')
