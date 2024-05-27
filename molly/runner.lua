@@ -57,7 +57,7 @@ local clock = require('molly.clock')
 local history_lib = require('molly.history')
 local log = require('molly.log')
 local threadpool = require('molly.threadpool')
-local wrapper = require('molly.client')
+local client = require('molly.client')
 local is_tarantool = require('molly.utils').is_tarantool
 
 local has_fun, _ = pcall(require, 'fun')
@@ -192,7 +192,7 @@ local function run_test(workload, opts)
     local history = history_lib.new()
     local total_time_begin = clock.proc()
     local pool = threadpool.new(opts.thread_type, opts.threads)
-    local ok, err = pool:start(wrapper.invoke, {
+    local ok, err = pool:start(client.run, {
         client = workload.client,
         gen = workload.generator,
         history = history,
