@@ -83,8 +83,6 @@ sqlite_list_append.invoke = function(self, op)
 end
 
 sqlite_list_append.teardown = function(self)
-    --self.insert_stmt:finalize()
-    --self.select_stmt:finalize()
     return true
 end
 

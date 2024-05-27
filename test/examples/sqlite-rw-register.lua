@@ -99,8 +99,6 @@ sqlite_rw_register.invoke = function(self, op)
 end
 
 sqlite_rw_register.teardown = function(self)
-    --self.insert_stmt:finalize()
-    --self.select_stmt:finalize()
     return true
 end
 
