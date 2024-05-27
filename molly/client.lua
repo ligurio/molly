@@ -45,7 +45,7 @@ local function process_operation(client, history, op, thread_id_str, thread_id)
     history:add(res)
 end
 
-local function invoke(thread_id, opts)
+local function run_client(thread_id, opts)
     dev_checks('number', 'table')
 
     local client = opts.client
@@ -166,5 +166,5 @@ end
 return {
     new = new,
 
-    invoke = invoke,        -- A wrapper for user-defined invoke.
+    run = run_client,
 }
