@@ -67,7 +67,7 @@
 -- Note that in Lua associative array is an array that can be indexed not only
 -- with numbers, but also with strings or any other value of the language,
 -- except nil. Null values in Lua tables are represented as JSON null
--- (`json.NULL`, a Lua `lightuserdata` NULL pointer). is provided for
+-- (`json.NULL`, a Lua `lightuserdata` NULL pointer) is provided for
 -- comparison.
 
 local math = require('math')
