@@ -27,7 +27,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(10)
+test:plan(11)
 
 test:test('clock', function(test)
     test:plan(5)
@@ -154,6 +154,33 @@ test:test('gen', function(test)
     local passed_time = clock.proc() - start_time
     local eps = 1
     test:ok(passed_time - timeout < eps, "gen.time_limit()")
+end)
+
+test:test('tests.cas_register_gen', function(test)
+    test:plan(4)
+
+    local num = 5
+    local n = tests.cas_register_gen():take(5):length()
+    test:is(n, num, 'tests.cas_register_gen(): length')
+
+    local gen, param, state = tests.cas_register_gen()
+    local _, res = gen(param, state)
+    res = res()
+    local f = res.f
+    local value = res.value
+    test:ok(f == 'cas' or
+	        f == 'write' or
+			f == 'read', 'tests.cas_register_gen(): function')
+    test:is(type(value), 'table', 'tests.cas_register_gen(): value type')
+    if f == 'cas' then
+        test:ok(#value, 2, 'tests.cas_register_gen(): cas value')
+    end
+    if f == 'read' then
+        test:ok(#value, 0, 'tests.cas_register_gen(): read value')
+    end
+    if f == 'write' then
+        test:ok(#value, 1, 'tests.cas_register_gen(): write value')
+    end
 end)
 
 local IDX_MOP_TYPE = 1

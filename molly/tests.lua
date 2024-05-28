@@ -69,6 +69,26 @@
 -- except nil. Null values in Lua tables are represented as JSON null
 -- (`json.NULL`, a Lua `lightuserdata` NULL pointer) is provided for
 -- comparison.
+--
+--### CAS-Register
+--
+-- Generator produces concurrent atomic updates to a shared
+-- register. Writes are assumed to be unique, but this is the only
+-- constraint.
+--
+-- Operations are of three forms:
+--
+--     { "r", "x", 1 } denotes a read of `x` observing the value 1.
+--     { "w", "x", 2 } denotes a write of `x`, settings its value to 2.
+--     { "cas", "x", 2 } denotes a CAS of `x`, settings its value to 2.
+--
+-- Example of history:
+--
+--     { type = "invoke", f = "cas", value = { 1, 5 },  process = 0, index = 1}
+--     { type = "ok",     f = "fail", value = { 1, 5 }, process = 0, index = 2}
+--     { type = "invoke", f = "write", value = { 2 },   process = 0, index = 3}
+--     { type = "ok",     f = "write", value = { 2 },   process = 0, index = 4}
+--
 
 local math = require('math')
 
@@ -135,6 +155,79 @@ end
 -- @function rw_register_gen
 local function rw_register_gen()
     return gen_lib.cycle(gen_lib.iter({ op_r, op_w }))
+end
+
+-- Function that describes a 'read' operation.
+local function cas_op_r()
+    return setmetatable({
+        f = 'read',
+        value = {
+            json.NULL,
+        },
+    }, {
+        __type = '<operation>',
+        __tostring = function(self)
+            return '<read>'
+        end,
+    })
+end
+
+-- Function that describes a 'write' operation.
+local function cas_op_w()
+    return setmetatable({
+        f = 'write',
+        value = {
+            math.random(1, 100),
+        }
+    }, {
+        __type = '<operation>',
+        __tostring = function(self)
+            return '<write>'
+        end,
+    })
+end
+
+-- Function that describes a 'cas' operation.
+local function cas_op_cas()
+    return setmetatable({
+        f = 'cas',
+        value = {
+            math.random(1, 100),
+            math.random(1, 100),
+        }
+    }, {
+        __type = '<operation>',
+        __tostring = function(self)
+            return '<cas>'
+        end,
+    })
+end
+
+--- CAS (Compare-And-Set) operations generator.
+--
+-- @usage
+--
+-- > log = require('log')
+-- > tests = require('molly.tests')
+-- > for _it, v in tests.cas_register_gen() do log.info(v()) end
+-- {"f":"read","value":[null]}
+-- {"f":"write","value":[80]}
+-- {"f":"cas","value":[70,60]}
+-- {"f":"read","value":[null]}
+-- {"f":"write","value":[76]}
+-- {"f":"cas","value":[9,67]}
+-- {"f":"read","value":[null]}
+-- {"f":"write","value":[34]}
+-- {"f":"cas","value":[74,43]}
+-- {"f":"read","value":[null]}
+-- ---
+-- ...
+--
+-- @return an iterator
+--
+-- @function cas_register_gen
+local function cas_register_gen()
+    return gen_lib.cycle(gen_lib.iter({ cas_op_r, cas_op_w, cas_op_cas }))
 end
 
 -- Function that describes a 'list' micro operation.
@@ -242,4 +335,5 @@ end
 return {
     list_append_gen = list_append_gen,
     rw_register_gen = rw_register_gen,
+    cas_register_gen = cas_register_gen,
 }
