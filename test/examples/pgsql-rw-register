@@ -9,45 +9,44 @@ local log = require('molly.log')
 local pg_rw_register = molly.client.new()
 
 
-
--- open database
-pg_rw_register.open = function(self)
-
-    self.env = assert (pgsql.postgres())
-    self.con = assert (self.env:connect('test2', 'postgres', nil, "127.0.0.1", 5432))
-    
-    return true
-end
-
-
-pg_rw_register.setup = function(self)
-    print('setup')
-    assert(self.con:execute("CREATE TABLE IF NOT EXISTS rw_register (id int, val int, ver int default 1)"))
-    assert(self.con:execute("CREATE TABLE IF NOT EXISTS log_register ( sm int default 0)"))
-    assert(self.con:execute("TRUNCATE TABLE rw_register"))
-    assert(self.con:execute("TRUNCATE TABLE log_register"))
-    
-    -- assert(self.con:execute("SELECT create_distributed_table('rw_register', 'id', shard_count=>2"))
-    return true
-end
-
-
 local threads = 5
 
 local OP_TYPE = 1
 local OP_VAL = 3
 local KEY_ID = 1
-local check = 100
+
+local check = 500
 local iterations = check * 2 
 
 
-pg_rw_register.invoke = function(self, op)
-    -- print('invoke')
+----- open database
+pg_rw_register.open = function(self)
+
+    local env = assert (pgsql.postgres())
+    local con = assert (env:connect('test2', 'postgres', nil, "127.0.0.1", 5432))
+    
+    local res ={
+        con = con,
+        env = env,
+    }
+   return res 
+end
+
+
+pg_rw_register.setup = function(self, con)
+    assert(con:execute("CREATE TABLE IF NOT EXISTS rw_register (id int, val int, ver int default 1)"))
+    assert(con:execute("TRUNCATE TABLE rw_register"))
+
+    return true
+end
+
+pg_rw_register.invoke = function(self, op, con)
     local val = op.value[1]
     local type = 'ok'
+
     if val[OP_TYPE] == 'r' then
 
-        local res = self.con:execute(string.format('SELECT val FROM rw_register WHERE id = %d', KEY_ID))
+        local res = con:execute(string.format('SELECT val FROM rw_register WHERE id = %d', KEY_ID))
         local row = res:fetch ({}, "a")
         
         if row == nil then
@@ -56,17 +55,11 @@ pg_rw_register.invoke = function(self, op)
             val[OP_VAL] = row.val
         end
 
-        -- if val[OP_VAL] == nil then
-        --    print(string.format('r KEY_ID=%d val[%d]=nil', KEY_ID, OP_VAL))
-        -- else
-        --     print(string.format('r KEY_ID=%d val[%d]=%d', KEY_ID, OP_VAL, val[OP_VAL]))
-        -- end
-
     elseif val[OP_TYPE] == 'w' then
 
         -- print(string.format('w KEY_ID=%d val[%d]=%d', KEY_ID, OP_VAL, val[OP_VAL]))
         local sql = string.format('INSERT INTO rw_register(id,val) VALUES (%d, %d)', KEY_ID, val[OP_VAL])
-        local ok = assert(self.con:execute(sql))
+        local ok = assert( con:execute(sql))
         if ok == false then
             print('insert fail')
             type = 'fail'
@@ -83,11 +76,11 @@ pg_rw_register.invoke = function(self, op)
     }
 end
 
-pg_rw_register.teardown = function(self)
-    print('teardown')
+pg_rw_register.teardown = function(self, con)
+ 
     -- local changes = self.db:total_changes()
         
-    local res = assert(self.con:execute('SELECT sum(ver) as sum FROM rw_register'))
+    local res = assert(con:execute('SELECT sum(ver) as sum FROM rw_register'))
     local row = res:fetch ({}, "a")
     -- assert(changes == 500, string.format('Number of operations is wrong (%d != 500)', changes))
     
@@ -97,17 +90,13 @@ pg_rw_register.teardown = function(self)
         log.debug('Total changes in Postgres DB is fail [excepted %s  call %d]', row.sum, check )
     end
 
-    assert(self.con:execute("INSERT INTO log_register VALUES(1)"))
-
-    print('class:',self)
     return true
 end
 
 -- finalize class
-pg_rw_register.close = function(self)
-    print('close ')
-    self.env:close()
-    self.con:close()
+pg_rw_register.close = function(self, con)
+    -- self.env:close()
+    con:close()
     return true
 end
 
@@ -124,16 +113,6 @@ local test_options = {
         -- 'node 6',
     },
 }
-
-
--- original tests option 
--- local test_options = {
---     create_reports = true,
---     threads = 5,
---     nodes = {
---         '1',
---     },
--- }
 
 
 local ok, err = molly.runner.run_test({
