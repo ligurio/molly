@@ -12,7 +12,7 @@ local op_lib = require('molly.op')
 local shared_gen_state
 local op_index = 1
 
-local function process_operation(client, history, op, thread_id_str, thread_id)
+local function process_operation(client, history, op, thread_id_str, thread_id, con)
     dev_checks('<client>', '<history>', 'function|table', 'string', 'number')
 
     if type(op) == 'function' then -- FIXME: check for callable object
@@ -28,7 +28,8 @@ local function process_operation(client, history, op, thread_id_str, thread_id)
     op.time = clock.monotonic64()
     log.debug('%-4s %s', thread_id_str, op_lib.to_string(op))
     history:add(op)
-    local ok, res = pcall(client.invoke, client, op)
+
+    local ok, res = pcall(client.invoke, client, op, con)
     if not ok then
         log.warn('Process %d crashed (%s)', thread_id, res)
         res.type = 'fail'
@@ -54,16 +55,19 @@ local function run_client(thread_id, opts)
 
     local nth = math.random(1, table.getn(opts.nodes)) -- TODO: Use fun.cycle() and closure.
     local addr = opts.nodes[nth]
+    local con
+    local env
 
     log.debug('Opening connection by thread %d to DB (%s)', thread_id, addr)
-    local ok, err = pcall(client.open, client, addr)
+    local ok, res = pcall(client.open, client, addr)
     if not ok then
-        log.info('ERROR: %s', err)
-        return false, err
+        log.info('ERROR: %s', res)
+        return false, res
     end
+    con = res["con"]
 
     log.debug('Setting up DB (%s) by thread %d', addr, thread_id)
-    ok, err = pcall(client.setup, client)
+    ok, err = pcall(client.setup, client, con)
     if not ok then
         log.info('ERROR: %s', err)
         return false, err
@@ -81,7 +85,7 @@ local function run_client(thread_id, opts)
             break
         end
         shared_gen_state = state
-        ok, err = pcall(process_operation, client, history, op, thread_id_str, thread_id)
+        ok, err = pcall(process_operation, client, history, op, thread_id_str, thread_id, con)
         if ok == false then
             error('Failed to process an operation', err)
         end
@@ -92,20 +96,23 @@ local function run_client(thread_id, opts)
     -- TODO: Add barrier here.
 
     log.debug('Tearing down DB (%s) by thread %d', addr, thread_id)
-    ok, err = pcall(client.teardown, client)
+    ok, err = pcall(client.teardown, client, con)
     if not ok then
         log.info('ERROR: %s', err)
         return false, err
     end
 
     log.debug('Closing connection to DB (%s) by thread %d', addr, thread_id)
-    ok, err = pcall(client.close, client)
+    ok, err = pcall(client.close, client, con)
     if not ok then
         log.info('ERROR: %s', err)
         return false, err
     end
 
-    return true, nil
+    log.debug('Closing enviroment of DB (%s) by thread %d', addr, thread_id)
+    res['env'].close()
+
+    return true, con
 end
 
 -- https://www.lua.org/pil/16.2.html
@@ -113,7 +120,7 @@ end
 local client_mt = {
     __type = '<client>',
     __index = {
-        open = function() return true end,
+        open = function() return {},{} end,
         setup = function() return true end,
         invoke = function() return {} end,
         teardown = function() return true end,

@@ -64,6 +64,11 @@ test-example:
 	@$(TARANTOOL_BIN) test/examples/sqlite-rw-register.lua
 	@$(TARANTOOL_BIN) test/examples/sqlite-list-append.lua
 
+test-pg:
+	@echo "Run PostgreSQL examples with Tarantool"
+	@$(TARANTOOL_BIN) test/examples/pgsql-rw-register.lua
+
+
 test-tarantool:
 	@echo "Run regression tests with Tarantool"
 	@DEV=$(DEV) $(TARANTOOL_BIN) $(TEST_FILES)
