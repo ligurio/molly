@@ -38,33 +38,15 @@
 
 local fun = require('fun')
 local clock = require('molly.clock')
+local tbl = require('molly.compat.tbl')
 
-local methods = {}
-local exports = {}
-
-local iterator_mt = {
-    __call = function(self, param, state)
-        return self.gen(param, state)
-    end,
-    __index = methods,
-    __tostring = function(self)
-        return '<generator>'
-    end
-}
-
-local wrap = function(gen, param, state)
-    return setmetatable({
-        gen = gen,
-        param = param,
-        state = state
-    }, iterator_mt), param, state
-end
-exports.wrap = wrap
+local fun_mt = debug.getmetatable(fun.range(10))
+local methods = fun_mt.__index
+local exports = tbl.copy(fun)
 
 local unwrap = function(self)
     return self.gen, self.param, self.state
 end
-methods.unwrap = unwrap
 
 -- Helpers
 
@@ -103,8 +85,6 @@ end
 -- ...
 --
 --- @function iter
-local iter = fun.iter
-exports.iter = iter
 
 --- Execute the function `fun` for each iteration value.
 -- See [fun.each](https://luafun.github.io/basic.html#fun.each).
@@ -121,19 +101,14 @@ exports.iter = iter
 -- ...
 --
 -- @function each
-local each = fun.each
-methods.each = each
-exports.each = each
+
 --- An alias for each().
 -- See `gen.each`.
 -- @function for_each
-methods.for_each = each
-exports.for_each = each
+
 --- An alias for each().
 -- See `gen.each`.
 -- @function foreach
-methods.foreach = each
-exports.foreach = each
 
 --- Generators: Finite Generators
 -- @section
@@ -173,8 +148,6 @@ exports.foreach = each
 -- ...
 --
 -- @function range
-local range = fun.range
-exports.range = range
 
 --- Generators: Infinity Generators
 -- @section
@@ -192,70 +165,45 @@ exports.range = range
 -- ...
 --
 -- @function duplicate
-local duplicate = fun.duplicate
-exports.duplicate = duplicate
+
 --- An alias for duplicate().
 -- @function xrepeat
 -- See `gen.duplicate`.
-exports.xrepeat = duplicate
+
 --- An alias for duplicate().
 -- @function replicate
 -- See `gen.duplicate`.
-exports.replicate = duplicate
 
 --- Return `fun(0)`, `fun(1)`, `fun(2)`, ... values indefinitely.
 -- @function tabulate
 -- See [fun.tabulate](https://luafun.github.io/generators.html#fun.tabulate).
-local tabulate = fun.tabulate
-exports.tabulate = tabulate
 
 --- Generators: Random sampling
 -- @section
 
 --- @function rands
 -- See [fun.rands](https://luafun.github.io/generators.html#fun.rands).
-local rands = fun.rands
-methods.rands = rands
-exports.rands = rands
 
 --- Slicing: Subsequences
 -- @section
 
 --- @function take_n
 -- See [fun.take_n](https://luafun.github.io/slicing.html#fun.take_n).
-local take_n = fun.take_n
-methods.take_n = take_n
-exports.take_n = take_n
 
 --- @function take_while
 -- See [fun.take_while](https://luafun.github.io/slicing.html#fun.take_while).
-local take_while = fun.take_while
-methods.take_while = take_while
-exports.take_while = take_while
 
 --- @function take
 -- See [fun.take](https://luafun.github.io/slicing.html#fun.take).
-local take = fun.take
-methods.take = take
-exports.take = take
 
 --- @function drop_n
 -- See [fun.drop_n](https://luafun.github.io/slicing.html#fun.drop_n).
-local drop_n = fun.drop_n
-methods.drop_n = drop_n
-exports.drop_n = drop_n
 
 --- @function drop_while
 -- See [fun.drop_while](https://luafun.github.io/slicing.html#fun.drop_while).
-local drop_while = fun.drop_while
-methods.drop_while = drop_while
-exports.drop_while = drop_while
 
 --- @function drop
 -- See [fun.drop](https://luafun.github.io/slicing.html#fun.drop).
-local drop = fun.drop
-methods.drop = drop
-exports.drop = drop
 
 --- @function span
 -- See [fun.span](https://luafun.github.io/slicing.html#fun.span).
@@ -265,53 +213,39 @@ exports.span = span
 --- An alias for span().
 -- See `fun.span`.
 -- @function split
-methods.split = span
-exports.split = span
+
 --- An alias for span().
 -- See `fun.span`.
 -- @function split_at
-methods.split_at = span
-exports.split_at = span
 
 --- Indexing
 -- @section
 
 --- @function index
 -- See [fun.index](https://luafun.github.io/indexing.html#fun.index).
-local index = fun.index
-methods.index = index
-exports.index = index
+
 --- An alias for index().
 -- See `fun.index`.
 -- @function index_of
-methods.index_of = index
-exports.index_of = index
+
 --- An alias for index().
 -- See `fun.index`.
 -- @function elem_index
-methods.elem_index = index
-exports.elem_index = index
 
 --- @function indexes
 -- See [fun.indexes](https://luafun.github.io/indexing.html#fun.indexes).
-local indexes = fun.indexes
-methods.indexes = indexes
-exports.indexes = indexes
+
 --- An alias for indexes().
 -- See `fun.indexes`.
 -- @function indices
-methods.indices = indexes
-exports.indices = indexes
+
 --- An alias for indexes().
 -- See `fun.indexes`.
 -- @function elem_indexes
-methods.elem_indexes = indexes
-exports.elem_indexes = indexes
+
 --- An alias for indexes().
 -- See `fun.indexes`.
 -- @function elem_indices
-methods.elem_indices = indexes
-exports.elem_indices = indexes
 
 --- Filtering
 -- @section
@@ -319,31 +253,21 @@ exports.elem_indices = indexes
 --- Return a new iterator of those elements that satisfy the `predicate`.
 -- See [fun.filter](https://luafun.github.io/filtering.html#fun.filter).
 -- @function filter
-local filter = fun.filter
-methods.filter = filter
-exports.filter = filter
+
 --- An alias for filter().
 -- See `gen.filter`.
 -- @function remove_if
-methods.remove_if = filter
-exports.remove_if = filter
 
 --- If `regexp_or_predicate` is string then the parameter is used as a regular
 -- expression to build filtering predicate. Otherwise the function is just an
 -- alias for gen.filter().
 -- @function grep
 -- See [fun.grep](https://luafun.github.io/filtering.html#fun.grep).
-local grep = fun.grep
-methods.grep = grep
-exports.grep = grep
 
 --- The function returns two iterators where elements do and do not satisfy the
 -- predicate.
 -- @function partition
 -- See [fun.partition](https://luafun.github.io/filtering.html#fun.partition).
-local partition = fun.partition
-methods.partition = partition
-exports.partition = partition
 
 --- Reducing: Folds
 -- @section
@@ -352,94 +276,57 @@ exports.partition = partition
 -- operator `accfun` and the initial value `initval`.
 -- @function foldl
 -- See [fun.foldl](https://luafun.github.io/reducing.html#fun.foldl).
-local foldl = fun.foldl
-methods.foldl = foldl
-exports.foldl = foldl
+
 --- An alias to foldl().
 -- See `gen.foldl`.
 -- @function reduce
-methods.reduce = foldl
-exports.reduce = foldl
 
 --- Return a number of elements in `gen, param, state` iterator.
 -- @function length
 -- See [fun.length](https://luafun.github.io/reducing.html#fun.length).
-local length = fun.length
-methods.length = length
-exports.length = length
 
 --- Return a new table (array) from iterated values.
 -- @function totable
 -- See [fun.totable](https://luafun.github.io/reducing.html#fun.totable).
-local totable = fun.totable
-methods.totable = totable
-exports.totable = totable
 
 --- Return a new table (map) from iterated values.
 -- @function tomap
 -- See [fun.tomap](https://luafun.github.io/reducing.html#fun.tomap).
-local tomap = fun.tomap
-methods.tomap = tomap
-exports.tomap = tomap
 
 --- Reducing: Predicates
 -- @section
 
 --- @function is_prefix_of
 -- See [fun.is_prefix_of](https://luafun.github.io/reducing.html#fun.is_prefix_of).
-local is_prefix_of = fun.is_prefix_of
-methods.is_prefix_of = is_prefix_of
-exports.is_prefix_of = is_prefix_of
 
 --- @function is_null
 -- See [fun.is_null](https://luafun.github.io/reducing.html#fun.is_null).
-local is_null = fun.is_null
-methods.is_null = is_null
-exports.is_null = is_null
 
 --- @function all
 -- See [fun.all](https://luafun.github.io/reducing.html#fun.all).
-local all = fun.all
-methods.all = all
-exports.all = all
 
 --- An alias for all().
 -- See `fun.all`.
 -- @function every
-methods.every = all
-exports.every = all
 
 --- @function any
 -- See [fun.any](https://luafun.github.io/reducing.html#fun.any).
-local any = fun.any
-methods.any = any
-exports.any = any
+
 --- An alias for any().
 -- See `fun.any`.
 -- @function some
-methods.some = any
-exports.some = any
 
 --- Transformations
 -- @section
 
 --- @function map
 -- See [fun.map](https://luafun.github.io/transformations.html#fun.map).
-local map = fun.map
-methods.map = map
-exports.map = map
 
 --- @function enumerate
 -- See [fun.enumerate](https://luafun.github.io/transformations.html#fun.enumerate).
-local enumerate = fun.enumerate
-methods.enumerate = enumerate
-exports.enumerate = enumerate
 
 --- @function intersperse
 -- See [fun.intersperse](https://luafun.github.io/transformations.html#fun.intersperse).
-local intersperse = fun.intersperse
-methods.intersperse = intersperse
-exports.intersperse = intersperse
 
 --- Compositions
 -- @section
@@ -452,9 +339,6 @@ exports.intersperse = intersperse
 -- @param ... - an iterators
 -- @return an iterator
 -- @function zip
-local zip = fun.zip
-methods.zip = zip
-exports.zip = zip
 
 --- A cycled version of an iterator.
 -- Make a new iterator that returns elements from `{gen, param, state}` iterator
@@ -468,9 +352,6 @@ exports.zip = zip
 -- @return an iterator
 -- See [fun.cycle](https://luafun.github.io/compositions.html#fun.cycle).
 -- @function cycle
-local cycle = fun.cycle
-methods.cycle = cycle
-exports.cycle = cycle
 
 --- Make an iterator that returns elements from the first iterator until it is
 -- exhausted, then proceeds to the next iterator, until all of the iterators are
@@ -495,9 +376,6 @@ exports.cycle = cycle
 -- ...
 --
 -- @function chain
-local chain = fun.chain
-methods.chain = chain
-exports.chain = chain
 
 --- (TODO) Cycles between several generators on a rotating schedule.
 -- Takes a flat series of [time, generator] pairs.
@@ -595,7 +473,7 @@ end)(function(timeout, gen, param, state)
     local get_time = clock.monotonic
     local start_time = get_time()
     local time_is_exceed = false
-    return wrap(function(ctx, state_x)
+    return fun.wrap(function(ctx, state_x)
         local gen_x, param_x, duration, cnt = ctx[1], ctx[2], ctx[3], ctx[4] + 1
         ctx[4] = cnt
         if time_is_exceed == false then
