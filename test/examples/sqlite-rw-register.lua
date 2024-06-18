@@ -47,6 +47,7 @@ end
 local sqlite_rw_register = molly.client.new()
 
 sqlite_rw_register.open = function(self)
+    assert(type(self) == 'table')
     self.db = assert(sqlite3.open_memory(), 'database handle is nil')
     -- For explanation see https://www.sqlite.org/pragma.html
     assert(sqlite3.OK == self.db:exec('PRAGMA journal_mode = WAL'))
@@ -58,6 +59,7 @@ sqlite_rw_register.open = function(self)
 end
 
 sqlite_rw_register.setup = function(self)
+    assert(type(self) == 'table')
     assert(sqlite3.OK == self.db:exec('CREATE TABLE IF NOT EXISTS rw_register (id, val)'))
     self.insert_stmt = assert(self.db:prepare('INSERT INTO rw_register VALUES (?, ?)'), 'statement prepare')
     self.select_stmt = assert(self.db:prepare('SELECT val FROM rw_register WHERE id = ?'), 'statement prepare')
@@ -71,6 +73,7 @@ local OP_VAL = 3
 local KEY_ID = 1
 
 sqlite_rw_register.invoke = function(self, op)
+    assert(type(self) == 'table')
     local val = op.value[1]
     local type = 'ok'
     if val[OP_TYPE] == 'r' then
@@ -99,10 +102,12 @@ sqlite_rw_register.invoke = function(self, op)
 end
 
 sqlite_rw_register.teardown = function(self)
+    assert(type(self) == 'table')
     return true
 end
 
 sqlite_rw_register.close = function(self)
+    assert(type(self) == 'table')
     -- Close database. All SQL statements prepared using
     -- db:prepare() should have been finalized before this
     -- function is called. The function returns sqlite3.OK on
