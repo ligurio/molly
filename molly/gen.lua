@@ -38,6 +38,7 @@
 
 local fun = require('fun')
 local clock = require('molly.clock')
+local log = require('molly.log')
 local tbl = require('molly.compat.tbl')
 
 local fun_mt = debug.getmetatable(fun.range(10))
@@ -456,15 +457,28 @@ methods.flip_flop = flip_flop
 --- Special generators
 -- @section
 
---- (TODO) A generator which, when asked for an operation, logs a message and yields
---  nil. Occurs only once; use `repeat` to repeat.
+--- A generator which, when asked for an operation, logs
+-- a message and yields `nil`. Occurs only once; use `repeat` to
+-- repeat.
 -- @return an iterator
 --
+-- @usage
+-- > molly.gen.iter({1, 2, 3}):log()
+-- [INFO  2024-07-07 11:38:47:119933]: 1
+-- ---
+-- - null
+-- ...
+-- --
 -- @function log
-local log = function()
-    -- TODO
+local log_it = function(it)
+    assert(tostring(it) == '<generator>')
+    local gen, param, state = unwrap(it)
+    local _, v = gen(param, state)
+    log.info(v)
+    return nil_gen(nil, nil)
 end
-exports.log = log
+exports.log = log_it
+methods.log = log_it
 
 --- (TODO) Operations from that generator are scheduled at uniformly random intervals
 -- between `0` to `2 * (dt seconds)`.
