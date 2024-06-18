@@ -387,19 +387,56 @@ local cycle_times = function()
 end
 methods.cycle_times = cycle_times
 
---- (TODO) A random mixture of several generators. Takes a collection of generators
--- and chooses between them uniformly.
+local mix_gen
+
+mix_gen = function(_, state)
+    assert(type(state) == 'table')
+    local len = table.getn(state)
+    if len == 0 then
+        return nil, nil
+    end
+    local nth = math.random(len)
+    local it = state[nth]
+    local gen1, param1, state1 = unwrap(it)
+    local state2, value = gen1(param1, state1)
+    if value == nil then
+        table.remove(state, nth)
+        return mix_gen(nil, state)
+    end
+    state[nth] = fun.wrap(gen1, param1, state2)
+    return state, value
+end
+
+--- A random mixture of a number generators. Takes a collection of
+-- generators and chooses between them uniformly.
 --
--- To be precise, a mix behaves like a sequence of one-time, randomly selected
--- generators from the given collection. This is efficient and prevents
--- multiple generators from competing for the next slot, making it hard to
--- control the mixture of operations.
+-- @usage
+-- > molly.gen.range(1, 5):mix(molly.gen.range(5, 10)):totable()
+-- ---
+-- - - 1
+--   - 5
+--   - 2
+--   - 3
+--   - 6
+--   - 7
+--   - 4
+--   - 8
+--   - 9
+--   - 5
+--   - 10
 --
 -- @param ... - an iterators
 -- @return an iterator
 -- @function mix
-local mix = function()
-    -- TODO
+local function mix(...)
+    local params = {...}
+    local state = {}
+    for _, it in ipairs(params) do
+        if tostring(it) == '<generator>' then
+            table.insert(state, it)
+        end
+    end
+    return fun.wrap(mix_gen, nil, state)
 end
 methods.mix = mix
 exports.mix = mix
