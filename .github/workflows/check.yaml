@@ -25,3 +25,24 @@ jobs:
 
       - name: Run static analysis
         run: make check
+
+  build-doc:
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+    strategy:
+      fail-fast: false
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup luarocks
+        run: sudo apt install -y luarocks
+
+      - name: Setup dependencies
+        run: make deps
+
+      - run: echo $(luarocks path --lr-bin) >> $GITHUB_PATH
+
+      - name: Build documentation
+        run: make doc
