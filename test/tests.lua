@@ -28,7 +28,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(14)
+test:plan(15)
 
 test:test('clock', function(test)
     test:plan(5)
@@ -265,6 +265,29 @@ test:test('tests.list_append_gen', function(test)
     local op_val = mop[OP_VAL]
     test:is(op_type == 'r' or op_type == 'append', true, "tests.list_append_gen(): op type")
     test:is(type(op_val) == 'number' or op_val == json.NULL, true, "tests.list_append_gen(): op value")
+end)
+
+test:test('tests.bank_gen', function(test)
+    test:plan(3)
+
+    local num = 5
+    local n = tests.bank_gen():take(5):length()
+    test:is(n, num, 'tests.bank_gen():length()')
+
+    local gen, param, state = tests.bank_gen()
+    local _, val = gen(param, state)
+
+    local op_name = val.f
+    test:ok(op_name == 'read' or
+            op_name == 'transfer',
+            "tests.bank_gen(): op name")
+    local op_value = val.v
+    test:ok((op_name == 'transfer' and
+             (type(op_value.amount) == 'number' or
+              type(op_value.from) == 'number' or
+              type(op_value.to) == 'number')) or
+            (op_name == 'read' and op_value == nil),
+            'tests.bank_gen(): op value')
 end)
 
 test:test('gen.mix', function(test)

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `log()` iterator.
 - A `mix()` iterator.
 - A CAS-register generator.
+- A bank generator.
 
 ### Changed
 

@@ -89,6 +89,18 @@
 --     { type = "invoke", f = "write", value = { 2 },   process = 0, index = 3}
 --     { type = "ok",     f = "write", value = { 2 },   process = 0, index = 4}
 --
+--### Bank
+--
+-- Generator produces updates to a set of bank accounts and transfers
+-- money between them at random, ensuring that no account goes negative.
+--
+-- Example of a history:
+--
+--     {:type :invoke, :f :transfer, :process 0, :time 12613722542, :index 34, :value {:from 1, :to 0, :amount 5}}
+--     {:type :fail,   :f :transfer, :process 0, :time 12686176735, :index 35, :value {:from 1, :to 0, :amount 5}}
+--     {:type :invoke, :f :read,     :process 0, :time 12686563291, :index 36}
+--     {:type :ok,     :f :read,     :process 0, :time 12799165489, :index 37, :value {0 97, 1 0, 2 0, 3 0, 4 0, 5 3, 6 0, 7 0, 8 0, 9 0}}
+--
 
 local math = require('math')
 
@@ -332,7 +344,76 @@ local function list_append_gen(opts)
     return gen_lib.wrap(list_append_op, param, 0)
 end
 
+local function bank_op_read()
+    return {
+        f = 'read',
+        value = nil,
+    }
+end
+
+local function bank_op_transfer(accounts, max_transfer)
+    return function()
+        return {
+            f = 'transfer',
+            value = {
+                from = math.random(1, accounts),
+                to = math.random(1, accounts),
+                amount = math.random(1, max_transfer),
+            }
+        }
+    end
+end
+
+--- A bank operations generator.
+--
+-- A generator of operations that simulate transfers between bank
+-- accounts, checker should verify that reads always show the same
+-- balance.
+-- @table[opt] opts Table with options.
+-- @number[opt] opts.accounts A collection of account identifiers.
+-- @number[opt] opts.max_transfer A largest transfer the test will
+-- try to execute.
+-- @usage
+--
+-- > log = require('log')
+-- > tests = require('molly.tests')
+-- > tests.bank_gen():map(function(op) return type(op) == 'function' and op() or op end):take(10):each(log.info)
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":2,"from":8,"to":7}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":2,"from":8,"to":1}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":1,"from":4,"to":8}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":1,"from":6,"to":2}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":1,"from":10,"to":8}}
+-- ---
+-- ...
+--
+-- @return an iterator
+--
+-- @function bank_gen
+local function bank_gen(opts)
+    dev_checks('?table')
+
+    opts = opts or {}
+    local param = {}
+    param.accounts = opts.accounts or 10
+    param.max_transfer = opts.max_transfer or 2
+
+    assert(type(param.accounts) == 'number', 'accounts must be a number')
+    assert(type(param.max_transfer) == 'number',
+           'max_transfer must be a number')
+
+    return gen_lib.cycle(gen_lib.iter({
+        bank_op_read(),
+        bank_op_transfer(param.accounts, param.max_transfer),
+    }))
+end
+
 return {
+    bank_gen = bank_gen,
     list_append_gen = list_append_gen,
     rw_register_gen = rw_register_gen,
     cas_register_gen = cas_register_gen,
