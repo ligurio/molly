@@ -24,7 +24,8 @@
 -- not perform another operation; the invocation remains open for the rest of
 -- the history.
 --
--- We define each operation as a table, that contains following keys:
+-- We define each operation as a table or a callable object that return
+-- a table, that contains following keys:
 --
 --  - state, can be nil (invoke), true (ok) or false (fail);
 --  - f is an action defined in a test, for example 'transfer', 'read' or
