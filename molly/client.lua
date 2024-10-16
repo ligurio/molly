@@ -8,14 +8,15 @@ local clock = require('molly.clock')
 local dev_checks = require('molly.dev_checks')
 local log = require('molly.log')
 local op_lib = require('molly.op')
+local utils = require('molly.utils')
 
 local shared_gen_state
 local op_index = 1
 
 local function process_operation(client, history, op, thread_id_str, thread_id, client_data)
-    dev_checks('<client>', '<history>', 'function|table', 'string', 'number')
+    dev_checks('<client>', '<history>', 'any', 'string', 'number')
 
-    if type(op) == 'function' then -- FIXME: check for callable object
+    if utils.is_callable(op) then
         op = op()
     end
 

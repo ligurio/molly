@@ -6,6 +6,7 @@ require('test.coverage').enable()
 
 local math = require('math')
 local os = require('os')
+local ffi = require('ffi')
 
 local helpers = require('test.helpers')
 local test = require('test.tap').test('molly')
@@ -27,7 +28,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(13)
+test:plan(14)
 
 test:test('clock', function(test)
     test:plan(5)
@@ -134,6 +135,53 @@ test:test('utils', function(test)
     test:isnil(os.getenv('MOLLY'), "os.getenv()")
 
     test:is(utils.basename('/home/sergeyb/sources/molly/README.md'), 'README.md', "utils.basename()")
+end)
+
+test:test("utils.is_callable", function(test)
+    test:plan(8)
+
+    local string_not_callable = 'str'
+    test:is(utils.is_callable(string_not_callable), false,
+	        "string is not callable")
+
+    local number_not_callable = 9
+    test:is(utils.is_callable(number_not_callable), false,
+	        "number is not callable")
+
+    local func_callable = function() end
+    test:is(utils.is_callable(func_callable), true, "func is callable")
+
+    local table_callable = setmetatable({}, {
+        __call = function() return 'op' end
+    })
+    test:is(utils.is_callable(table_callable), true, "table is callable")
+
+    local table_not_callable = setmetatable({}, {})
+    test:is(utils.is_callable(table_not_callable), false,
+	        "table is not callable")
+
+    local userdata_callable = newproxy(true)
+    local mt = getmetatable(userdata_callable)
+    mt.__call = function() return 'op' end
+    test:is(utils.is_callable(userdata_callable), true, "userdata is callable")
+
+    local userdata_not_callable = newproxy(true)
+    mt = getmetatable(userdata_not_callable)
+    mt.__call = {}
+    test:is(utils.is_callable(userdata_not_callable), false,
+	        "userdata is callable")
+
+    ffi.cdef[[
+        typedef struct
+        {
+            int data;
+        } test_check_struct_t;
+    ]]
+    ffi.metatype('test_check_struct_t', {
+        __call = function(_, key) return key end
+    })
+    local cdata_callable = ffi.new('test_check_struct_t')
+    test:is(utils.is_callable(cdata_callable), true, "cdata is callable")
 end)
 
 local OP_TYPE = 1

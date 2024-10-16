@@ -82,8 +82,41 @@ local function pack(...)
     }
 end
 
+local function is_callable(object)
+    if type(object) == 'function' then
+        return true
+    end
+
+    -- All objects with type `cdata` are allowed because there is
+	-- no easy way to get metatable.__call of object with type
+	-- `cdata`.
+    if type(object) == 'cdata' then
+        return true
+    end
+
+    local object_metatable = getmetatable(object)
+    if (type(object) == 'table' or type(object) == 'userdata') then
+        -- If metatable type is not `table` -> metatable is
+		-- protected -> cannot detect metamethod `__call` exists.
+        if object_metatable and
+		   type(object_metatable) ~= 'table' then
+            return true
+        end
+
+        -- The `__call` metamethod can be only the `function`
+        -- and cannot be a `table`, `userdata` or `cdata`
+        -- with `__call` methamethod on its own.
+        if object_metatable and object_metatable.__call then
+            return type(object_metatable.__call) == 'function'
+        end
+    end
+
+    return false
+end
+
 return {
     basename = basename,
+    is_callable = is_callable,
     chdir = chdir,
     cwd = cwd,
     setenv = setenv,
