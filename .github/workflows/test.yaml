@@ -12,7 +12,7 @@ jobs:
       github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
-        LUA: ['luajit-2.0.5', 'tarantool']
+        LUA: ['luajit', 'tarantool']
       fail-fast: false
     runs-on: [ubuntu-latest]
     steps:
@@ -25,10 +25,8 @@ jobs:
           tarantool-version: '2.10'
 
       - name: Setup LuaJIT (${{ matrix.LUA }})
-        if: matrix.LUA != 'tarantool'
-        uses: leafo/gh-actions-lua@v8
-        with:
-          luaVersion: ${{ matrix.LUA }}
+        if: matrix.LUA == 'luajit'
+        run: sudo apt install -y luajit
 
       - name: Setup luarocks
         run: sudo apt install -y luarocks
@@ -49,5 +47,5 @@ jobs:
           DEV: ON
 
       - name: Run tests with LuaJIT (${{ matrix.LUA }})
-        if: matrix.LUA != 'tarantool'
-        run: LUAJIT_BIN=$(pwd)/.lua/bin/luajit DEV=ON make test-luajit
+        if: matrix.LUA == 'luajit'
+        run: LUAJIT_BIN=luajit DEV=ON make test-luajit
