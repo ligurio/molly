@@ -20,7 +20,8 @@ local function process_operation(client, history, op, thread_id_str, thread_id, 
         op = op()
     end
 
-    assert(type(op) == 'table', 'Type of operation is not a Lua table.')
+    local err_msg = ('"operation" is not a Lua table: %s'):format(tostring(op))
+    assert(type(op) == 'table', err_msg)
 
     op.type = 'invoke'
     op.process = thread_id
@@ -31,10 +32,11 @@ local function process_operation(client, history, op, thread_id_str, thread_id, 
     history:add(op)
     local ok, res = pcall(client.invoke, client, op, client_data)
     if not ok then
-        log.warn('Process %d crashed (%s)', thread_id, res)
-        res.type = 'fail'
-        return
+        log.info('Process %d crashed (%s)', thread_id, res)
+        -- res.type = 'fail'
+        -- return
     end
+    res.type = 'ok'
     if res.type == nil then
         error('Operation type is empty.')
     end
@@ -74,21 +76,21 @@ local function run_client(thread_id, opts)
     -- TODO: Add barrier here.
 
     local gen, param, state = ops_generator:unwrap()
-    shared_gen_state = state
     local op
     local thread_id_str = '[' .. tostring(thread_id) .. ']'
-    while true do
-        state, op = gen(param, shared_gen_state)
-        if state == nil then
-            break
-        end
-        shared_gen_state = state
+    shared_gen_state = state
+    state, op = gen(param, shared_gen_state)
+    while op ~= nil do
         ok, err = pcall(process_operation, client, history, op, thread_id_str, thread_id, client_data)
         if ok == false then
-            error('Failed to process an operation', err)
+            log.info('ERROR: %s', err)
+            return false, err
         end
 
         require('fiber').yield()
+
+        shared_gen_state = state
+        state, op = gen(param, shared_gen_state)
     end
 
     -- TODO: Add barrier here.

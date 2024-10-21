@@ -332,7 +332,80 @@ local function list_append_gen(opts)
     return gen_lib.wrap(list_append_op, param, 0)
 end
 
+local function bank_op_read()
+    return {
+        f = 'read',
+        value = nil,
+    }
+end
+
+local function bank_op_transfer(accounts, total_amount)
+    return function()
+        return {
+            f = 'transfer',
+            value = {
+                from = math.random(1, accounts),
+                to = math.random(1, accounts),
+                amount = math.random(1, total_amount),
+            }
+        }
+    end
+end
+
+--- Bank operations generator.
+--
+-- A generator of operations that simulate transfers between bank
+-- accounts, checker should verify that reads always show the same
+-- balance.
+-- @table[opt] opts Table with options.
+-- @number[opt] opts.accounts A collection of account identifiers.
+-- @number[opt] opts.total_amount A total amount to allocate.
+-- @number[opt] opts.max_transfer A largest transfer the test will
+-- try to execute.
+-- @usage
+--
+-- > log = require('log')
+-- > tests = require('molly.tests')
+-- > for _it, op in tests.bank_gen():take(10) do if type(op) ~= 'table' then op = op() end log.info(op) end
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":5,"from":1,"to":9}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":83,"from":9,"to":7}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":93,"from":2,"to":3}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":36,"from":4,"to":1}}
+-- {"f":"read"}
+-- {"f":"transfer","value":{"amount":68,"from":10,"to":1}}
+-- ---
+-- ...
+--
+-- @return an iterator
+--
+-- @function bank_gen
+local function bank_gen(opts)
+    dev_checks('?table')
+
+    opts = opts or {}
+    local param = {}
+    param.accounts = opts.accounts or 10
+    param.total_amount = opts.total_amount or 100
+    param.max_transfer = opts.max_transfer or 2
+
+    assert(type(param.accounts) == 'number', 'accounts must be a number')
+    assert(type(param.total_amount) == 'number',
+           'total_amount must be a number')
+    assert(type(param.max_transfer) == 'number',
+           'max_transfer must be a number')
+
+    return gen_lib.cycle(gen_lib.iter({
+        bank_op_read(),
+        bank_op_transfer(param.accounts, param.total_amount),
+    }))
+end
+
 return {
+    bank_gen = bank_gen,
     list_append_gen = list_append_gen,
     rw_register_gen = rw_register_gen,
     cas_register_gen = cas_register_gen,

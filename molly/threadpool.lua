@@ -39,9 +39,9 @@ local function start(self, ...)
     local func, opts = ...
     for thread_id = 1, self.thread_num do
         log.debug('Spawn a new thread %d', thread_id)
-        local ok = self.pool[thread_id]:create(func, opts)
+        local ok, err = self.pool[thread_id]:create(func, opts)
         if not ok then
-            error('Failed to start thread')
+            error('Failed to start thread:' .. err)
         end
         if THREAD_TYPE == 'fiber' then
             self.pool[thread_id]:yield()
