@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Allow chaining `luafun` iterators with iterators defined in Molly and vice versa.
 - Using of SQL prepared statements in test examples.
 - Generated operation can be any callable Lua object.
+- RW-register generator emits every number only once.
 
 ### Removed
 

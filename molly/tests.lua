@@ -109,7 +109,7 @@ local gen_lib = require('molly.gen')
 local json = require('molly.json')
 
 -- Function that describes a 'read' operation.
-local function op_r()
+local function rw_register_op_r()
     return setmetatable({
         f = 'txn',
         value = {{
@@ -126,13 +126,13 @@ local function op_r()
 end
 
 -- Function that describes a 'write' operation.
-local function op_w()
+local function rw_register_op_w(n)
     return setmetatable({
         f = 'txn',
         value = {{
             'w',
             'x',
-            math.random(1, 100),
+            n,
         }}
     }, {
         __type = '<operation>',
@@ -142,8 +142,12 @@ local function op_w()
     })
 end
 
---- Write/Read operations generator.
+--- An RW-register operations generator.
 --
+-- A generator for operations where values are transactions made
+-- up of reads and appends to various integer keys.
+-- @table[opt] opts A table with options.
+-- @number[opt] opts.max_n A maximum number. Default is 1000.
 -- @usage
 --
 -- > log = require('log')
@@ -165,8 +169,17 @@ end
 -- @return an iterator
 --
 -- @function rw_register_gen
-local function rw_register_gen()
-    return gen_lib.cycle(gen_lib.iter({ op_r, op_w }))
+local function rw_register_gen(opts)
+    dev_checks('?table')
+
+    opts = opts or {}
+    local param = {}
+    param.max_n = opts.max_n or 1000
+
+    assert(type(param.max_n) == 'number', 'max_n must be a number')
+
+    return gen_lib.mix(gen_lib.range(param.max_n):map(rw_register_op_w),
+                       gen_lib.iter({rw_register_op_r}):cycle())
 end
 
 -- Function that describes a 'read' operation.
