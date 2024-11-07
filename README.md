@@ -64,7 +64,7 @@ Example produces two files with history: `history.txt` and `history.json`. With
 for consistency:
 
 ```sh
-$ VER=0.1.4
+$ VER=0.1.8
 $ curl -O -L https://github.com/ligurio/elle-cli/releases/download/${VER}/elle-cli-bin-${VER}.zip
 $ unzip elle-cli-bin-${VER}.zip
 $ java -jar ./target/elle-cli-${VER}-standalone.jar -m elle-rw-register history.json
