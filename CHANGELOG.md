@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Executing `close` method in a `Client` instance (#2).
 - list-append generator (#3).
 - Passing a client object to a client's methods (#9).
+- Links in rendered LDoc documentation for a module `molly.gen`.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
