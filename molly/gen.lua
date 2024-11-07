@@ -212,11 +212,11 @@ local span = fun.span
 methods.span = span
 exports.span = span
 --- An alias for span().
--- See `fun.span`.
+-- See `gen.span`.
 -- @function split
 
 --- An alias for span().
--- See `fun.span`.
+-- See `gen.span`.
 -- @function split_at
 
 --- Indexing
@@ -226,26 +226,26 @@ exports.span = span
 -- See [fun.index](https://luafun.github.io/indexing.html#fun.index).
 
 --- An alias for index().
--- See `fun.index`.
+-- See `gen.index`.
 -- @function index_of
 
 --- An alias for index().
--- See `fun.index`.
+-- See `gen.index`.
 -- @function elem_index
 
 --- @function indexes
 -- See [fun.indexes](https://luafun.github.io/indexing.html#fun.indexes).
 
 --- An alias for indexes().
--- See `fun.indexes`.
+-- See `gen.indexes`.
 -- @function indices
 
 --- An alias for indexes().
--- See `fun.indexes`.
+-- See `gen.indexes`.
 -- @function elem_indexes
 
 --- An alias for indexes().
--- See `fun.indexes`.
+-- See `gen.indexes`.
 -- @function elem_indices
 
 --- Filtering
@@ -261,7 +261,7 @@ exports.span = span
 
 --- If `regexp_or_predicate` is string then the parameter is used as a regular
 -- expression to build filtering predicate. Otherwise the function is just an
--- alias for gen.filter().
+-- alias for `gen.filter`.
 -- @function grep
 -- See [fun.grep](https://luafun.github.io/filtering.html#fun.grep).
 
@@ -307,14 +307,14 @@ exports.span = span
 -- See [fun.all](https://luafun.github.io/reducing.html#fun.all).
 
 --- An alias for all().
--- See `fun.all`.
+-- See `gen.all`.
 -- @function every
 
 --- @function any
 -- See [fun.any](https://luafun.github.io/reducing.html#fun.any).
 
 --- An alias for any().
--- See `fun.any`.
+-- See `gen.any`.
 -- @function some
 
 --- Transformations
