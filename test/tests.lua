@@ -243,16 +243,16 @@ test:test('tests.rw_register_gen', function(test)
     test:is(n, num, "tests.rw_register_gen(): length")
 
     local gen, param, state = tests.rw_register_gen()
-    local _, op_func, _ = gen(param, state)
-    local op = op_func()
+    local _, op, _ = gen(param, state)
+    op = type(op) == 'function' and op() or op
     local mop = op.value[1]
     test:is(type(mop), 'table', "tests.rw_register_gen(): mop")
     local mop_key = mop[IDX_MOP_KEY]
     test:is(type(mop_key), 'string', "tests.rw_register_gen(): mop key")
     local mop_type = mop[IDX_MOP_TYPE]
-    test:is(mop_type == 'r' or mop_type == 'append', true, "tests.rw_register_gen(): mop type")
+    test:is(mop_type == 'r' or mop_type == 'w', true, "tests.rw_register_gen(): mop type")
     local mop_val = mop[IDX_MOP_VAL]
-    test:is(mop_val == 'number' or mop_val == json.NULL, true, "tests.rw_register_gen(): mop value")
+    test:is(type(mop_val) == 'number' or mop_val == json.NULL, true, "tests.rw_register_gen(): mop value")
 end)
 
 test:test('tests.list_append_gen', function(test)
