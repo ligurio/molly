@@ -20,9 +20,9 @@ jobs:
 
       - name: Setup Tarantool
         if: matrix.LUA == 'tarantool'
-        uses: tarantool/setup-tarantool@v1
+        uses: tarantool/setup-tarantool@v4
         with:
-          tarantool-version: '2.10'
+          tarantool-version: '2.11'
 
       - name: Setup LuaJIT (${{ matrix.LUA }})
         if: matrix.LUA == 'luajit'
