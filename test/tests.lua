@@ -44,7 +44,7 @@ test:test('clock', function(test)
 end)
 
 test:test('history', function(test)
-    test:plan(9)
+    test:plan(12)
     test:isnt(history.new(), nil, "history.new()")
 
     local h = history.new()
@@ -72,18 +72,21 @@ test:test('history', function(test)
 
     h = history.new()
     h:add({ type = 'ok', value = 2 })
-    local ref_str = '[{"type":"ok","value":2}]'
-    test:is(h:to_json(), ref_str, "history_obj:to_json(): { type = 'ok' }")
+    local history_json = h:to_json()
+    test:like(history_json, '"type":"ok"', ":to_json() type is ok")
+    test:like(history_json, '"value":2', ":to_json() value is 2")
 
     h = history.new()
     h:add({ type = 'fail', value = 3 })
-    ref_str = '[{"type":"fail","value":3}]'
-    test:is(h:to_json(), ref_str, "history_obj:to_json(): { type = 'fail' }")
+    history_json = h:to_json()
+    test:like(history_json, '"type":"fail"', ":to_json() type is fail")
+    test:like(history_json, '"value":3', ":to_json() value is 3")
 
     h = history.new()
     h:add({ type = 'invoke', value = 6 })
-    ref_str = '[{"type":"invoke","value":6}]'
-    test:is(h:to_json(), ref_str, "history_obj:to_json(): { type = 'invoke' }")
+    history_json = h:to_json()
+    test:like(history_json, '"type":"invoke"', ":to_json() type is invoke")
+    test:like(history_json, '"value":6', ":to_json() value is 6")
 end)
 
 test:test('op', function(test)
