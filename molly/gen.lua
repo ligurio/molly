@@ -378,15 +378,82 @@ exports.span = span
 --
 -- @function chain
 
---- (TODO) Cycles between several generators on a rotating schedule.
--- Takes a flat series of [time, generator] pairs.
--- @param ... - an iterators
+--- Cycles between several generators on a rotating schedule.
+-- Takes a flat series of [time, generator] pairs. Emits from the first
+-- generator for `time` seconds, then from the second generator for `time`
+-- seconds, and so on, restarting from the first generator after all generators
+-- were used. State of every generator is preserved from cycle to cycle.
+-- The iterator stops when one of the generators is exhausted.
+--
+-- @usage
+-- > gen.each(print, gen.cycle_times(
+-- >   0.1, gen.duplicate('a'),
+-- >   0.1, gen.duplicate('b'))
+-- > )
+-- a
+-- a
+-- a
+-- b
+-- b
+-- ...
+--
+-- @param ... a flat series of [time, generator] pairs.
 -- @return an iterator
 -- @function cycle_times
-local cycle_times = function()
-    -- TODO
+local cycle_times = function(...)
+    local args = {...}
+    local times, gens = {}, {}
+    for _, arg in ipairs(args) do
+        if type(arg) == 'number' then
+            times[#times + 1] = arg
+        elseif tostring(arg) == '<generator>' then
+            gens[#gens + 1] = arg
+        end
+    end
+    if #gens == 0 then
+        error('cycle_times: no generators given', 2)
+    end
+    if #times < #gens then
+        error('cycle_times: expected a duration before each generator', 2)
+    end
+    local stages, cutoffs, period = {}, {}, 0
+    for i, it in ipairs(gens) do
+        local duration = times[i]
+        if type(duration) ~= 'number' or duration <= 0 then
+            error('cycle_times: invalid duration', 2)
+        end
+        period = period + duration
+        cutoffs[i] = period
+        stages[i] = { it = it }
+    end
+    local ctx = {
+        cutoffs = cutoffs,
+        period = period,
+        stages = stages,
+        t0 = nil,
+    }
+    local cycle_times_gen = function(_param, _state)
+        local now = clock.monotonic()
+        if ctx.t0 == nil then
+            ctx.t0 = now
+        end
+        local offset = (now - ctx.t0) % ctx.period
+        local i = 1
+        while i < #ctx.stages and offset >= ctx.cutoffs[i] do
+            i = i + 1
+        end
+        local gen1, param1, state1 = unwrap(ctx.stages[i].it)
+        local state2, value = gen1(param1, state1)
+        if state2 == nil then
+            return nil
+        end
+        ctx.stages[i].it = fun.wrap(gen1, param1, state2)
+        return ctx, value
+    end
+    return fun.wrap(cycle_times_gen, ctx, nil)
 end
 methods.cycle_times = cycle_times
+exports.cycle_times = cycle_times
 
 local mix_gen
 
