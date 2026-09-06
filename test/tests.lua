@@ -28,7 +28,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(15)
+test:plan(16)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -311,6 +311,46 @@ test:test('gen.log', function(test)
 
     local res = molly.gen.iter({1, 2, 3}):log()
     test:is(res, nil, 'gen.log returns nil')
+end)
+
+test:test('gen.cycle_times', function(test)
+    test:plan(6)
+
+    test:is(type(molly.gen.cycle_times), 'function',
+        'gen.cycle_times(): exported function')
+    local it = molly.gen.cycle_times(1, molly.gen.duplicate('a'))
+    test:is(tostring(it), '<generator>',
+        'gen.cycle_times(): returns an iterator')
+
+    local res = {}
+    for _, v in molly.gen.cycle_times(
+        100, molly.gen.range(1, 3),
+        100, molly.gen.duplicate('x')) do
+        res[#res + 1] = v
+    end
+    test:is(table.concat(res, ','), '1,2,3',
+        'gen.cycle_times(): stops when a generator is exhausted')
+
+    local gen, param, state = molly.gen.cycle_times(
+        0.5, molly.gen.duplicate('a'),
+        0.5, molly.gen.duplicate('b')):unwrap()
+    local value
+    state, value = gen(param, state)
+    test:is(value, 'a', 'gen.cycle_times(): first generator')
+
+    local wait = function(t0, total)
+        local target = t0 + total * 10^9
+        while tonumber(clock.monotonic64()) < target do
+            -- Busy wait.
+        end
+    end
+    local t0 = tonumber(clock.monotonic64())
+    wait(t0, 0.75)
+    state, value = gen(param, state)
+    test:is(value, 'b', 'gen.cycle_times(): second generator')
+    wait(t0, 1.25)
+    value = select(2, gen(param, state))
+    test:is(value, 'a', 'gen.cycle_times(): cycles back to first generator')
 end)
 
 test:test('runner', function(test)
