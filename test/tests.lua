@@ -28,7 +28,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(19)
+test:plan(20)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -386,7 +386,7 @@ test:test('gen.flip_flop', function(test)
 end)
 
 test:test('runner', function(test)
-    test:plan(4)
+    test:plan(10)
 
     local workload_opts = {
         client = {},
@@ -398,39 +398,63 @@ test:test('runner', function(test)
     local res = string.find(err, 'Generator must have an unwrap method')
     test:isnt(res, nil, "runner.run_test(): err is not nil")
 
-    local cl = client.new()
-    cl.setup = function() assert(nil, 'broken setup') end
-    workload_opts = {
-        client = cl,
-        generator = {
-            unwrap = function() return end
-        },
+    local single_gen = gen_lib.range(1, 1):map(function(n)
+        return { f = 'test', value = n }
+    end)
+    local opts_with_nodes = {
+        nodes = { 'a' },
     }
-    test_opts = {
-        nodes = {
-            'a',
-        }
-    }
-    ok = runner.run_test(workload_opts, test_opts)
-    test:is(ok, true, "runner.run_test(): broken setup")
 
-    cl = client.new()
-    cl.teardown = function()
-        assert(nil, 'broken teardown')
-    end
-    workload_opts = {
+    -- A worker returns (false, err) when open() fails.
+    local cl = client.new()
+    cl.open = function() error('broken open') end
+    ok, err = runner.run_test({
         client = cl,
-        generator = {
-            unwrap = function() return end
-        },
+        generator = single_gen,
+    }, opts_with_nodes)
+    test:ok(not ok, "runner.run_test(): broken open")
+    res = string.find(err, 'broken open')
+    test:isnt(res, nil, "runner.run_test(): broken open error")
+
+    -- A worker returns (false, err) when setup() fails.
+    cl = client.new()
+    cl.setup = function() error('broken setup') end
+    ok, err = runner.run_test({
+        client = cl,
+        generator = single_gen,
+    }, opts_with_nodes)
+    test:ok(not ok, "runner.run_test(): broken setup")
+    res = string.find(err, 'broken setup')
+    test:isnt(res, nil, "runner.run_test(): broken setup error")
+
+    -- A worker returns (false, err) when teardown() fails.
+    cl = client.new()
+    cl.invoke = function(_self, _op)
+        return { type = 'ok', f = 'test' }
+    end
+    cl.teardown = function() error('broken teardown') end
+    ok, err = runner.run_test({
+        client = cl,
+        generator = single_gen,
+    }, opts_with_nodes)
+    test:ok(not ok, "runner.run_test(): broken teardown")
+    res = string.find(err, 'broken teardown')
+    test:isnt(res, nil, "runner.run_test(): broken teardown error")
+
+    -- A worker panic is propagated to run_test().
+    local crash_gen = {
+        unwrap = function()
+            return function() error('generator boom') end, nil, nil
+        end,
     }
-    test_opts = {
-        nodes = {
-            'a',
-        }
-    }
-    ok = runner.run_test(workload_opts, test_opts)
-    test:is(ok, true, "runner.run_test(): broken teardown")
+    cl = client.new()
+    ok, err = runner.run_test({
+        client = cl,
+        generator = crash_gen,
+    }, opts_with_nodes)
+    test:ok(not ok, "runner.run_test(): crashed worker")
+    res = string.find(err, 'generator boom')
+    test:isnt(res, nil, "runner.run_test(): crashed worker error")
 end)
 
 test:test('client.invoke_fail', function(test)
@@ -566,6 +590,16 @@ test:test('threadpool.coroutine_args', function(test)
     test:is(seen.id, 1, 'threadpool.coroutine_args(): thread_id is passed')
     test:is(seen.opts.marker, 'x',
         'threadpool.coroutine_args(): worker arguments are passed')
+end)
+
+test:test('threadpool.worker_error', function(test)
+    test:plan(2)
+
+    local pool = threadpool.new('coroutine', 1)
+    local ok, err = pool:start(function() error('worker boom') end, {})
+    test:is(ok, nil, 'threadpool.worker_error(): start returned nil')
+    local res = string.find(err, 'worker boom')
+    test:isnt(res, nil, 'threadpool.worker_error(): error is propagated')
 end)
 
 test:test("threads", function(test)

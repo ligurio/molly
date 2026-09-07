@@ -41,6 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to the active thread type (fiber or coroutine).
 - A failed `invoke` is recorded in a history as a `fail` operation
   with an error message.
+- Worker errors and `false` results returned by `open`, `setup`,
+  `teardown` and `close` are propagated from a thread pool to
+  `run_test()`.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 

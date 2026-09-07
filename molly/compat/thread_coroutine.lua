@@ -22,12 +22,15 @@ local function scheduler()
         local thread = threads[id]
         local co = thread['coro']
         if coroutine.status(co) == 'suspended' then
+            local res
             if thread['started'] == true then
-                coroutine.resume(co)
+                res = {coroutine.resume(co)}
             else
                 thread['started'] = true
-                coroutine.resume(co, thread.thread_id, unpack(thread['func_args']))
+                res = {coroutine.resume(co, thread.thread_id,
+                                       unpack(thread['func_args']))}
             end
+            thread['last_result'] = res
         end
         if coroutine.status(co) == 'dead' then
             table.remove(threads, id)
@@ -59,7 +62,21 @@ end
 
 local function join(self)
     dev_checks('<thread>')
-    -- TODO
+
+    local res = self['last_result']
+    if res == nil then
+        return true
+    end
+    if res[1] == false then
+        -- A coroutine has terminated with an error.
+        return false, tostring(res[2])
+    end
+    if res[2] == false then
+        -- A worker returned (false, err).
+        local err = res[3]
+        return false, err ~= nil and tostring(err) or 'worker returned an error'
+    end
+
     return true
 end
 
