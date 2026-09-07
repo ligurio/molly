@@ -31,15 +31,21 @@ math.randomseed(seed)
 test:plan(15)
 
 test:test('clock', function(test)
-    test:plan(5)
+    test:plan(7)
 
     local res = clock.monotonic64()
     local res_tarantool = type(res) == 'cdata' and utils.is_tarantool()
     local res_luajit = type(res) == 'number' and not utils.is_tarantool()
     test:is(res_tarantool or res_luajit, true, "clock.monotonic64()")
     test:isnumber(clock.monotonic(), "clock.monotonic()")
+    local diff = math.abs(clock.monotonic() -
+        tonumber(clock.monotonic64()) / 10^9)
+    test:ok(diff < 0.01, "clock.monotonic() in seconds")
     test:isnumber(clock.proc(), "clock.proc()")
     test:isnil(clock.sleep(0.1), "clock.sleep()")
+    local before = clock.monotonic()
+    clock.sleep(0.05)
+    test:ok(clock.monotonic() - before >= 0.04, "clock.sleep() in seconds")
     test:isstring(clock.dt(), "clock.dt()")
 end)
 
