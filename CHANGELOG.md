@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - list-append generator (#3).
 - Passing a client object to a client's methods (#9).
 - Links in rendered LDoc documentation for a module `molly.gen`.
+- `clock.monotonic()` and `clock.sleep()` use seconds on LuaJIT like on Tarantool.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
