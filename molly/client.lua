@@ -33,7 +33,18 @@ local function process_operation(client, history, op, thread_id_str, thread_id, 
     local ok, res = pcall(client.invoke, client, op, client_data)
     if not ok then
         log.warn('Process %d crashed (%s)', thread_id, res)
-        res.type = 'fail'
+        local failed_op = {
+            type = 'fail',
+            f = op.f,
+            value = op.value,
+            process = thread_id,
+            index = op_index,
+            time = clock.monotonic64(),
+            error = tostring(res),
+        }
+        op_index = op_index + 1
+        log.debug('%-4s %s', thread_id_str, op_lib.to_string(failed_op))
+        history:add(failed_op)
         return
     end
     if res.type == nil then

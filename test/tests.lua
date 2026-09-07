@@ -28,7 +28,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(18)
+test:plan(19)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -431,6 +431,35 @@ test:test('runner', function(test)
     }
     ok = runner.run_test(workload_opts, test_opts)
     test:is(ok, true, "runner.run_test(): broken teardown")
+end)
+
+test:test('client.invoke_fail', function(test)
+    test:plan(5)
+
+    local thread_type = utils.is_tarantool() and 'fiber' or 'coroutine'
+    local cl = client.new()
+    cl.invoke = function(_self, _op)
+        error('invoke boom')
+    end
+
+    local hist = history.new()
+    local pool = threadpool.new(thread_type, 1)
+    local ok = pool:start(client.run, {
+        client = cl,
+        gen = gen_lib.range(1, 1):map(function(n)
+            return { f = 'test', value = n }
+        end),
+        history = hist,
+        nodes = { 'a' },
+    })
+    test:is(ok, true, 'client.invoke_fail(): run_client returned ok')
+
+    local ops = hist.history
+    test:is(#ops, 2, 'client.invoke_fail(): history has invoke and fail ops')
+    test:is(ops[1].type, 'invoke', 'client.invoke_fail(): invoke op is recorded')
+    test:is(ops[2].type, 'fail', 'client.invoke_fail(): fail op is recorded')
+    test:isnt(string.find(ops[2].error, 'invoke boom'), nil,
+        'client.invoke_fail(): error message is recorded')
 end)
 
 ------------------------
