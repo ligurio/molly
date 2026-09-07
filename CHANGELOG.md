@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A CAS-register generator.
 - A bank generator.
 - A `cycle_times()` iterator.
+- A `flip_flop()` iterator.
 
 ### Changed
 

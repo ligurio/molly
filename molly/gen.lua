@@ -509,17 +509,50 @@ end
 methods.mix = mix
 exports.mix = mix
 
---- (TODO) Emits an operation from generator A, then B, then A again, then B again,
--- etc. Stops as soon as any gen is exhausted.
--- @number a generator A.
--- @number b generator B.
+--- Emits an operation from generator A, then B, then A again, then B again,
+-- etc. Stops as soon as any generator is exhausted.
+--
+-- @usage
+-- > gen.each(print, gen.flip_flop(gen.range(1, 2), gen.duplicate('x')))
+-- 1
+-- x
+-- 2
+-- x
+--
+-- @param a a generator.
+-- @param b a generator.
 -- @return an iterator
 --
 -- @function flip_flop
-local flip_flop = (function()
-    -- TODO
-end)
+local flip_flop_gen = function(_param, state)
+    assert(type(state) == 'table')
+    state.i = state.i % #state + 1
+    local it = state[state.i]
+    local gen1, param1, state1 = unwrap(it)
+    local state2, value = gen1(param1, state1)
+    if state2 == nil then
+        return nil
+    end
+    state[state.i] = fun.wrap(gen1, param1, state2)
+    return state, value
+end
+
+local function flip_flop(...)
+    local params = {...}
+    local gens = {}
+    for _, it in ipairs(params) do
+        if tostring(it) == '<generator>' then
+            table.insert(gens, it)
+        end
+    end
+    if #gens ~= 2 then
+        error('flip_flop: expected two generators', 2)
+    end
+    local state = { gens[1], gens[2], i = 0 }
+    return fun.wrap(flip_flop_gen, nil, state)
+end
 methods.flip_flop = flip_flop
+exports.flip_flop = flip_flop
 
 --- Special generators
 -- @section

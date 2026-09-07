@@ -28,7 +28,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(16)
+test:plan(17)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -351,6 +351,38 @@ test:test('gen.cycle_times', function(test)
     wait(t0, 1.25)
     value = select(2, gen(param, state))
     test:is(value, 'a', 'gen.cycle_times(): cycles back to first generator')
+end)
+
+test:test('gen.flip_flop', function(test)
+    test:plan(6)
+
+    test:is(type(molly.gen.flip_flop), 'function',
+        'gen.flip_flop(): exported function')
+    local it = molly.gen.flip_flop(
+        molly.gen.range(1, 2),
+        molly.gen.range(3, 4)
+    )
+    test:is(tostring(it), '<generator>', 'gen.flip_flop(): returns an iterator')
+
+    local collect = function(a, b)
+        local res = {}
+        for _, v in molly.gen.flip_flop(a, b) do
+            res[#res + 1] = v
+        end
+        return table.concat(res, ',')
+    end
+
+    test:is(collect(molly.gen.range(1, 2), molly.gen.range(3, 4)), '1,3,2,4',
+        'gen.flip_flop(): alternates and stops when exhausted')
+    test:is(collect(molly.gen.duplicate('a'), molly.gen.range(1, 2)),
+        'a,1,a,2,a', 'gen.flip_flop(): alternates when second gen is shorter')
+    local res = {}
+    for _, v in molly.gen.range(1, 2):flip_flop(molly.gen.range(3, 4)) do
+        res[#res + 1] = v
+    end
+    test:is(table.concat(res, ','), '1,3,2,4', 'gen.flip_flop(): method form')
+    local ok = pcall(molly.gen.flip_flop, molly.gen.range(1, 2))
+    test:is(ok, false, 'gen.flip_flop(): error on a single generator')
 end)
 
 test:test('runner', function(test)
