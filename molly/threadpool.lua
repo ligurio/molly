@@ -10,15 +10,23 @@ local thread_lib = require('molly.thread')
 local function join(self)
     dev_checks('<threadpool>')
 
-    for i = 1, self.thread_num do
-        self.pool[i]:join()
-    end
-
-    -- Drive coroutine threads to completion. A no-op for fiber threads,
-    -- which are scheduled by the runtime.
+    -- Drive coroutine threads to completion first, so their join()
+    -- below can observe the result. A no-op for fiber threads, which
+    -- are scheduled and joined by the runtime.
     thread_lib.scheduler()
 
-    return true
+    local first_err
+    for i = 1, self.thread_num do
+        local ok, err = self.pool[i]:join()
+        if not ok and first_err == nil then
+            first_err = err
+        end
+    end
+
+    if first_err == nil then
+        return true
+    end
+    return false, first_err
 end
 
 local function cancel(self)
@@ -43,9 +51,9 @@ local function start(self, ...)
         end
     end
 
-    local ok = self:join()
+    local ok, err = self:join()
     if not ok then
-        error('Failed to wait completion')
+        return nil, err
     end
 
     return true

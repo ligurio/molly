@@ -66,8 +66,19 @@ end
 local function join(self)
     dev_checks('<thread>')
 
-    if self.fiber_obj ~= nil and self.fiber_obj:status() ~= 'dead' then
-        self.fiber_obj:join()
+    if self.fiber_obj == nil then
+        return true
+    end
+
+    local vals = { self.fiber_obj:join() }
+    if vals[1] == false then
+        -- A fiber has terminated with an error.
+        return false, tostring(vals[2])
+    end
+    if vals[2] == false then
+        -- A worker returned (false, err).
+        local err = vals[3]
+        return false, err ~= nil and tostring(err) or 'worker returned an error'
     end
 
     return true
