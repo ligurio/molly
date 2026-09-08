@@ -10,6 +10,7 @@ if is_tarantool() then
     clock.monotonic64 = clock_lib.monotonic64
     clock.monotonic = clock_lib.monotonic
     clock.proc = clock_lib.proc
+    clock.realtime = clock_lib.realtime
     clock.sleep = require('fiber').sleep
 else
     clock = require('molly.compat.clock_ffi')
@@ -67,25 +68,34 @@ end
 --
 -- @function monotonic64
 
--- Get datetime with milliseconds.
--- @return string, string with datetime with milliseconds
+-- The real time. Derived from C function
+-- `clock_gettime(CLOCK_REALTIME)`. Real time may be affected by
+-- changes done by a user or by a system time synchronization.
+-- Best function to use to obtain a current date and time.
+-- @return number, seconds since epoch (1970-01-01 00:00:00 UTC).
+-- @usage
+-- > local clock = require('molly.clock')
+-- > print(clock.realtime())
+-- 1735689600.5
+--
+-- @function realtime
+
+-- Get current datetime with a sub-second part.
+-- @return string, string with datetime with microsecond
 -- precision.
 -- @usage
 -- > local clock = require('molly.clock')
 -- > print(clock.dt())
--- 2022-06-01 10:38:07:081899
+-- 2025-06-15 18:06:40:081899
 --
 -- @function dt
 function clock.dt()
-    local ms = string.match(tostring(os.clock()), '%d%.(%d+)')
-    local dt = os.date('*t')
-    return ('%d-%.2d-%.2d %.2d:%.2d:%.2d:%-6d'):format(dt.year,
-                                           dt.month,
-                                           dt.day,
-                                           dt.hour,
-                                           dt.min,
-                                           dt.sec,
-                                           ms)
+    local now = clock.realtime()
+    local sec = math.floor(now)
+    local usec = math.floor((now - sec) * 10^6)
+    local d = os.date('*t', sec)
+    return ('%d-%.2d-%.2d %.2d:%.2d:%.2d:%06d'):format(
+        d.year, d.month, d.day, d.hour, d.min, d.sec, usec)
 end
 
 return clock

@@ -42,7 +42,7 @@ math.randomseed(seed)
 test:plan(47)
 
 test:test('clock', function(test)
-    test:plan(7)
+    test:plan(9)
 
     local res = clock.monotonic64()
     local res_tarantool = type(res) == 'cdata' and utils.is_tarantool()
@@ -57,11 +57,16 @@ test:test('clock', function(test)
         assert(tonumber(clock.monotonic64())) / 10^9)
     test:ok(diff < 1, "clock.monotonic() in seconds")
     test:isnumber(clock.proc(), "clock.proc()")
+    test:isnumber(clock.realtime(), "clock.realtime()")
     test:isnil(clock.sleep(0.1), "clock.sleep()")
     local before = clock.monotonic()
     clock.sleep(0.05)
     test:ok(clock.monotonic() - before >= 0.04, "clock.sleep() in seconds")
-    test:isstring(clock.dt(), "clock.dt()")
+    local dt_str = clock.dt()
+    test:isstring(dt_str, "clock.dt()")
+    test:isnt(string.match(dt_str,
+        '^%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d:%d%d%d%d%d%d$'), nil,
+        "clock.dt() format")
 end)
 
 test:test('json.NULL', function(test)
