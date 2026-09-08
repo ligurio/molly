@@ -32,7 +32,7 @@ local function sync_stage(opts, stage)
 end
 
 local function process_operation(client, history, op, thread_id_str, thread_id, client_data)
-    dev_checks('<client>', '<history>', 'any', 'string', 'number')
+    dev_checks('<client>', '<history>', '!', 'string', 'number')
 
     if utils.is_callable(op) then
         op = op()
