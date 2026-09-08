@@ -68,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `run_test()`.
 - Generated operations are invoked exactly once: a shared
   generator cursor is no longer reset by every client thread.
+- The `time_limit` option is applied to a workload generator in
+  `run_test()`.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
