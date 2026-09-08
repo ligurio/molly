@@ -64,19 +64,17 @@ test-example:
 	@$(TARANTOOL_BIN) test/examples/sqlite-rw-register.lua
 	@$(TARANTOOL_BIN) test/examples/sqlite-list-append.lua
 
-test-tarantool:
+test-tarantool: clean
 	@echo "Run regression tests with Tarantool"
 	@DEV=$(DEV) $(TARANTOOL_BIN) $(TEST_FILES)
 
-test-luajit:
+test-luajit: clean
 	@echo "Run regression tests with LuaJIT"
 	@DEV=$(DEV) LUA_PATH=$(LUA_PATH) LUA_CPATH=$(LUA_CPATH) $(LUAJIT_BIN) $(TEST_FILES)
 
 test: test-tarantool test-luajit
 
-$(LUACOV_STATS): test-tarantool test-example
-
-coverage: $(LUACOV_STATS)
+coverage: test-tarantool test-example
 	@sed -i -e 's@'"$$(realpath .)"'/@@' $(LUACOV_STATS)
 	@cd $(PROJECT_DIR) && luacov ^molly
 	@grep -A999 '^Summary' $(LUACOV_REPORT)
