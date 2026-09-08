@@ -21,6 +21,7 @@ local clock = {}
 
 -- The IDs of the various system clocks (for POSIX.1b interval
 -- timers).
+local CLOCK_REALTIME = 0
 local CLOCK_MONOTONIC = 1
 local CLOCK_PROCESS_CPUTIME_ID = 2
 
@@ -36,6 +37,14 @@ function clock.monotonic()
     ---@type any
     local ts = ffi.new("ts[?]", 1)
     ffi.C.clock_gettime(CLOCK_MONOTONIC, ts)
+    return assert(tonumber(ts[0].tv_sec)) +
+        assert(tonumber(ts[0].tv_nsec)) / 10^9
+end
+
+function clock.realtime()
+    ---@type any
+    local ts = ffi.new("ts[?]", 1)
+    assert(ffi.C.clock_gettime(CLOCK_REALTIME, ts) == 0)
     return assert(tonumber(ts[0].tv_sec)) +
         assert(tonumber(ts[0].tv_nsec)) / 10^9
 end

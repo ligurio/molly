@@ -90,6 +90,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   history entries. Nested values are still shared.
 - `mix` removes a generator from a mixture only when it is
   exhausted, not when it yields a `nil` value.
+- `clock.dt()` takes the date and its sub-second part from the
+  wall-clock time (`clock.realtime`) instead of deriving the
+  fraction from CPU time; the sub-second part has a fixed width.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
