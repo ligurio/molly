@@ -67,6 +67,7 @@ local checks = require('molly.dev_checks')
 local math = require('math')
 
 local clock = require('molly.clock')
+local gen_lib = require('molly.gen')
 local history_lib = require('molly.history')
 local log = require('molly.log')
 local threadpool = require('molly.threadpool')
@@ -158,7 +159,9 @@ end
 -- thread types in `molly.thread`.
 -- @number[opt] opts.time_limit Number of seconds to limit time of
 -- testing. By default testing time is endless and limited by a
--- number of operations produced by generator.
+-- number of operations produced by generator. When the option is
+-- set, a generator is wrapped with `gen.time_limit`, so a
+-- workload generator must be a Molly iterator.
 -- @table[opt] opts.nodes A table that contains IP addresses of
 -- nodes participated in testing.
 --
@@ -216,6 +219,14 @@ local function run_test(workload, opts)
         error('Generator must have an unwrap method')
     end
 
+    local generator = workload.generator
+    if opts.time_limit ~= nil then
+        if type(opts.time_limit) ~= 'number' or opts.time_limit <= 0 then
+            error('time_limit must be a positive number')
+        end
+        generator = gen_lib.time_limit(generator, opts.time_limit)
+    end
+
     -- Start workload.
     local history = history_lib.new()
     local total_time_begin = clock.proc()
@@ -233,7 +244,7 @@ local function run_test(workload, opts)
     }
     local ok, err = pool:start(client.run, {
         client = workload.client,
-        gen = workload.generator,
+        gen = generator,
         history = history,
         nodes = opts.nodes,
         barriers = barriers,

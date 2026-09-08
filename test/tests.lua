@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(36)
+test:plan(37)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -494,6 +494,33 @@ for _, backend in ipairs({ 'coroutine', 'fiber' }) do
         test:isnt(res, nil, "runner.run_test(): crashed worker error")
     end)
 end
+
+test:test('runner.time_limit', function(test)
+    test:plan(3)
+
+    local invocations = 0
+    local cl = client.new()
+    cl.invoke = function(_self, _op)
+        invocations = invocations + 1
+        return { type = 'ok', f = 'test' }
+    end
+
+    local start_time = clock.monotonic()
+    local ok, err = runner.run_test({
+        client = cl,
+        generator = gen_lib.duplicate({ f = 'test', value = 1 }),
+    }, {
+        threads = 1,
+        nodes = { 'a' },
+        time_limit = 0.05,
+    })
+    local elapsed = clock.monotonic() - start_time
+
+    test:is(ok, true, 'runner.time_limit(): run_test returned ok')
+    test:is(err, nil, 'runner.time_limit(): err is nil')
+    test:ok(invocations > 0 and elapsed < 5,
+            'runner.time_limit(): generator is stopped by time limit')
+end)
 
 for _, backend in ipairs({ 'coroutine', 'fiber' }) do
     test:test('client.invoke_fail (' .. backend .. ')', function(test)
