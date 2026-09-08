@@ -29,7 +29,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(28)
+test:plan(30)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -761,10 +761,42 @@ local sync_wg = function(backend)
     }
 end
 
+local sync_failstop = function(backend)
+    local N = 5
+    local barrier = thread.barrier_new(N)
+    local finished = {}
+
+    local pool = threadpool.new(backend, N)
+    local ok, err = pool:start(function(thread_id, opts)
+        if thread_id == N then
+            error('boom')
+        end
+        opts.barrier:wait()
+        finished[thread_id] = true
+        return true
+    end, { barrier = barrier })
+
+    local others_done = false
+    for i = 1, N - 1 do
+        if finished[i] == true then
+            others_done = true
+        end
+    end
+
+    return {
+        { ok = ok == nil and err ~= nil and
+              string.find(tostring(err), 'boom') ~= nil,
+          name = 'a failed worker makes the pool return an error' },
+        { ok = others_done == false,
+          name = 'the rest of workers are cancelled after a failure' },
+    }
+end
+
 for _, backend in ipairs({ 'fiber', 'coroutine' }) do
     sync_subtest(backend, 'barrier', sync_barrier)
     sync_subtest(backend, 'mutex', sync_mutex)
     sync_subtest(backend, 'wg', sync_wg)
+    sync_subtest(backend, 'failstop', sync_failstop)
 end
 
 -- A client that records stages of its lifecycle into a shared
@@ -790,6 +822,20 @@ local stage_client = function(log)
     cl.close = function(_self, _client_data)
         log[#log + 1] = 'close'
         return true
+    end
+    return cl
+end
+
+-- A client whose chosen stage raises an error. Used to check that
+-- a failed stage aborts the rest of the pool instead of leaving
+-- threads hanging on a barrier.
+local stage_failure_client = function(stage)
+    local cl = client.new()
+    cl.invoke = function(_self, _op, _client_data)
+        return { type = 'ok', f = 'test' }
+    end
+    cl[stage] = function()
+        error('broken ' .. stage)
     end
     return cl
 end
@@ -845,6 +891,22 @@ local sync_stages = function(backend)
     local invoke_f, invoke_l = marker_bounds(log, 'invoke')
     local teardown_f = marker_bounds(log, 'teardown')
 
+    -- A failed stage must abort the run on every thread backend
+    -- instead of leaving other threads hanging on a barrier.
+    local failed = {}
+    for _, stage in ipairs({ 'open', 'setup', 'teardown' }) do
+        local okr, errr = runner.run_test({
+            client = stage_failure_client(stage),
+            generator = generator(),
+        }, {
+            threads = N,
+            thread_type = backend,
+            nodes = { 'a' },
+        })
+        failed[stage] = okr == nil and errr ~= nil and
+            string.find(tostring(errr), 'broken ' .. stage) ~= nil
+    end
+
     return {
         { ok = ok == true,
           name = 'run_test with synchronized stages completed' },
@@ -865,6 +927,12 @@ local sync_stages = function(backend)
         { ok = invoke_l ~= nil and teardown_f ~= nil and
               invoke_l < teardown_f,
           name = 'threads finish operations before any teardown' },
+        { ok = failed.open == true,
+          name = 'a broken open aborts a run with several threads' },
+        { ok = failed.setup == true,
+          name = 'a broken setup aborts a run with several threads' },
+        { ok = failed.teardown == true,
+          name = 'a broken teardown aborts a run with several threads' },
     }
 end
 
