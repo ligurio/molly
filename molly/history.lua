@@ -12,13 +12,13 @@ local op = require('molly.op')
 local function to_txt(self)
     dev_checks('<history>')
 
-    local history_str = ''
+    local history_str = { '' }
     for _, operation in ipairs(self.history) do
         local op_str = ('%3d    %s'):format(operation.process, op.to_string(operation))
-        history_str = ('%s\n%s'):format(history_str, op_str)
+        table.insert(history_str, op_str)
     end
 
-    return history_str
+    return table.concat(history_str, '\n')
 end
 
 -- Get a string representation of history encoded to JSON.
