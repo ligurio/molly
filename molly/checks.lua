@@ -20,6 +20,10 @@
 
 checkers = { }
 
+checkers.any = function(_)
+    return true
+end
+
 local function check_one(expected, val)
     if type(val)==expected then return true end
     local mt = getmetatable(val)
