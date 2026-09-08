@@ -66,7 +66,7 @@ local sync = thread_sync.new(yield)
 -- which are scheduled by the runtime.
 local function scheduler()
     if current.scheduler ~= nil then
-        current.scheduler()
+        return current.scheduler()
     end
     return true
 end

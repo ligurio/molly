@@ -63,8 +63,15 @@ end
 local function cancel(self)
     dev_checks('<thread>')
 
-    if self.fiber_obj ~= nil and self.fiber_obj:status() ~= 'dead' then
-        self.fiber_obj:kill()
+    local fiber_obj = self.fiber_obj
+    if fiber_obj ~= nil and fiber_obj:status() ~= 'dead' then
+        if type(fiber_obj.cancel) == 'function' then
+            fiber_obj:cancel()
+        elseif type(fiber_obj.kill) == 'function' then
+            fiber_obj:kill()
+        else
+            error('a fiber object has no cancel method')
+        end
     end
 
     return true
