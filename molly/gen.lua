@@ -479,12 +479,18 @@ mix_gen = function(_, state)
     local it = state[nth]
     local gen1, param1, state1 = unwrap(it)
     local state2, value = gen1(param1, state1)
-    if value == nil then
+    if state2 == nil then
+        -- The generator is exhausted.
         table.remove(state, nth)
         ---@diagnostic disable-next-line: need-check-nil
         return mix_gen(nil, state)
     end
     state[nth] = fun.wrap(gen1, param1, state2)
+    if value == nil then
+        -- The generator is alive, but has no value yet; retry.
+        ---@diagnostic disable-next-line: need-check-nil
+        return mix_gen(nil, state)
+    end
     return state, value
 end
 
