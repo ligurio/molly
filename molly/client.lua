@@ -103,8 +103,8 @@ local function run_client(thread_id, opts)
     log.debug('Opening connection by thread %d to DB (%s)', thread_id, addr)
     local ok, err = pcall(client.open, client, addr, client_data)
     if not ok then
-        log.info('ERROR: %s', err)
-        return false, err
+        log.error('Failed to open connection: %s', err)
+        error(err, 0)
     end
 
     -- Wait until every thread opened a connection before setting
@@ -114,8 +114,8 @@ local function run_client(thread_id, opts)
     log.debug('Setting up DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.setup, client, client_data)
     if not ok then
-        log.info('ERROR: %s', err)
-        return false, err
+        log.error('Failed to set up DB: %s', err)
+        error(err, 0)
     end
 
     -- Wait until every thread set up the DB before running
@@ -149,15 +149,15 @@ local function run_client(thread_id, opts)
     log.debug('Tearing down DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.teardown, client, client_data)
     if not ok then
-        log.info('ERROR: %s', err)
-        return false, err
+        log.error('Failed to tear down DB: %s', err)
+        error(err, 0)
     end
 
     log.debug('Closing connection to DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.close, client, client_data)
     if not ok then
-        log.info('ERROR: %s', err)
-        return false, err
+        log.error('Failed to close connection: %s', err)
+        error(err, 0)
     end
 
     return true, nil
@@ -185,15 +185,14 @@ local client_mt = {
 -- Client must implement the following methods:
 --
 -- **open** - function that open a connection to a database
--- instance. Function must return a boolean value, true in case of
--- success and false otherwise. Two arguments are passed to the
--- function:
+-- instance. Function must raise an error on failure. Two
+-- arguments are passed to the function:
 --   - `address` - an 'address' of the remote node
 --   - `client_data` - a table with client's data
 --
 -- **setup** - function that set up a database instance. Function
--- must return a boolean value, true in case of success and false
--- otherwise. Single argument is passed to the function:
+-- must raise an error on failure. A single argument is passed
+-- to the function:
 --   - `client_data` - a table with client's data
 --
 -- **invoke** - function that accept an operation and invoke it
@@ -205,20 +204,20 @@ local client_mt = {
 --   - `client_data` - a table with client's data
 --
 -- **teardown** - function that tear down a database instance.
--- Function must return a boolean value, true in case of success
--- and false otherwise. Single argument is passed to the function:
+-- Function must raise an error on failure. Single argument is
+-- passed to the function:
 --   - `client_data` - a table with client's data
 --
 -- **close** - function that close connection to a database
--- instance. Function must return a boolean value, true in case of
--- success and false otherwise. and false otherwise. Single
+-- instance. Function must raise an error on failure. Single
 -- argument is passed to the function:
 --   - `client_data` - a table with client's data
 --
 -- In general it is recommended to raise an error in case of fatal
 -- errors like failed database setup, teardown or connection and
 -- set status of operation to 'fail' when key is not found in
--- database table etc.
+-- database table etc. A returned `false` is not treated as a
+-- failure and does not abort a run.
 --
 -- @return client
 -- @usage
