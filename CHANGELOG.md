@@ -47,6 +47,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a worker function.
 - A client yields to a scheduler through `molly.thread` according
   to the active thread type (fiber or coroutine).
+- A failed worker cancels the rest of a thread pool instead of
+  leaving other workers hanging on synchronization primitives
+  (fail-stop). A failed client stage raises an error, so a single
+  failed client aborts the rest of the pool instead of leaving
+  threads hanging on a barrier.
 - A failed `invoke` is recorded in a history as a `fail` operation
   with an error message.
 - Worker errors and `false` results returned by `open`, `setup`,
