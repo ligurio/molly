@@ -72,6 +72,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `run_test()`.
 - A dev checker `workload_opts` checks a type of `checker`, not
   of `generator`.
+- `json.NULL` is available on LuaJIT too (exposed as an alias of
+  `cjson.null`).
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
