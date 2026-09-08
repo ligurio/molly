@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(37)
+test:plan(38)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -520,6 +520,23 @@ test:test('runner.time_limit', function(test)
     test:is(err, nil, 'runner.time_limit(): err is nil')
     test:ok(invocations > 0 and elapsed < 5,
             'runner.time_limit(): generator is stopped by time limit')
+end)
+
+test:test('runner.checkers', function(test)
+    test:plan(3)
+
+    test:is(checkers.workload_opts({ client = {}, generator = {} }), true,
+            'runner.checkers(): checker is optional')
+    test:is(checkers.workload_opts({
+        client = {},
+        generator = {},
+        checker = {},
+    }), true, 'runner.checkers(): checker is a table')
+    test:is(checkers.workload_opts({
+        client = {},
+        generator = {},
+        checker = 'x',
+    }), false, 'runner.checkers(): checker must be a table')
 end)
 
 for _, backend in ipairs({ 'coroutine', 'fiber' }) do

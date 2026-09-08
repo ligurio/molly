@@ -102,7 +102,7 @@ end
 function checkers.workload_opts(opts)
     return opts.client ~= nil and type(opts.client) == 'table' and
            opts.generator ~= nil and type(opts.generator) == 'table' and
-           (opts.checker == nil or type(opts.generator) == 'table')
+           (opts.checker == nil or type(opts.checker) == 'table')
 end
 
 function checkers.test_opts(opts)
