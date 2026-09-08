@@ -88,6 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   generators and clients that reuse an operation table (for
   example `gen.duplicate`) do not overwrite already recorded
   history entries. Nested values are still shared.
+- `mix` removes a generator from a mixture only when it is
+  exhausted, not when it yields a `nil` value.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
