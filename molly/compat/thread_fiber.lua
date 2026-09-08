@@ -16,6 +16,13 @@
 -- non-blocking I/O that is built into Tarantool's application
 -- server and fibers yield implicitly to other fibers, whereas
 -- this logic would have to be added for coroutines.
+--
+-- The module provides a thread object (`new`, `create`, `cancel`,
+-- `join` and `yield` methods). Thread synchronization primitives
+-- are exported by `molly.thread`.
+--
+-- @see molly.thread
+-- @see molly.thread_coroutine
 
 local has_fiber, fiber = pcall(require, 'fiber')
 if not has_fiber then
