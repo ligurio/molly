@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(38)
+test:plan(39)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -58,6 +58,15 @@ test:test('clock', function(test)
     clock.sleep(0.05)
     test:ok(clock.monotonic() - before >= 0.04, "clock.sleep() in seconds")
     test:isstring(clock.dt(), "clock.dt()")
+end)
+
+test:test('json.NULL', function(test)
+    test:plan(2)
+
+    test:is(json.encode({ json.NULL, 5 }), '[null,5]',
+            'json.NULL encodes to null')
+    test:is(json.encode({ 'r', 1, json.NULL }), '["r",1,null]',
+            'json.NULL is preserved in arrays')
 end)
 
 test:test('history', function(test)
