@@ -23,12 +23,13 @@ local op_lib = require('molly.op')
 local runner = molly.runner
 local tests = molly.tests
 local threadpool = require('molly.threadpool')
+local thread = require('molly.thread')
 local utils = molly.utils
 
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(20)
+test:plan(28)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -612,6 +613,179 @@ test:test("threads", function(test)
     end
     test:is(run_test_dict('fiber'), res, "run_test_dict: fiber")
 end)
+
+------------------------
+-- Thread sync tests  --
+------------------------
+
+local function sync_backend_available(backend)
+    if backend == 'fiber' then
+        return utils.is_tarantool()
+    end
+    return true
+end
+
+local function sync_subtest(backend, kind, checks_fn)
+    test:test('sync.' .. kind .. ' (' .. backend .. ')', function(test)
+        if not sync_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
+
+        local ok, checks = pcall(checks_fn, backend)
+        if not ok then
+            test:plan(1)
+            test:fail('sync.' .. kind .. ' (' .. backend ..
+                ') raised an error: ' .. tostring(checks))
+            return
+        end
+
+        test:plan(#checks)
+        for _, check in ipairs(checks) do
+            test:is(check.ok, true, check.name)
+        end
+    end)
+end
+
+local sync_barrier = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local barrier = thread.barrier_new(N)
+    local mutex = thread.mutex_new()
+    local counter = 0
+    local order = {}
+
+    local pool = threadpool.new(backend, N)
+    local ok = pool:start(function(thread_id, opts)
+        opts.barrier:wait()
+        opts.mutex:lock()
+        counter = counter + 1
+        order[#order + 1] = thread_id .. '-r1'
+        opts.mutex:unlock()
+        opts.barrier:wait()
+        opts.mutex:lock()
+        counter = counter + 1
+        order[#order + 1] = thread_id .. '-r2'
+        opts.mutex:unlock()
+        return true
+    end, { barrier = barrier, mutex = mutex })
+
+    local max_r1, min_r2 = 0, math.huge
+    for idx, s in ipairs(order) do
+        if string.find(s, 'r1') then
+            max_r1 = math.max(max_r1, idx)
+        else
+            min_r2 = math.min(min_r2, idx)
+        end
+    end
+
+    return {
+        { ok = ok == true, name = 'pool with a barrier completes' },
+        { ok = counter == 2 * N,
+          name = 'a barrier releases all workers every round' },
+        { ok = #order == 2 * N and max_r1 < min_r2,
+          name = 'a barrier separates rounds of workers' },
+    }
+end
+
+local sync_mutex = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local mutex = thread.mutex_new()
+    local counter = 0
+
+    local pool = threadpool.new(backend, N)
+    local ok = pool:start(function(_thread_id, opts)
+        for _ = 1, 10 do
+            opts.mutex:lock()
+            counter = counter + 1
+            opts.mutex:unlock()
+        end
+        return true
+    end, { mutex = mutex })
+
+    mutex = thread.mutex_new()
+    local unlocked_err = pcall(function()
+        mutex:unlock()
+    end)
+
+    return {
+        { ok = ok == true, name = 'pool with a mutex completes' },
+        { ok = counter == 10 * N,
+          name = 'a mutex serializes critical sections' },
+        { ok = mutex:trylock() == true,
+          name = 'trylock() locks an unlocked mutex' },
+        { ok = mutex:trylock() == false,
+          name = 'trylock() reports a locked mutex' },
+        { ok = unlocked_err == false,
+          name = 'unlock() of an unlocked mutex raises an error' },
+    }
+end
+
+local sync_wg = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local wg = thread.wg_new()
+    local waiter_done = false
+    wg:add(N - 1)
+
+    local pool = threadpool.new(backend, N)
+    local ok = pool:start(function(thread_id, opts)
+        if thread_id == 1 then
+            opts.wg:wait()
+            waiter_done = true
+            return true
+        end
+        opts.wg:done()
+        return true
+    end, { wg = wg })
+
+    return {
+        { ok = ok == true, name = 'pool with a wait group completes' },
+        { ok = waiter_done == true,
+          name = 'wait() returns when the counter is zero' },
+    }
+end
+
+local sync_failstop = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local barrier = thread.barrier_new(N)
+    local finished = {}
+
+    local pool = threadpool.new(backend, N)
+    local ok, err = pool:start(function(thread_id, opts)
+        if thread_id == N then
+            error('boom')
+        end
+        opts.barrier:wait()
+        finished[thread_id] = true
+        return true
+    end, { barrier = barrier })
+
+    local others_done = false
+    for i = 1, N - 1 do
+        if finished[i] == true then
+            others_done = true
+        end
+    end
+
+    return {
+        { ok = ok == nil and err ~= nil and
+              string.find(tostring(err), 'boom') ~= nil,
+          name = 'a failed worker makes the pool return an error' },
+        { ok = others_done == false,
+          name = 'the rest of workers are cancelled after a failure' },
+    }
+end
+
+for _, backend in ipairs({ 'fiber', 'coroutine' }) do
+    sync_subtest(backend, 'barrier', sync_barrier)
+    sync_subtest(backend, 'mutex', sync_mutex)
+    sync_subtest(backend, 'wg', sync_wg)
+    sync_subtest(backend, 'failstop', sync_failstop)
+end
 
 ------------------------
 ---- Run the tests  ----

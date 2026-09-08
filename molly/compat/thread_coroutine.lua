@@ -7,6 +7,14 @@
 -- Roberto Ierusalimschy
 -- - [Coroutines in Lua](https://www.lua.org/doc/jucs04.pdf) - Ana L´ucia de
 -- Moura, Noemi Rodriguez, Roberto Ierusalimschy
+--
+-- The module provides a thread object (`new`, `create`, `cancel`, `join` and
+-- `yield` methods) and a scheduler that runs registered threads. Thread
+-- synchronization primitives are exported by `molly.thread`, see
+-- `molly.thread_sync`.
+--
+-- @see molly.thread_sync
+-- @see molly.thread_fiber
 
 local math = require('math')
 
@@ -36,6 +44,7 @@ local function scheduler()
             table.remove(threads, id)
         end
     end
+    return true
 end
 
 local function create(self, ...)

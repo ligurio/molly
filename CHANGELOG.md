@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A bank generator.
 - A `cycle_times()` iterator.
 - A `flip_flop()` iterator.
+- Synchronization primitives (a barrier, a mutex and a wait group) shared by
+  fiber- and coroutine-based threads.
 
 ### Changed
 

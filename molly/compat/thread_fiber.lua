@@ -15,6 +15,10 @@
 -- fibers yield implicitly to other fibers, whereas this logic would have to be
 -- added for coroutines.
 --
+-- The module provides a thread object (`new`, `create`, `cancel`, `join` and
+-- `yield` methods). Thread synchronization primitives are exported by
+-- `molly.thread`, see `molly.thread_sync`.
+--
 --### References
 --
 -- - [Tarantool Documentation: Module fiber](https://www.tarantool.io/en/doc/latest/reference/reference_lua/fiber/)
@@ -24,6 +28,9 @@
 -- requests](https://blueprints.launchpad.net/tarantool/+spec/fiber-specialization)
 -- - [When to use fibers and when to use co-routines in
 -- Tarantool?](https://stackoverflow.com/questions/36152489/when-to-use-fibers-and-when-to-use-co-routines-in-tarantool)
+--
+-- @see molly.thread_sync
+-- @see molly.thread_coroutine
 
 local has_fiber, fiber = pcall(require, 'fiber')
 if not has_fiber then
