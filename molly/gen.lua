@@ -56,7 +56,7 @@ local nil_gen = function(_param, _state) -- luacheck: no unused
 end
 
 --- Basic Functions
--- @section
+-- @section basic_functions
 
 --- Make an iterator from the iterable object.
 -- See [fun.iter](https://luafun.github.io/basic.html#fun.iter).
@@ -112,7 +112,7 @@ end
 -- @function foreach
 
 --- Generators: Finite Generators
--- @section
+-- @section generators_finite_generators
 
 --- The iterator to create arithmetic progressions.
 -- Iteration values are generated within closed interval `[start, stop]` (i.e.
@@ -151,7 +151,7 @@ end
 -- @function range
 
 --- Generators: Infinity Generators
--- @section
+-- @section generators_infinity_generators
 
 --- The iterator returns values over and over again indefinitely. All values
 -- that passed to the iterator are returned as-is during the iteration.
@@ -180,13 +180,13 @@ end
 -- See [fun.tabulate](https://luafun.github.io/generators.html#fun.tabulate).
 
 --- Generators: Random sampling
--- @section
+-- @section generators_random_sampling
 
 --- @function rands
 -- See [fun.rands](https://luafun.github.io/generators.html#fun.rands).
 
 --- Slicing: Subsequences
--- @section
+-- @section slicing_subsequences
 
 --- @function take_n
 -- See [fun.take_n](https://luafun.github.io/slicing.html#fun.take_n).
@@ -220,7 +220,7 @@ exports.span = span
 -- @function split_at
 
 --- Indexing
--- @section
+-- @section indexing
 
 --- @function index
 -- See [fun.index](https://luafun.github.io/indexing.html#fun.index).
@@ -249,7 +249,7 @@ exports.span = span
 -- @function elem_indices
 
 --- Filtering
--- @section
+-- @section filtering
 
 --- Return a new iterator of those elements that satisfy the `predicate`.
 -- See [fun.filter](https://luafun.github.io/filtering.html#fun.filter).
@@ -271,7 +271,7 @@ exports.span = span
 -- See [fun.partition](https://luafun.github.io/filtering.html#fun.partition).
 
 --- Reducing: Folds
--- @section
+-- @section reducing_folds
 
 --- The function reduces the iterator from left to right using the binary
 -- operator `accfun` and the initial value `initval`.
@@ -295,7 +295,7 @@ exports.span = span
 -- See [fun.tomap](https://luafun.github.io/reducing.html#fun.tomap).
 
 --- Reducing: Predicates
--- @section
+-- @section reducing_predicates
 
 --- @function is_prefix_of
 -- See [fun.is_prefix_of](https://luafun.github.io/reducing.html#fun.is_prefix_of).
@@ -318,7 +318,7 @@ exports.span = span
 -- @function some
 
 --- Transformations
--- @section
+-- @section transformations
 
 --- @function map
 -- See [fun.map](https://luafun.github.io/transformations.html#fun.map).
@@ -330,7 +330,7 @@ exports.span = span
 -- See [fun.intersperse](https://luafun.github.io/transformations.html#fun.intersperse).
 
 --- Compositions
--- @section
+-- @section compositions
 
 --- Return a new iterator where i-th return value contains the i-th element
 -- from each of the iterators. The returned iterator is truncated in length to
@@ -555,7 +555,7 @@ methods.flip_flop = flip_flop
 exports.flip_flop = flip_flop
 
 --- Special generators
--- @section
+-- @section special_generators
 
 --- A generator which, when asked for an operation, logs
 -- a message and yields `nil`. Occurs only once; use `repeat` to
