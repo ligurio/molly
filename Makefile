@@ -17,8 +17,12 @@ TEST_FILES ?= test/tests.lua
 TARANTOOL_BIN ?= /usr/bin/tarantool
 LUAJIT_BIN ?= /usr/bin/luajit
 
-LUA_PATH ?= "?/init.lua;./?.lua;$(shell luarocks path --lr-path)"
-LUA_CPATH ?= "$(shell luarocks path --lr-cpath)"
+# Compose module lookup paths from the ambient environment
+# (for example, set by nix-shell), project-relative patterns and
+# the local luarocks tree, so both runtime and development
+# dependencies are found.
+LUA_PATH := $(LUA_PATH)$(if $(LUA_PATH),;)?/init.lua;./?.lua;$(shell luarocks path --lr-path)
+LUA_CPATH := $(LUA_CPATH)$(if $(LUA_CPATH),;)$(shell luarocks path --lr-cpath)
 
 DEV ?= OFF
 
@@ -69,7 +73,7 @@ test-tarantool: clean
 
 test-luajit: clean
 	@echo "Run regression tests with LuaJIT"
-	@DEV=$(DEV) LUA_PATH=$(LUA_PATH) LUA_CPATH=$(LUA_CPATH) $(LUAJIT_BIN) $(TEST_FILES)
+	@DEV=$(DEV) LUA_PATH="$(LUA_PATH)" LUA_CPATH="$(LUA_CPATH)" $(LUAJIT_BIN) $(TEST_FILES)
 
 test: test-tarantool test-luajit
 
