@@ -7,8 +7,6 @@ local log = require('molly.log')
 local dev_checks = require('molly.dev_checks')
 local thread_lib = require('molly.thread')
 
-local THREAD_TYPE
-
 local function join(self)
     dev_checks('<threadpool>')
 
@@ -16,9 +14,9 @@ local function join(self)
         self.pool[i]:join()
     end
 
-    if THREAD_TYPE == 'coroutine' then
-        thread_lib[THREAD_TYPE].scheduler()
-    end
+    -- Drive coroutine threads to completion. A no-op for fiber threads,
+    -- which are scheduled by the runtime.
+    thread_lib.scheduler()
 
     return true
 end
@@ -43,9 +41,6 @@ local function start(self, ...)
         if not ok then
             error('Failed to start thread')
         end
-        if THREAD_TYPE == 'fiber' then
-            self.pool[thread_id]:yield()
-        end
     end
 
     local ok = self:join()
@@ -68,16 +63,13 @@ local mt = {
 local function new(thread_type, thread_num)
     dev_checks('string', 'number')
 
-    THREAD_TYPE = thread_type
-    local thread = thread_lib[thread_type]
-    -- TODO: check thread type in runner.lua
-    if type(thread) ~= 'table' then
-        error(('No thread library with type "%s"'):format(thread_type))
-    end
+    -- Raises an error when a thread library is not available, e.g.
+    -- 'fiber' under LuaJIT.
+    thread_lib.set_type(thread_type)
 
     local pool = {}
     for thread_id = 1, thread_num do
-        pool[thread_id] = thread.new(thread_id)
+        pool[thread_id] = thread_lib.new(thread_id)
     end
 
     return setmetatable({

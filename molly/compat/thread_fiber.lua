@@ -93,4 +93,5 @@ end
 
 return {
     new = new,
+    yield = yield,
 }
