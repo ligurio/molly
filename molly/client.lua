@@ -1,8 +1,16 @@
 ---- Module with default Molly client.
 -- @module molly.client
 --
+-- A client is executed by a thread pool in a number of stages: open a
+-- connection, set up the DB, invoke operations, tear down and close. When a
+-- runner passes `opts.barriers` (see `molly.thread_sync`), threads synchronize
+-- at stage boundaries: no thread runs operations until every thread opened a
+-- connection and set up the DB, and no thread tears down until every thread
+-- finished operations. A failed stage aborts the run.
+--
 -- @see molly.gen
 -- @see molly.tests
+-- @see molly.thread_sync
 
 local clock = require('molly.clock')
 local dev_checks = require('molly.dev_checks')
@@ -13,6 +21,15 @@ local utils = require('molly.utils')
 
 local shared_gen_state
 local op_index = 1
+
+-- Synchronize threads at a stage boundary. A runner passes a table with
+-- barriers (`opts.barriers`) sized to a number of client threads. When the
+-- client is executed directly without barriers, the call is a no-op.
+local function sync_stage(opts, stage)
+    if opts.barriers ~= nil and opts.barriers[stage] ~= nil then
+        opts.barriers[stage]:wait()
+    end
+end
 
 local function process_operation(client, history, op, thread_id_str, thread_id, client_data)
     dev_checks('<client>', '<history>', 'any', 'string', 'number')
@@ -73,17 +90,21 @@ local function run_client(thread_id, opts)
     local ok, err = pcall(client.open, client, addr, client_data)
     if not ok then
         log.info('ERROR: %s', err)
-        return false, err
+        error(err, 0)
     end
+
+    -- Wait until every thread opened a connection before setting up the DB.
+    sync_stage(opts, 'open')
 
     log.debug('Setting up DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.setup, client, client_data)
     if not ok then
         log.info('ERROR: %s', err)
-        return false, err
+        error(err, 0)
     end
 
-    -- TODO: Add barrier here.
+    -- Wait until every thread set up the DB before running operations.
+    sync_stage(opts, 'setup')
 
     local gen, param, state = ops_generator:unwrap()
     shared_gen_state = state
@@ -97,26 +118,27 @@ local function run_client(thread_id, opts)
         shared_gen_state = state
         ok, err = pcall(process_operation, client, history, op, thread_id_str, thread_id, client_data)
         if ok == false then
-            error('Failed to process an operation', err)
+            error(('Failed to process an operation: %s'):format(tostring(err)), 0)
         end
 
         thread.yield()
     end
 
-    -- TODO: Add barrier here.
+    -- Wait until every thread finished operations before tearing down.
+    sync_stage(opts, 'invoke')
 
     log.debug('Tearing down DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.teardown, client, client_data)
     if not ok then
         log.info('ERROR: %s', err)
-        return false, err
+        error(err, 0)
     end
 
     log.debug('Closing connection to DB (%s) by thread %d', addr, thread_id)
     ok, err = pcall(client.close, client, client_data)
     if not ok then
         log.info('ERROR: %s', err)
-        return false, err
+        error(err, 0)
     end
 
     return true, nil

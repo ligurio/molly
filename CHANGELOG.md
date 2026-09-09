@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `flip_flop()` iterator.
 - Synchronization primitives (a barrier, a mutex and a wait group) shared by
   fiber- and coroutine-based threads.
+- Synchronization of client threads at stage boundaries: all threads open
+  connections and set up the DB before any of them runs operations, and no
+  thread tears down until every thread finished operations.
 
 ### Changed
 

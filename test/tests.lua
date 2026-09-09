@@ -29,7 +29,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(28)
+test:plan(30)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -786,6 +786,150 @@ for _, backend in ipairs({ 'fiber', 'coroutine' }) do
     sync_subtest(backend, 'wg', sync_wg)
     sync_subtest(backend, 'failstop', sync_failstop)
 end
+
+-- A client that records stages of its lifecycle into a shared log.
+local stage_client = function(log)
+    local cl = client.new()
+    cl.open = function(_self, _addr, _client_data)
+        log[#log + 1] = 'open'
+        return true
+    end
+    cl.setup = function(_self, _client_data)
+        log[#log + 1] = 'setup'
+        return true
+    end
+    cl.invoke = function(_self, _op, _client_data)
+        log[#log + 1] = 'invoke'
+        return { type = 'ok', f = 'test' }
+    end
+    cl.teardown = function(_self, _client_data)
+        log[#log + 1] = 'teardown'
+        return true
+    end
+    cl.close = function(_self, _client_data)
+        log[#log + 1] = 'close'
+        return true
+    end
+    return cl
+end
+
+local function count_phase(log, phase)
+    local n = 0
+    for _, marker in ipairs(log) do
+        if marker == phase then
+            n = n + 1
+        end
+    end
+    return n
+end
+
+local function marker_bounds(log, phase)
+    local first, last
+    for idx, marker in ipairs(log) do
+        if marker == phase then
+            if first == nil then
+                first = idx
+            end
+            last = idx
+        end
+    end
+    return first, last
+end
+
+-- Verify that run_client() synchronizes stages with barriers: every thread
+-- opens and sets up before any operation, and tears down only after all
+-- threads finished operations.
+local sync_stages = function(backend)
+    local N = 3
+    local total_ops = 30
+    local generator = function()
+        return gen_lib.range(1, total_ops):map(function(n)
+            return { f = 'test', value = n }
+        end)
+    end
+
+    local log = {}
+    local cl = stage_client(log)
+    local ok = runner.run_test({
+        client = cl,
+        generator = generator(),
+    }, {
+        threads = N,
+        thread_type = backend,
+        nodes = { 'a' },
+    })
+
+    local _, open_l = marker_bounds(log, 'open')
+    local setup_f, setup_l = marker_bounds(log, 'setup')
+    local invoke_f, invoke_l = marker_bounds(log, 'invoke')
+    local teardown_f = marker_bounds(log, 'teardown')
+
+    -- A broken teardown after all threads finished operations must abort the
+    -- run and must not leave other threads hanging on a barrier.
+    local clf = client.new()
+    clf.invoke = function(_self, _op, _client_data)
+        return { type = 'ok', f = 'test' }
+    end
+    clf.teardown = function(_self, _client_data)
+        error('broken teardown')
+    end
+    local okf, errf = runner.run_test({
+        client = clf,
+        generator = generator(),
+    }, {
+        threads = N,
+        thread_type = backend,
+        nodes = { 'a' },
+    })
+
+    return {
+        { ok = ok == true,
+          name = 'run_test with synchronized stages completed' },
+        { ok = count_phase(log, 'open') == N and
+              count_phase(log, 'setup') == N and
+              count_phase(log, 'teardown') == N and
+              count_phase(log, 'close') == N,
+          name = 'each thread ran open/setup/teardown/close once' },
+        { ok = count_phase(log, 'invoke') >= total_ops,
+          name = 'operations were invoked' },
+        { ok = open_l ~= nil and setup_f ~= nil and open_l < setup_f,
+          name = 'threads open a connection before any setup' },
+        { ok = setup_l ~= nil and invoke_f ~= nil and setup_l < invoke_f,
+          name = 'threads set up the DB before any operation' },
+        { ok = invoke_l ~= nil and teardown_f ~= nil and
+              invoke_l < teardown_f,
+          name = 'threads finish operations before any teardown' },
+        { ok = okf == nil and errf ~= nil and
+              string.find(tostring(errf), 'broken teardown') ~= nil,
+          name = 'a broken teardown aborts a run with several threads' },
+    }
+end
+
+local function stages_subtest(backend, checks_fn)
+    test:test('stages (' .. backend .. ')', function(test)
+        if not sync_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
+
+        local ok, checks = pcall(checks_fn, backend)
+        if not ok then
+            test:plan(1)
+            test:fail('stages (' .. backend .. ') raised an error: ' ..
+                tostring(checks))
+            return
+        end
+
+        test:plan(#checks)
+        for _, check in ipairs(checks) do
+            test:is(check.ok, true, check.name)
+        end
+    end)
+end
+
+stages_subtest('fiber', sync_stages)
+stages_subtest('coroutine', sync_stages)
 
 ------------------------
 ---- Run the tests  ----
