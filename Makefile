@@ -40,7 +40,7 @@ deps-dev:
 	luarocks install --local luacheck 1.2.0
 	luarocks install --local luacov 0.15.0
 	luarocks install --local luacov-coveralls 0.2.3
-	luarocks install --local ldoc 1.4.2
+	luarocks install --local ldoc 1.5.0
 	luarocks install --local lsqlite3 0.9.5
 
 deps-runtime:
