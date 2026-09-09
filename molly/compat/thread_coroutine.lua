@@ -11,7 +11,6 @@
 local math = require('math')
 
 local dev_checks = require('molly.dev_checks')
-local utils = require('molly.utils')
 
 local threads = {}
 
@@ -22,9 +21,13 @@ local function scheduler()
         local id = math.random(1, n)
         local thread = threads[id]
         local co = thread['coro']
-        local func_args = thread['func_args']
         if coroutine.status(co) == 'suspended' then
-            coroutine.resume(co, unpack(func_args))
+            if thread['started'] == true then
+                coroutine.resume(co)
+            else
+                thread['started'] = true
+                coroutine.resume(co, thread.thread_id, unpack(thread['func_args']))
+            end
         end
         if coroutine.status(co) == 'dead' then
             table.remove(threads, id)
@@ -35,9 +38,14 @@ end
 local function create(self, ...)
     dev_checks('<thread>')
 
-    local fn, func_args = ...
-    rawset(self, 'coro', coroutine.create(fn, self.thread_id, utils.pack(func_args)))
+    local params = {...}
+    rawset(self, 'coro', coroutine.create(params[1]))
+    local func_args = {}
+    for i = 2, #params do
+        table.insert(func_args, params[i])
+    end
     rawset(self, 'func_args', func_args)
+    rawset(self, 'started', false)
     table.insert(threads, self)
 
     return true

@@ -28,7 +28,7 @@ local utils = molly.utils
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(17)
+test:plan(18)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -521,6 +521,22 @@ test:test("threadpool", function(test)
     test:is(ok, false, "threadpool.new('xxx'): ok is true")
     res = string.find(err, 'No thread library with type "xxx"')
     test:isnt(res, nil, "threadpool.new('xxx'): error is correct")
+end)
+
+test:test('threadpool.coroutine_args', function(test)
+    test:plan(3)
+
+    local seen = {}
+    local pool = threadpool.new('coroutine', 1)
+    local function worker(id, opts)
+        seen = { id = id, opts = opts }
+        return true
+    end
+    local ok = pool:start(worker, { marker = 'x' })
+    test:is(ok, true, 'threadpool.coroutine_args(): start returned ok')
+    test:is(seen.id, 1, 'threadpool.coroutine_args(): thread_id is passed')
+    test:is(seen.opts.marker, 'x',
+        'threadpool.coroutine_args(): worker arguments are passed')
 end)
 
 test:test("threads", function(test)

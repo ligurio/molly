@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `clock.monotonic()` and `clock.sleep()` use seconds on LuaJIT like on Tarantool.
 - `history:to_txt()` builds a history in a linear time.
 - A missing checker for the `any` type in `molly.checks`.
+- Coroutine-based threads pass a `thread_id` and arguments to
+  a worker function.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
