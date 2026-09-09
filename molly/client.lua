@@ -8,6 +8,7 @@ local clock = require('molly.clock')
 local dev_checks = require('molly.dev_checks')
 local log = require('molly.log')
 local op_lib = require('molly.op')
+local thread = require('molly.thread')
 local utils = require('molly.utils')
 
 local shared_gen_state
@@ -88,7 +89,7 @@ local function run_client(thread_id, opts)
             error('Failed to process an operation', err)
         end
 
-        require('fiber').yield()
+        thread.yield()
     end
 
     -- TODO: Add barrier here.

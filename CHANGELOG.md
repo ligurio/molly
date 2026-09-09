@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A missing checker for the `any` type in `molly.checks`.
 - Coroutine-based threads pass a `thread_id` and arguments to
   a worker function.
+- A client yields to a scheduler through `molly.thread` according
+  to the active thread type (fiber or coroutine).
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
