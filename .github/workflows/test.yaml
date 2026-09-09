@@ -12,20 +12,27 @@ jobs:
       github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
-        LUA: ['luajit', 'tarantool']
+        include:
+          - runtime: luajit
+            version: '2.1'
+          - runtime: tarantool
+            version: '2.11'
+            coverage: true
+          - runtime: tarantool
+            version: '3.8'
       fail-fast: false
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Tarantool
-        if: matrix.LUA == 'tarantool'
+      - name: Setup Tarantool (${{ matrix.version }})
+        if: matrix.runtime == 'tarantool'
         uses: tarantool/setup-tarantool@v4
         with:
-          tarantool-version: '2.11'
+          tarantool-version: ${{ matrix.version }}
 
-      - name: Setup LuaJIT (${{ matrix.LUA }})
-        if: matrix.LUA == 'luajit'
+      - name: Setup LuaJIT
+        if: matrix.runtime == 'luajit'
         run: sudo apt install -y luajit
 
       - name: Setup luarocks
@@ -40,12 +47,16 @@ jobs:
       - run: echo $(luarocks path --lr-bin) >> $GITHUB_PATH
 
       - name: Run tests with Tarantool and send coverage to Coveralls.io
-        if: matrix.LUA == 'tarantool'
+        if: matrix.runtime == 'tarantool' && matrix.coverage
         run: make coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEV: ON
 
-      - name: Run tests with LuaJIT (${{ matrix.LUA }})
-        if: matrix.LUA == 'luajit'
+      - name: Run tests with Tarantool (${{ matrix.version }})
+        if: matrix.runtime == 'tarantool' && !matrix.coverage
+        run: DEV=ON make test-tarantool
+
+      - name: Run tests with LuaJIT
+        if: matrix.runtime == 'luajit'
         run: LUAJIT_BIN=luajit DEV=ON make test-luajit
