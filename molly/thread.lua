@@ -2,16 +2,19 @@
 -- @module molly.thread
 --
 -- The module stores an active thread type and delegates generic thread
--- operations (`new`, `yield`, `scheduler`) to the corresponding
--- implementation:
+-- operations (`new`, `yield`, `scheduler`) and synchronization primitives
+-- (`barrier_new`, `mutex_new`, `wg_new`) to the corresponding implementation:
 --
 -- - `molly.compat.thread_fiber` - threads, based on Tarantool fibers.
 -- - `molly.compat.thread_coroutine` - threads, based on Lua coroutines.
+--
+-- @see molly.thread_sync
 
 local dev_checks = require('molly.dev_checks')
 
 local thread_coroutine = require('molly.compat.thread_coroutine')
 local thread_fiber = require('molly.compat.thread_fiber')
+local thread_sync = require('molly.compat.thread_sync')
 
 -- A module that returns nil (e.g. `thread_fiber` when fibers are
 -- unavailable) is loaded by `require` as `true`, so keep only usable
@@ -57,11 +60,13 @@ local function yield()
     return current.yield()
 end
 
+local sync = thread_sync.new(yield)
+
 --- Drive coroutine threads to completion. A no-op for fiber threads,
 -- which are scheduled by the runtime.
 local function scheduler()
     if current.scheduler ~= nil then
-        current.scheduler()
+        return current.scheduler()
     end
     return true
 end
@@ -71,6 +76,9 @@ return {
     new = new,
     yield = yield,
     scheduler = scheduler,
-    ['fiber'] = thread['fiber'],
-    ['coroutine'] = thread['coroutine'],
+
+    -- Synchronization primitives, see `molly.thread_sync`.
+    barrier_new = sync.barrier_new,
+    mutex_new = sync.mutex_new,
+    wg_new = sync.wg_new,
 }

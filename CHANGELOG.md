@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A bank generator.
 - A `cycle_times()` iterator.
 - A `flip_flop()` iterator.
+- Synchronization primitives (a barrier, a mutex and a wait group) shared by
+  fiber- and coroutine-based threads.
+- Synchronization of client threads at stage boundaries: all threads open
+  connections and set up the DB before any of them runs operations, and no
+  thread tears down until every thread finished operations.
 
 ### Changed
 
@@ -39,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a worker function.
 - A client yields to a scheduler through `molly.thread` according
   to the active thread type (fiber or coroutine).
+- A failed worker cancels the rest of a thread pool instead of
+  leaving other workers hanging on synchronization primitives
+  (fail-stop).
 - A failed `invoke` is recorded in a history as a `fail` operation
   with an error message.
 - Worker errors and `false` results returned by `open`, `setup`,

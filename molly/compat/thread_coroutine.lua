@@ -7,6 +7,14 @@
 -- Roberto Ierusalimschy
 -- - [Coroutines in Lua](https://www.lua.org/doc/jucs04.pdf) - Ana L´ucia de
 -- Moura, Noemi Rodriguez, Roberto Ierusalimschy
+--
+-- The module provides a thread object (`new`, `create`, `cancel`, `join` and
+-- `yield` methods) and a scheduler that runs registered threads. Thread
+-- synchronization primitives are exported by `molly.thread`, see
+-- `molly.thread_sync`.
+--
+-- @see molly.thread_sync
+-- @see molly.thread_fiber
 
 local math = require('math')
 
@@ -30,12 +38,21 @@ local function scheduler()
                 res = {coroutine.resume(co, thread.thread_id,
                                        unpack(thread['func_args']))}
             end
+            if res[1] == false then
+                -- A thread terminated with an error. Drop the remaining
+                -- threads (fail-stop) and report the error to a caller.
+                for i = table.getn(threads), 1, -1 do
+                    table.remove(threads, i)
+                end
+                return false, tostring(res[2])
+            end
             thread['last_result'] = res
         end
         if coroutine.status(co) == 'dead' then
             table.remove(threads, id)
         end
     end
+    return true
 end
 
 local function create(self, ...)

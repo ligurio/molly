@@ -60,6 +60,11 @@
 --    3  ok       transfer   {from = 8, to = 2, amount = 3}
 --    0  ok       transfer   {from = 1, to = 9, amount = 1}
 --    0  invoke   transfer   {from = 3, to = 9, amount = 5}
+--
+-- Learn more about operation structure and operation semantics in
+-- [1].
+--
+-- 1. https://github.com/jepsen-io/history
 
 local dev_checks = require('molly.dev_checks')
 local pprint = require('molly.json').encode

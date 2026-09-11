@@ -23,12 +23,13 @@ local op_lib = require('molly.op')
 local runner = molly.runner
 local tests = molly.tests
 local threadpool = require('molly.threadpool')
+local thread = require('molly.thread')
 local utils = molly.utils
 
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(20)
+test:plan(30)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -612,6 +613,323 @@ test:test("threads", function(test)
     end
     test:is(run_test_dict('fiber'), res, "run_test_dict: fiber")
 end)
+
+------------------------
+-- Thread sync tests  --
+------------------------
+
+local function sync_backend_available(backend)
+    if backend == 'fiber' then
+        return utils.is_tarantool()
+    end
+    return true
+end
+
+local function sync_subtest(backend, kind, checks_fn)
+    test:test('sync.' .. kind .. ' (' .. backend .. ')', function(test)
+        if not sync_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
+
+        local ok, checks = pcall(checks_fn, backend)
+        if not ok then
+            test:plan(1)
+            test:fail('sync.' .. kind .. ' (' .. backend ..
+                ') raised an error: ' .. tostring(checks))
+            return
+        end
+
+        test:plan(#checks)
+        for _, check in ipairs(checks) do
+            test:is(check.ok, true, check.name)
+        end
+    end)
+end
+
+local sync_barrier = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local barrier = thread.barrier_new(N)
+    local mutex = thread.mutex_new()
+    local counter = 0
+    local order = {}
+
+    local pool = threadpool.new(backend, N)
+    local ok = pool:start(function(thread_id, opts)
+        opts.barrier:wait()
+        opts.mutex:lock()
+        counter = counter + 1
+        order[#order + 1] = thread_id .. '-r1'
+        opts.mutex:unlock()
+        opts.barrier:wait()
+        opts.mutex:lock()
+        counter = counter + 1
+        order[#order + 1] = thread_id .. '-r2'
+        opts.mutex:unlock()
+        return true
+    end, { barrier = barrier, mutex = mutex })
+
+    local max_r1, min_r2 = 0, math.huge
+    for idx, s in ipairs(order) do
+        if string.find(s, 'r1') then
+            max_r1 = math.max(max_r1, idx)
+        else
+            min_r2 = math.min(min_r2, idx)
+        end
+    end
+
+    return {
+        { ok = ok == true, name = 'pool with a barrier completes' },
+        { ok = counter == 2 * N,
+          name = 'a barrier releases all workers every round' },
+        { ok = #order == 2 * N and max_r1 < min_r2,
+          name = 'a barrier separates rounds of workers' },
+    }
+end
+
+local sync_mutex = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local mutex = thread.mutex_new()
+    local counter = 0
+
+    local pool = threadpool.new(backend, N)
+    local ok = pool:start(function(_thread_id, opts)
+        for _ = 1, 10 do
+            opts.mutex:lock()
+            counter = counter + 1
+            opts.mutex:unlock()
+        end
+        return true
+    end, { mutex = mutex })
+
+    mutex = thread.mutex_new()
+    local unlocked_err = pcall(function()
+        mutex:unlock()
+    end)
+
+    return {
+        { ok = ok == true, name = 'pool with a mutex completes' },
+        { ok = counter == 10 * N,
+          name = 'a mutex serializes critical sections' },
+        { ok = mutex:trylock() == true,
+          name = 'trylock() locks an unlocked mutex' },
+        { ok = mutex:trylock() == false,
+          name = 'trylock() reports a locked mutex' },
+        { ok = unlocked_err == false,
+          name = 'unlock() of an unlocked mutex raises an error' },
+    }
+end
+
+local sync_wg = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local wg = thread.wg_new()
+    local waiter_done = false
+    wg:add(N - 1)
+
+    local pool = threadpool.new(backend, N)
+    local ok = pool:start(function(thread_id, opts)
+        if thread_id == 1 then
+            opts.wg:wait()
+            waiter_done = true
+            return true
+        end
+        opts.wg:done()
+        return true
+    end, { wg = wg })
+
+    return {
+        { ok = ok == true, name = 'pool with a wait group completes' },
+        { ok = waiter_done == true,
+          name = 'wait() returns when the counter is zero' },
+    }
+end
+
+local sync_failstop = function(backend)
+    local N = 5
+    thread.set_type(backend)
+    local barrier = thread.barrier_new(N)
+    local finished = {}
+
+    local pool = threadpool.new(backend, N)
+    local ok, err = pool:start(function(thread_id, opts)
+        if thread_id == N then
+            error('boom')
+        end
+        opts.barrier:wait()
+        finished[thread_id] = true
+        return true
+    end, { barrier = barrier })
+
+    local others_done = false
+    for i = 1, N - 1 do
+        if finished[i] == true then
+            others_done = true
+        end
+    end
+
+    return {
+        { ok = ok == nil and err ~= nil and
+              string.find(tostring(err), 'boom') ~= nil,
+          name = 'a failed worker makes the pool return an error' },
+        { ok = others_done == false,
+          name = 'the rest of workers are cancelled after a failure' },
+    }
+end
+
+for _, backend in ipairs({ 'fiber', 'coroutine' }) do
+    sync_subtest(backend, 'barrier', sync_barrier)
+    sync_subtest(backend, 'mutex', sync_mutex)
+    sync_subtest(backend, 'wg', sync_wg)
+    sync_subtest(backend, 'failstop', sync_failstop)
+end
+
+-- A client that records stages of its lifecycle into a shared log.
+local stage_client = function(log)
+    local cl = client.new()
+    cl.open = function(_self, _addr, _client_data)
+        log[#log + 1] = 'open'
+        return true
+    end
+    cl.setup = function(_self, _client_data)
+        log[#log + 1] = 'setup'
+        return true
+    end
+    cl.invoke = function(_self, _op, _client_data)
+        log[#log + 1] = 'invoke'
+        return { type = 'ok', f = 'test' }
+    end
+    cl.teardown = function(_self, _client_data)
+        log[#log + 1] = 'teardown'
+        return true
+    end
+    cl.close = function(_self, _client_data)
+        log[#log + 1] = 'close'
+        return true
+    end
+    return cl
+end
+
+local function count_phase(log, phase)
+    local n = 0
+    for _, marker in ipairs(log) do
+        if marker == phase then
+            n = n + 1
+        end
+    end
+    return n
+end
+
+local function marker_bounds(log, phase)
+    local first, last
+    for idx, marker in ipairs(log) do
+        if marker == phase then
+            if first == nil then
+                first = idx
+            end
+            last = idx
+        end
+    end
+    return first, last
+end
+
+-- Verify that run_client() synchronizes stages with barriers: every thread
+-- opens and sets up before any operation, and tears down only after all
+-- threads finished operations.
+local sync_stages = function(backend)
+    local N = 3
+    local total_ops = 30
+    local generator = function()
+        return gen_lib.range(1, total_ops):map(function(n)
+            return { f = 'test', value = n }
+        end)
+    end
+
+    local log = {}
+    local cl = stage_client(log)
+    local ok = runner.run_test({
+        client = cl,
+        generator = generator(),
+    }, {
+        threads = N,
+        thread_type = backend,
+        nodes = { 'a' },
+    })
+
+    local _, open_l = marker_bounds(log, 'open')
+    local setup_f, setup_l = marker_bounds(log, 'setup')
+    local invoke_f, invoke_l = marker_bounds(log, 'invoke')
+    local teardown_f = marker_bounds(log, 'teardown')
+
+    -- A broken teardown after all threads finished operations must abort the
+    -- run and must not leave other threads hanging on a barrier.
+    local clf = client.new()
+    clf.invoke = function(_self, _op, _client_data)
+        return { type = 'ok', f = 'test' }
+    end
+    clf.teardown = function(_self, _client_data)
+        error('broken teardown')
+    end
+    local okf, errf = runner.run_test({
+        client = clf,
+        generator = generator(),
+    }, {
+        threads = N,
+        thread_type = backend,
+        nodes = { 'a' },
+    })
+
+    return {
+        { ok = ok == true,
+          name = 'run_test with synchronized stages completed' },
+        { ok = count_phase(log, 'open') == N and
+              count_phase(log, 'setup') == N and
+              count_phase(log, 'teardown') == N and
+              count_phase(log, 'close') == N,
+          name = 'each thread ran open/setup/teardown/close once' },
+        { ok = count_phase(log, 'invoke') >= total_ops,
+          name = 'operations were invoked' },
+        { ok = open_l ~= nil and setup_f ~= nil and open_l < setup_f,
+          name = 'threads open a connection before any setup' },
+        { ok = setup_l ~= nil and invoke_f ~= nil and setup_l < invoke_f,
+          name = 'threads set up the DB before any operation' },
+        { ok = invoke_l ~= nil and teardown_f ~= nil and
+              invoke_l < teardown_f,
+          name = 'threads finish operations before any teardown' },
+        { ok = okf == nil and errf ~= nil and
+              string.find(tostring(errf), 'broken teardown') ~= nil,
+          name = 'a broken teardown aborts a run with several threads' },
+    }
+end
+
+local function stages_subtest(backend, checks_fn)
+    test:test('stages (' .. backend .. ')', function(test)
+        if not sync_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
+
+        local ok, checks = pcall(checks_fn, backend)
+        if not ok then
+            test:plan(1)
+            test:fail('stages (' .. backend .. ') raised an error: ' ..
+                tostring(checks))
+            return
+        end
+
+        test:plan(#checks)
+        for _, check in ipairs(checks) do
+            test:is(check.ok, true, check.name)
+        end
+    end)
+end
+
+stages_subtest('fiber', sync_stages)
+stages_subtest('coroutine', sync_stages)
 
 ------------------------
 ---- Run the tests  ----
