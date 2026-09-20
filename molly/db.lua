@@ -17,8 +17,8 @@ local db_mt = {
 -- - **setup** - function that set up a database instance
 -- - **teardown** - function that tear down a database instance
 --
--- Default implementation of a DB defines setup and teardown methods with empty
--- implementation that always returns true.
+-- Default implementation of a DB defines setup and teardown
+-- methods with empty implementation that always returns true.
 -- @return db
 --
 -- @function new

@@ -4,6 +4,9 @@ globals = {
     "package",
 }
 
+max_code_line_length = 80
+max_comment_line_length = 66
+
 ignore = {
     -- Accessing an undefined field of a global variable <debug>.
     "143/debug",
@@ -19,11 +22,11 @@ ignore = {
     "431",
 }
 
-files["molly/tests.lua"] = {
-    ignore = {
-        -- Line is too long.
-        "631"
-    }
+-- Long external URLs and verbatim examples in comments cannot be
+-- wrapped to fit into the default max_comment_line_length, so
+-- relax the limit for files that contain them.
+files["molly/gen.lua"] = {
+    max_comment_line_length = 105,
 }
 
 include_files = {

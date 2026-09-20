@@ -51,9 +51,12 @@ end
 
 sqlite_list_append.setup = function(self)
     assert(type(self) == 'table')
-    assert(sqlite3.OK == self.db:exec('CREATE TABLE IF NOT EXISTS list_append (key INT NOT NULL, val INT)'))
-    self.insert_stmt = assert(self.db:prepare('INSERT INTO list_append VALUES (?, ?)'))
-    self.select_stmt = assert(self.db:prepare('SELECT key, val FROM list_append ORDER BY key'))
+    assert(sqlite3.OK == self.db:exec(
+        'CREATE TABLE IF NOT EXISTS list_append (key INT NOT NULL, val INT)'))
+    self.insert_stmt = assert(self.db:prepare(
+        'INSERT INTO list_append VALUES (?, ?)'))
+    self.select_stmt = assert(self.db:prepare(
+        'SELECT key, val FROM list_append ORDER BY key'))
     return true
 end
 
@@ -63,7 +66,8 @@ local IDX_MOP_VAL = 3
 
 sqlite_list_append.invoke = function(self, op)
     assert(type(self) == 'table')
-    local mop = op.value[1] -- TODO: Support more than one mop in operation.
+    -- TODO: Support more than one mop in operation.
+    local mop = op.value[1]
     local mop_key = mop[IDX_MOP_KEY]
     local type = 'ok'
     if mop[IDX_MOP_TYPE] == 'r' then

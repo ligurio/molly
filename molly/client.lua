@@ -14,7 +14,8 @@ local utils = require('molly.utils')
 local shared_gen_state
 local op_index = 1
 
-local function process_operation(client, history, op, thread_id_str, thread_id, client_data)
+local function process_operation(client, history, op, thread_id_str, thread_id,
+        client_data)
     dev_checks('<client>', '<history>', 'any', 'string', 'number')
 
     if utils.is_callable(op) then
@@ -66,7 +67,8 @@ local function run_client(thread_id, opts)
     local ops_generator = opts.gen
     local history = opts.history
 
-    local nth = math.random(1, #opts.nodes) -- TODO: Use fun.cycle() and closure.
+    -- TODO: Use fun.cycle() and closure.
+    local nth = math.random(1, #opts.nodes)
     local addr = opts.nodes[nth]
 
     local client_data = {}
@@ -96,7 +98,8 @@ local function run_client(thread_id, opts)
             break
         end
         shared_gen_state = state
-        ok, err = pcall(process_operation, client, history, op, thread_id_str, thread_id, client_data)
+        ok, err = pcall(process_operation, client, history, op, thread_id_str,
+            thread_id, client_data)
         if ok == false then
             error('Failed to process an operation', err)
         end
@@ -138,8 +141,9 @@ local client_mt = {
 
 --- Function that returns a default client implementation.
 --
--- Default implementation of a client defines open, setup, teardown and close
--- methods with empty implementation that always returns true.
+-- Default implementation of a client defines open, setup,
+-- teardown and close methods with empty implementation that
+-- always returns true.
 --
 -- Client must implement the following methods:
 --

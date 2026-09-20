@@ -6,7 +6,9 @@ source = {
 }
 
 description = {
-    summary = 'A framework for distributed systems verification, with fault injection',
+    summary = [[
+A framework for distributed systems verification, with fault injection
+]],
     homepage = 'https://github.com/ligurio/molly',
     maintainer = 'Sergey Bronnikov <estetus@gmail.com>',
     license = 'ISC',

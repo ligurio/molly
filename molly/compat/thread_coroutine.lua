@@ -3,10 +3,10 @@
 --
 --### References
 --
--- - [Programming in Lua, Coroutines](http://www.lua.org/pil/9.html) -
--- Roberto Ierusalimschy
--- - [Coroutines in Lua](https://www.lua.org/doc/jucs04.pdf) - Ana L´ucia de
--- Moura, Noemi Rodriguez, Roberto Ierusalimschy
+-- - "Programming in Lua, Coroutines", Roberto Ierusalimschy,
+-- http://www.lua.org/pil/9.html
+-- - "Coroutines in Lua" - Ana L´ucia de Moura, Noemi Rodriguez,
+-- Roberto Ierusalimschy, https://www.lua.org/doc/jucs04.pdf
 
 local math = require('math')
 

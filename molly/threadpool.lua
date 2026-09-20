@@ -1,6 +1,6 @@
 -- A thread pool used to execute functions in parallel.
--- Spawns a specified number of worker threads and replenishes the pool if any
--- worker threads panic.
+-- Spawns a specified number of worker threads and replenishes the
+-- pool if any worker threads panic.
 
 local log = require('molly.log')
 
@@ -10,9 +10,9 @@ local thread_lib = require('molly.thread')
 local function join(self)
     dev_checks('<threadpool>')
 
-    -- Drive coroutine threads to completion first, so their join()
-    -- below can observe the result. A no-op for fiber threads, which
-    -- are scheduled and joined by the runtime.
+    -- Drive coroutine threads to completion first, so their
+    -- join() below can observe the result. A no-op for fiber
+    -- threads, which are scheduled and joined by the runtime.
     thread_lib.scheduler()
 
     local first_err
@@ -71,8 +71,8 @@ local mt = {
 local function new(thread_type, thread_num)
     dev_checks('string', 'number')
 
-    -- Raises an error when a thread library is not available, e.g.
-    -- 'fiber' under LuaJIT.
+    -- Raises an error when a thread library is not available,
+    -- e.g. 'fiber' under LuaJIT.
     thread_lib.set_type(thread_type)
 
     local pool = {}
