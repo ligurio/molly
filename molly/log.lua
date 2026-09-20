@@ -5,8 +5,9 @@
 --
 -- Copyright (c) 2016 rxi
 --
--- This library is free software; you can redistribute it and/or modify it
--- under the terms of the MIT license. See LICENSE for details.
+-- This library is free software; you can redistribute it and/or
+-- modify it under the terms of the MIT license. See LICENSE for
+-- details.
 --
 -- Source: https://github.com/rxi/log.lua
 
@@ -43,8 +44,8 @@ end
 -- @string message Message.
 -- @usage
 -- > local log = require('molly.log')
--- > log.debug('Total planned requests: 1010')
--- [DEBUG 2021-12-1 12:26:8:689379] /home/sergeyb/sources/molly/jepsen/runner.lua:80: Total planned requests: 1010
+-- > log.debug('Message')
+-- [DEBUG 2021-12-1 12:26:8:689379] runner.lua:80: Message
 --
 -- @return nil
 --
@@ -99,7 +100,8 @@ for i, x in ipairs(modes) do
         end
 
         local timestamp = clock.dt()
-        local str = ('[%-6s%-24s]%s: %s\n'):format(nameupper, timestamp, lineinfo, msg)
+        local str = ('[%-6s%-24s]%s: %s\n'):format(
+            nameupper, timestamp, lineinfo, msg)
         -- Output to console.
         io.write(str)
 

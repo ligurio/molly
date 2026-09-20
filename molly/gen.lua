@@ -1,19 +1,21 @@
 ---- Module with functions for generators.
 -- @module molly.gen
 --
--- One of the key pieces of a Molly test is a generators for client and
--- nemesis operations. These generators will create a finite or infinite
--- sequence of operations. It is often test have its own nemesis generator, but
--- most likely shares a common client generator with other tests. A nemesis
--- generator, for instance, might be a sequence of partition, sleep, and
--- restore, repeated infinitely. A client generator will specify a random,
--- infinite sequence of client operation, as well as the associated parameters
--- such as durability level, the document key, the new value to write or CAS
--- (Compare-And-Set), etc. When a test starts, the client generator feeds
--- client operations to the client and the nemesis generator feeds operations
--- to the nemesis. The test will continue until either the nemesis generator
--- has completed a specified number of operations, a time limit is reached, or
--- an error is thrown.
+-- One of the key pieces of a Molly test is a generators for
+-- client and nemesis operations. These generators will create a
+-- finite or infinite sequence of operations. It is often test
+-- have its own nemesis generator, but most likely shares a common
+-- client generator with other tests. A nemesis generator, for
+-- instance, might be a sequence of partition, sleep, and restore,
+-- repeated infinitely. A client generator will specify a random,
+-- infinite sequence of client operation, as well as the
+-- associated parameters such as durability level, the document
+-- key, the new value to write or CAS (Compare-And-Set), etc. When
+-- a test starts, the client generator feeds client operations to
+-- the client and the nemesis generator feeds operations to the
+-- nemesis. The test will continue until either the nemesis
+-- generator has completed a specified number of operations, a
+-- time limit is reached, or an error is thrown.
 --
 -- Example of generator that generates two operations `w` and `r`:
 --
@@ -116,14 +118,16 @@ end
 -- @section generators_finite_generators
 
 --- The iterator to create arithmetic progressions.
--- Iteration values are generated within closed interval `[start, stop]` (i.e.
--- `stop` is included). If the `start` argument is omitted, it defaults to 1 (`stop
--- > 0`) or to -1 (`stop < 0`). If the `step` argument is omitted, it defaults to 1
--- (`start <= stop`) or to -1 (`start > stop`). If `step` is positive, the last
--- element is the largest `start + i * step` less than or equal to `stop`; if `step`
--- is negative, the last element is the smallest `start + i * step` greater than
--- or equal to `stop`. `step` must not be zero (or else an error is raised).
--- `range(0)` returns empty iterator.
+-- Iteration values are generated within closed interval
+-- `[start, stop]` (i.e. `stop` is included). If the `start`
+-- argument is omitted, it defaults to 1 (`stop > 0`) or to -1
+-- (`stop < 0`). If the `step` argument is omitted, it defaults to
+-- 1 (`start <= stop`) or to -1 (`start > stop`). If `step` is
+-- positive, the last element is the largest `start + i * step`
+-- less than or equal to `stop`; if `step` is negative, the last
+-- element is the smallest `start + i * step` greater than or
+-- equal to `stop`. `step` must not be zero (or else an error is
+-- raised). `range(0)` returns empty iterator.
 -- See [fun.range](https://luafun.github.io/generators.html#fun.range).
 --
 -- @number[opt] start – an endpoint of the interval.
@@ -154,8 +158,9 @@ end
 --- Generators: Infinity Generators
 -- @section generators_infinity_generators
 
---- The iterator returns values over and over again indefinitely. All values
--- that passed to the iterator are returned as-is during the iteration.
+--- The iterator returns values over and over again indefinitely.
+-- All values that passed to the iterator are returned as-is
+-- during the iteration.
 -- See [fun.duplicate](https://luafun.github.io/generators.html#fun.duplicate).
 --
 -- @usage
@@ -252,7 +257,8 @@ exports.span = span
 --- Filtering
 -- @section filtering
 
---- Return a new iterator of those elements that satisfy the `predicate`.
+--- Return a new iterator of those elements that satisfy the
+-- `predicate`.
 -- See [fun.filter](https://luafun.github.io/filtering.html#fun.filter).
 -- @function filter
 
@@ -260,22 +266,22 @@ exports.span = span
 -- See `gen.filter`.
 -- @function remove_if
 
---- If `regexp_or_predicate` is string then the parameter is used as a regular
--- expression to build filtering predicate. Otherwise the function is just an
--- alias for `gen.filter`.
+--- If `regexp_or_predicate` is string then the parameter is used
+-- as a regular expression to build filtering predicate. Otherwise
+-- the function is just an alias for `gen.filter`.
 -- @function grep
 -- See [fun.grep](https://luafun.github.io/filtering.html#fun.grep).
 
---- The function returns two iterators where elements do and do not satisfy the
--- predicate.
+--- The function returns two iterators where elements do and do
+-- not satisfy the predicate.
 -- @function partition
 -- See [fun.partition](https://luafun.github.io/filtering.html#fun.partition).
 
 --- Reducing: Folds
 -- @section reducing_folds
 
---- The function reduces the iterator from left to right using the binary
--- operator `accfun` and the initial value `initval`.
+--- The function reduces the iterator from left to right using the
+-- binary operator `accfun` and the initial value `initval`.
 -- @function foldl
 -- See [fun.foldl](https://luafun.github.io/reducing.html#fun.foldl).
 
@@ -333,37 +339,41 @@ exports.span = span
 --- Compositions
 -- @section compositions
 
---- Return a new iterator where i-th return value contains the i-th element
--- from each of the iterators. The returned iterator is truncated in length to
--- the length of the shortest iterator. For multi-return iterators only the
--- first variable is used.
+--- Return a new iterator where i-th return value contains the
+-- i-th element from each of the iterators. The returned iterator
+-- is truncated in length to the length of the shortest iterator.
+-- For multi-return iterators only the first variable is used.
 -- See [fun.zip](https://luafun.github.io/compositions.html#fun.zip).
 -- @param ... - an iterators
 -- @return an iterator
 -- @function zip
 
 --- A cycled version of an iterator.
--- Make a new iterator that returns elements from `{gen, param, state}` iterator
--- until the end and then "restart" iteration using a saved clone of `{gen,
--- param, state}`. The returned iterator is constant space and no return values
--- are buffered. Instead of that the function make a clone of the source `{gen,
--- param, state}` iterator. Therefore, the source iterator must be pure
--- functional to make an indentical clone. Infinity iterators are supported,
--- but are not recommended.
+-- Make a new iterator that returns elements from
+-- `{gen, param, state}` iterator until the end and then "restart"
+-- iteration using a saved clone of `{gen, param, state}`. The
+-- returned iterator is constant space and no return values are
+-- buffered. Instead of that the function make a clone of the
+-- source `{gen, param, state}` iterator. Therefore, the source
+-- iterator must be pure functional to make an indentical clone.
+-- Infinity iterators are supported, but are not recommended.
 -- @param iterator - an iterator
 -- @return an iterator
 -- See [fun.cycle](https://luafun.github.io/compositions.html#fun.cycle).
 -- @function cycle
 
---- Make an iterator that returns elements from the first iterator until it is
--- exhausted, then proceeds to the next iterator, until all of the iterators are
--- exhausted. Used for treating consecutive iterators as a single iterator.
--- Infinity iterators are supported, but are not recommended.
+--- Make an iterator that returns elements from the first iterator
+-- until it is exhausted, then proceeds to the next iterator,
+-- until all of the iterators are exhausted. Used for treating
+-- consecutive iterators as a single iterator. Infinity iterators
+-- are supported, but are not recommended.
 -- See [fun.chain](https://luafun.github.io/compositions.html#fun.chain).
 -- @param ... - an iterators
--- @return an iterator, a consecutive iterator from sources (left from right).
+-- @return an iterator, a consecutive iterator from sources (left
+-- from right).
 -- @usage
--- > fun.each(print, fun.chain(fun.range(5, 1, -1), fun.range(1, 5)))
+-- > fun.each(print, fun.chain(
+-- >   fun.range(5, 1, -1), fun.range(1, 5)))
 -- 5
 -- 4
 -- 3
@@ -380,11 +390,12 @@ exports.span = span
 -- @function chain
 
 --- Cycles between several generators on a rotating schedule.
--- Takes a flat series of [time, generator] pairs. Emits from the first
--- generator for `time` seconds, then from the second generator for `time`
--- seconds, and so on, restarting from the first generator after all generators
--- were used. State of every generator is preserved from cycle to cycle.
--- The iterator stops when one of the generators is exhausted.
+-- Takes a flat series of [time, generator] pairs. Emits from the
+-- first generator for `time` seconds, then from the second
+-- generator for `time` seconds, and so on, restarting from the
+-- first generator after all generators were used. State of every
+-- generator is preserved from cycle to cycle. The iterator stops
+-- when one of the generators is exhausted.
 --
 -- @usage
 -- > gen.each(print, gen.cycle_times(
@@ -511,11 +522,12 @@ end
 methods.mix = mix
 exports.mix = mix
 
---- Emits an operation from generator A, then B, then A again, then B again,
--- etc. Stops as soon as any generator is exhausted.
+--- Emits an operation from generator A, then B, then A again,
+-- then B again, etc. Stops as soon as any generator is exhausted.
 --
 -- @usage
--- > gen.each(print, gen.flip_flop(gen.range(1, 2), gen.duplicate('x')))
+-- > gen.each(print, gen.flip_flop(
+-- >   gen.range(1, 2), gen.duplicate('x')))
 -- 1
 -- x
 -- 2
@@ -582,7 +594,8 @@ end
 exports.log = log_it
 methods.log = log_it
 
---- (TODO) Operations from that generator are scheduled at uniformly random intervals
+--- (TODO) Operations from that generator are scheduled at
+-- uniformly random intervals
 -- between `0` to `2 * (dt seconds)`.
 -- @number dt Number of seconds.
 -- @return an iterator
@@ -598,7 +611,9 @@ methods.stagger = stagger
 -- @return an iterator
 --
 -- @usage
--- >  for _it, v in gen.time_limit(gen.range(1, 100), 0.0001) do print(v) end
+-- >  for _it, v in gen.time_limit(gen.range(1, 100), 0.0001) do
+-- >    print(v)
+-- >  end
 -- 1
 -- 2
 -- 3

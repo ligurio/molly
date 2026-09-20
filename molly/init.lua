@@ -1,4 +1,5 @@
----- Framework for distributed system's verification, with fault injection.
+---- Framework for distributed system's verification, with fault
+---- injection.
 -- @module molly
 -- @author Sergey Bronnikov
 -- @license ISC

@@ -1,5 +1,6 @@
 -- Alternative implementation of checks() in Lua.
--- Slower than the C counterpart, but no compilation and porting concerns.
+-- Slower than the C counterpart, but no compilation and porting
+-- concerns.
 --
 -- Copyright (c) 2006-2013 Fabien Fleutot and others.
 --
@@ -10,9 +11,10 @@
 -- accompanies this distribution, and is available at
 -- http://www.eclipse.org/legal/epl-v10.html
 --
--- This program and the accompanying materials are also made available
--- under the terms of the MIT public license which accompanies this
--- distribution, and is available at http://www.lua.org/license.html
+-- This program and the accompanying materials are also made
+-- available under the terms of the MIT public license which
+-- accompanies this distribution, and is available at
+-- http://www.lua.org/license.html
 --
 -- Contributors:
 --     Fabien Fleutot - API and implementation

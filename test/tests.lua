@@ -60,7 +60,8 @@ test:test('history', function(test)
     h = history.new()
     ok = h:add({ f = 'read', type = 'invoke', process = 1, })
     test:is(ok, true, "history_obj:add()")
-    test:is(h:to_txt(), "\n  1    invoke     read       null      ", "history_obj:to_txt()")
+    test:is(h:to_txt(),
+        "\n  1    invoke     read       null      ", "history_obj:to_txt()")
 
     h = history.new()
     h:add({ type = 'ok', value = 2 })
@@ -99,24 +100,29 @@ test:test('op', function(test)
     test:plan(9)
     local op = { f = 'read', value = 10, type = 'invoke' }
     local str = op_lib.to_string(op)
-    test:is(str, 'invoke     read       10        ', "op.to_string() { type = 'invoke'}")
+    test:is(str,
+        'invoke     read       10        ', "op.to_string() { type = 'invoke'}")
 
     op = { f = 'read', value = 10, type = 'ok' }
     str = op_lib.to_string(op)
-    test:is(str, 'ok         read       10        ', "op.to_string() { type = 'ok' }")
+    test:is(str,
+        'ok         read       10        ', "op.to_string() { type = 'ok' }")
 
     op = { f = 'read', value = 10, type = 'fail' }
     str = op_lib.to_string(op)
-    test:is(str, 'fail       read       10        ', "op.to_string() { type = 'fail' }")
+    test:is(str,
+        'fail       read       10        ', "op.to_string() { type = 'fail' }")
 
     op = { type = 'ok' }
     test:is(op_lib.is_completed(op), true, "op.is_completed() { type = 'ok' }")
 
     op = { type = 'fail' }
-    test:is(op_lib.is_completed(op), true, "op.is_completed() { type = 'fail' }")
+    test:is(op_lib.is_completed(op), true,
+        "op.is_completed() { type = 'fail' }")
 
     op = { type = 'invoke' }
-    test:is(op_lib.is_completed(op), false, "op.is_completed() { type = 'invoke' }")
+    test:is(op_lib.is_completed(op), false,
+        "op.is_completed() { type = 'invoke' }")
 
     op = { type = 'ok' }
     test:is(op_lib.is_planned(op), false, "op.is_planned() { type = 'ok' }")
@@ -125,7 +131,8 @@ test:test('op', function(test)
     test:is(op_lib.is_planned(op), false, "op.is_planned() { type = 'fail' }")
 
     op = { type = 'invoke' }
-    test:is(op_lib.is_completed(op), false, "op.is_planned() { type = 'invoke' }")
+    test:is(op_lib.is_completed(op), false,
+        "op.is_planned() { type = 'invoke' }")
 end)
 
 test:test('utils', function(test)
@@ -143,7 +150,8 @@ test:test('utils', function(test)
     test:is(utils.setenv('MOLLY'), true, "utils.setenv()")
     test:isnil(os.getenv('MOLLY'), "os.getenv()")
 
-    test:is(utils.basename('/home/sergeyb/sources/molly/README.md'), 'README.md', "utils.basename()")
+    test:is(utils.basename('/home/sergeyb/sources/molly/README.md'),
+        'README.md', "utils.basename()")
 end)
 
 test:test("utils.is_callable", function(test)
@@ -259,9 +267,11 @@ test:test('tests.rw_register_gen', function(test)
     local mop_key = mop[IDX_MOP_KEY]
     test:is(type(mop_key), 'string', "tests.rw_register_gen(): mop key")
     local mop_type = mop[IDX_MOP_TYPE]
-    test:is(mop_type == 'r' or mop_type == 'w', true, "tests.rw_register_gen(): mop type")
+    test:is(mop_type == 'r' or mop_type == 'w', true,
+        "tests.rw_register_gen(): mop type")
     local mop_val = mop[IDX_MOP_VAL]
-    test:is(type(mop_val) == 'number' or mop_val == json.NULL, true, "tests.rw_register_gen(): mop value")
+    test:is(type(mop_val) == 'number' or mop_val == json.NULL, true,
+        "tests.rw_register_gen(): mop value")
 end)
 
 test:test('tests.list_append_gen', function(test)
@@ -272,8 +282,10 @@ test:test('tests.list_append_gen', function(test)
     local mop = val.value[1]
     local op_type = mop[OP_TYPE]
     local op_val = mop[OP_VAL]
-    test:is(op_type == 'r' or op_type == 'append', true, "tests.list_append_gen(): op type")
-    test:is(type(op_val) == 'number' or op_val == json.NULL, true, "tests.list_append_gen(): op value")
+    test:is(op_type == 'r' or op_type == 'append', true,
+        "tests.list_append_gen(): op type")
+    test:is(type(op_val) == 'number' or op_val == json.NULL, true,
+        "tests.list_append_gen(): op value")
 end)
 
 test:test('tests.bank_gen', function(test)
@@ -395,7 +407,8 @@ test:test('runner', function(test)
     local test_opts = {}
     local ok, err = pcall(runner.run_test, workload_opts, test_opts)
     test:is(ok, false, "runner.run_test(): invalid generator")
-    local res = string.find(tostring(err), 'Generator must have an unwrap method')
+    local res = string.find(tostring(err),
+        'Generator must have an unwrap method')
     test:isnt(res, nil, "runner.run_test(): err is not nil")
 
     local single_gen = gen_lib.range(1, 1):map(function(n)
@@ -480,7 +493,8 @@ test:test('client.invoke_fail', function(test)
 
     local ops = hist.history
     test:is(#ops, 2, 'client.invoke_fail(): history has invoke and fail ops')
-    test:is(ops[1].type, 'invoke', 'client.invoke_fail(): invoke op is recorded')
+    test:is(ops[1].type, 'invoke',
+        'client.invoke_fail(): invoke op is recorded')
     test:is(ops[2].type, 'fail', 'client.invoke_fail(): fail op is recorded')
     test:isnt(string.find(ops[2].error, 'invoke boom'), nil,
         'client.invoke_fail(): error message is recorded')
@@ -513,8 +527,8 @@ client_dict.invoke = function(_self, op)
     }
 end
 
--- Run a test that generates random read and write operations for Lua
--- dictionary.
+-- Run a test that generates random read and write operations for
+-- Lua dictionary.
 local run_test_dict = function(thread_type)
     if utils.is_tarantool() == false and thread_type == 'fiber' then
         return false
@@ -524,7 +538,8 @@ local run_test_dict = function(thread_type)
         create_reports = true,
         thread_type = thread_type,
         threads = 5,
-        nodes = { 'a', 'b', 'c' }, -- Required for better code coverage.
+        -- Required for better code coverage.
+        nodes = { 'a', 'b', 'c' },
     }
     local ok, err = runner.run_test({
         client = client_dict,
@@ -536,7 +551,8 @@ local run_test_dict = function(thread_type)
 
     if ok == true and test_options.create_reports == true then
         assert(helpers.file_exists('history.txt'), "history.txt does not exist")
-        assert(helpers.file_exists('history.json'), "history.json does not exist")
+        assert(helpers.file_exists('history.json'),
+            "history.json does not exist")
 
         -- Cleanup.
         if os.getenv('DEV') ~= 'ON' then

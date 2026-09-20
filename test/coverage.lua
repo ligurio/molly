@@ -1,7 +1,8 @@
 local utils = require('molly.utils')
 local runner = require('luacov.runner')
 
--- Module with utilities for collecting code coverage from external processes.
+-- Module with utilities for collecting code coverage from
+-- external processes.
 local export = {
     DEFAULT_EXCLUDE = {
         '^builtin/',
@@ -20,8 +21,8 @@ end
 
 local function coverage_enable()
     local root = utils.cwd()
-    -- Change directory to the original root so luacov can find default config
-    -- and resolve relative filenames.
+    -- Change directory to the original root so luacov can find
+    -- default config and resolve relative filenames.
     with_cwd(root, function()
         local config = runner.load_config()
         config.exclude = config.exclude or {}

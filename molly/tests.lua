@@ -5,70 +5,150 @@
 --
 -- list-append operations are either appends or reads
 --
--- Detects cycles in histories where operations are transactions over named
--- lists lists, and operations are either appends or reads.
+-- Detects cycles in histories where operations are transactions
+-- over named lists lists, and operations are either appends or
+-- reads.
 --
--- The *append* test models the database as a collection of named lists,
--- and performs transactions comprised of read and append operations. A
--- read returns the value of a particular list, and an append adds a single
--- unique element to the end of a particular list. We derive ordering
--- dependencies between these transactions, and search for cycles in that
--- dependency graph to identify consistency anomalies.
+-- The *append* test models the database as a collection of named
+-- lists, and performs transactions comprised of read and append
+-- operations. A read returns the value of a particular list, and
+-- an append adds a single unique element to the end of a
+-- particular list. We derive ordering dependencies between these
+-- transactions, and search for cycles in that dependency graph to
+-- identify consistency anomalies.
 --
--- In terms of Molly, values in operation are lists of integers. Each operation
--- performs a transaction, comprised of micro-operations which are either reads
--- of some value (returning the entire list) or appends (adding a single number
--- to whatever the present value of the given list is). We detect cycles in
--- these transactions using Elle's cycle-detection system.
+-- In terms of Molly, values in operation are lists of integers.
+-- Each operation performs a transaction, comprised of
+-- micro-operations which are either reads of some value
+-- (returning the entire list) or appends (adding a single number
+-- to whatever the present value of the given list is). We detect
+-- cycles in these transactions using Elle's cycle-detection
+-- system.
 --
 -- Generator `molly.tests.list_append_gen` produces an operations
 -- compatible with Molly:
 --
---     { index = 2, type = "invoke", value = {{ "append", 255, 8 } { "r", 253, null }}}
---     { index = 3, type = "ok",     value = {{ "append", 255, 8 } { "r", 253, { 1, 3, 4 }}}}
---     { index = 4, type = "invoke", value = {{ "append", 256, 4 } { "r", 255, null } { "r", 256, nil } { "r", 253, null }}}
---     { index = 5, type = "ok",     value = {{ "append", 256, 4 } { "r", 255, { 2, 3, 4, 5, 8 }} { "r", 256, { 1, 2, 4 }} {{ "r", 253, { 1, 3, 4 }}}}
---     { index = 6, type = "invoke", value = {{ "append", 250, 10 } { "r", 253, null }{ "r", 255, null } { "append", 256, 3 }}}
+--     {
+--         index = 2,
+--         type = "invoke",
+--         value = {{ "append", 255, 8 } { "r", 253, null }}
+--     }
+--     {
+--         index = 3,
+--         type = "ok",
+--         value = {{ "append", 255, 8 } { "r", 253, { 1, 3, 4 }}}
+--     }
+--     {
+--         index = 4,
+--         type = "invoke",
+--         value = {
+--             { "append", 256, 4 }
+--             { "r", 255, null }
+--             { "r", 256, nil }
+--             { "r", 253, null }
+--         }
+--     }
+--     {
+--         index = 5,
+--         type = "ok",
+--         value = {
+--             { "append", 256, 4 }
+--             { "r", 255, { 2, 3, 4, 5, 8 }}
+--             { "r", 256, { 1, 2, 4 }}
+--             { "r", 253, { 1, 3, 4 }}
+--         }
+--     }
+--     {
+--         index = 6,
+--         type = "invoke",
+--         value = {
+--             { "append", 250, 10 }
+--             { "r", 253, null }
+--             { "r", 255, null }
+--             { "append", 256, 3 }
+--         }
+--    }
 --
--- A partial test, including a generator and checker. You'll need to provide a
--- client which can understand operations of the form:
+-- A partial test, including a generator and checker. You'll need
+-- to provide a client which can understand operations of the
+-- form:
 --
---     { type = "invoke", f = "txn", value = {{ "r", 3, null } { "append", 3, 2 } { "r", 3, null }}}
+--     {
+--         type = "invoke",
+--         f = "txn",
+--         value = {
+--             { "r", 3, null }
+--             { "append", 3, 2 }
+--             { "r", 3, null }
+--         }
+--    }
 --
 -- and return completions like:
 --
---     { type = "invoke", f = "txn", value = {{ "r", 3, { 1 }} { "append", 3, 2 } { "r", 3, { 1, 2 }}}}
+--    {
+--         type = "invoke",
+--         f = "txn",
+--         value = {
+--             { "r", 3, { 1 }}
+--             { "append", 3, 2 }
+--             { "r", 3, { 1, 2 }}
+--         }
+--    }
 --
--- where the key `3` identifies some list, whose value is initially `[1]`, and
--- becomes `[1 2]`.
+-- where the key `3` identifies some list, whose value is
+-- initially `[1]`, and becomes `[1 2]`.
 --
--- Lists are encoded as rows in a table; key names are table names, and the set
--- of all rows determines the list contents.
+-- Lists are encoded as rows in a table; key names are table
+-- names, and the set of all rows determines the list contents.
 --
 -- This test requires a way to order table contents.
 --
 --### RW Register
 --
--- Generator produces concurrent atomic updates to a shared register. Writes
--- are assumed to be unique, but this is the only constraint.
+-- Generator produces concurrent atomic updates to a shared
+-- register. Writes are assumed to be unique, but this is the only
+-- constraint.
 --
--- Operations are of two forms:
---
---     { "r", "x", 1 } denotes a read of `x` observing the value 1.
---     { "w", "x", 2 } denotes a write of `x`, settings its value to 2.
+-- Operations are of two forms: `{ "r", "x", 1 }` denotes a read
+-- of `x` observing the value 1. `{ "w", "x", 2 }` denotes a write
+-- of `x`, settings its value to 2.
 --
 -- Example of history:
 --
---     { type = "invoke", f = "txn", value = {{ "w", "x", 1 }},   process = 0, index = 1}
---     { type = "ok",     f = "txn", value = {{ "w", "x", 1 }},   process = 0, index = 2}
---     { type = "invoke", f = "txn", value = {{ "r", "x", null }}, process = 0, index = 3}
---     { type = "ok",     f = "txn", value = {{ "r", "x", 2 }},   process = 0, index = 4}
+--     {
+--         type = "invoke",
+--         f = "txn",
+--         value = {{ "w", "x", 1 }},
+--         process = 0,
+--         index = 1,
+--     }
+--     {
+--         type = "ok",
+--         f = "txn",
+--         value = {{ "w", "x", 1 }},
+--         process = 0,
+--         index = 2,
+--     }
+--     {
+--         type = "invoke",
+--         f = "txn",
+--         value = {{ "r", "x", null }},
+--         process = 0,
+--         index = 3,
+--     }
+--     {
+--         type = "ok",
+--         f = "txn",
+--         value = {{ "r", "x", 2 }},
+--         process = 0,
+--         index = 4
+--     }
 --
--- Note that in Lua associative array is an array that can be indexed not only
--- with numbers, but also with strings or any other value of the language,
--- except nil. Null values in Lua tables are represented as JSON null
--- (`json.NULL`, a Lua `lightuserdata` NULL pointer) is provided for
--- comparison.
+-- Note that in Lua associative array is an array that can be
+-- indexed not only with numbers, but also with strings or any
+-- other value of the language, except nil. Null values in Lua
+-- tables are represented as JSON null (`json.NULL`, a Lua
+-- `lightuserdata` NULL pointer) is provided for comparison.
 --
 --### CAS-Register
 --
@@ -78,28 +158,85 @@
 --
 -- Operations are of three forms:
 --
---     { "r", "x", 1 } denotes a read of `x` observing the value 1.
---     { "w", "x", 2 } denotes a write of `x`, settings its value to 2.
---     { "cas", "x", 2 } denotes a CAS of `x`, settings its value to 2.
+-- - `{ "r", "x", 1 }` denotes a read of `x` observing the value
+--   1.
+-- - `{ "w", "x", 2 }` denotes a write of `x`, settings its value
+--   to 2.
+-- - `{ "cas", "x", 2 }` denotes a CAS of `x`, settings its value
+--   to 2.
 --
 -- Example of history:
 --
---     { type = "invoke", f = "cas", value = { 1, 5 },  process = 0, index = 1}
---     { type = "ok",     f = "fail", value = { 1, 5 }, process = 0, index = 2}
---     { type = "invoke", f = "write", value = { 2 },   process = 0, index = 3}
---     { type = "ok",     f = "write", value = { 2 },   process = 0, index = 4}
+--     {
+--         type = "invoke",
+--         f = "cas",
+--         value = { 1, 5 },
+--         process = 0,
+--         index = 1
+--     }
+--     {
+--         type = "ok",
+--         f = "fail",
+--         value = { 1, 5 },
+--         process = 0,
+--         index = 2
+--     }
+--     {
+--         type = "invoke",
+--         f = "write",
+--         value = { 2 },
+--         process = 0,
+--         index = 3
+--     }
+--     {
+--         type = "ok",
+--         f = "write",
+--         value = { 2 },
+--         process = 0,
+--         index = 4
+--     }
 --
 --### Bank
 --
--- Generator produces updates to a set of bank accounts and transfers
--- money between them at random, ensuring that no account goes negative.
+-- Generator produces updates to a set of bank accounts and
+-- transfers money between them at random, ensuring that no
+-- account goes negative.
 --
 -- Example of a history:
 --
---     {:type :invoke, :f :transfer, :process 0, :time 12613722542, :index 34, :value {:from 1, :to 0, :amount 5}}
---     {:type :fail,   :f :transfer, :process 0, :time 12686176735, :index 35, :value {:from 1, :to 0, :amount 5}}
---     {:type :invoke, :f :read,     :process 0, :time 12686563291, :index 36}
---     {:type :ok,     :f :read,     :process 0, :time 12799165489, :index 37, :value {0 97, 1 0, 2 0, 3 0, 4 0, 5 3, 6 0, 7 0, 8 0, 9 0}}
+--     {
+--         :type :invoke,
+--         :f :transfer,
+--         :process 0,
+--         :time 12613722542,
+--         :index 34,
+--         :value {:from 1, :to 0, :amount 5}
+--     }
+--     {
+--         :type :fail,
+--         :f :transfer,
+--         :process 0,
+--         :time 12686176735,
+--         :index 35,
+--         :value {:from 1, :to 0, :amount 5}
+--     }
+--     {
+--         :type :invoke,
+--         :f :read,
+--         :process 0,
+--         :time 12686563291,
+--         :index 36
+--     }
+--     {
+--         :type :ok,
+--         :f :read,
+--         :process 0,
+--         :time 12799165489,
+--         :index 37,
+--         :value {
+--             0 97, 1 0, 2 0, 3 0, 4 0, 5 3, 6 0, 7 0, 8 0, 9 0
+--         }
+--     }
 --
 
 local math = require('math')
@@ -305,17 +442,17 @@ end
 
 --- List-Append operations generator.
 --
--- A generator for operations where values are transactions made up of reads
--- and appends to various integer keys.
+-- A generator for operations where values are transactions made
+-- up of reads and appends to various integer keys.
 -- @table[opt] opts Table with options.
--- @number[opt] opts.key_count Number of distinct keys at any point. Default is
--- 3.
--- @number[opt] opts.min_txn_len Minimum number of operations per txn. Default
--- is 1.
--- @number[opt] opts.max_txn_len Maximum number of operations per txn. Default
--- is 2.
--- @number[opt] opts.max_writes_per_key Maximum number of operations per key.
--- Default is 32.
+-- @number[opt] opts.key_count Number of distinct keys at any
+-- point. Default is 3.
+-- @number[opt] opts.min_txn_len Minimum number of operations per
+-- txn. Default is 1.
+-- @number[opt] opts.max_txn_len Maximum number of operations per
+-- txn. Default is 2.
+-- @number[opt] opts.max_writes_per_key Maximum number of
+-- operations per key. Default is 32.
 -- @usage
 --
 -- > log = require('log')
@@ -390,7 +527,10 @@ end
 --
 -- > log = require('log')
 -- > tests = require('molly.tests')
--- > tests.bank_gen():map(function(op) return type(op) == 'function' and op() or op end):take(10):each(log.info)
+-- > tests.bank_gen():map(
+-- >   function(op)
+-- >     return type(op) == 'function' and op() or op end
+-- >   ):take(10):each(log.info)
 -- {"f":"read"}
 -- {"f":"transfer","value":{"amount":2,"from":8,"to":7}}
 -- {"f":"read"}

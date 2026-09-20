@@ -14,7 +14,8 @@ local function to_txt(self)
 
     local history_str = { '' }
     for _, operation in ipairs(self.history) do
-        local op_str = ('%3d    %s'):format(operation.process, op.to_string(operation))
+        local op_str = ('%3d    %s'):format(
+            operation.process, op.to_string(operation))
         table.insert(history_str, op_str)
     end
 
@@ -58,12 +59,14 @@ local function add(self, operation)
     return true
 end
 
+-- luacheck: push no max line length
 -- Get a HdrHistogram (High Dynamic Range (HDR) Histogram)
 --
--- Since Molly uses HdrHistogram and produces HdrHistogram logs, various tools
--- that plot and view histogram logs can be used to analyze Molly's data. Some
--- common tools include HistggramLogAnalyzer, HdrHistogramVisualizer, hdr-plot,
--- and a Javascript-based in-browser histogram log parser.
+-- Since Molly uses HdrHistogram and produces HdrHistogram logs,
+-- various tools that plot and view histogram logs can be used to
+-- analyze Molly's data. Some common tools include
+-- HistggramLogAnalyzer, HdrHistogramVisualizer, hdr-plot, and a
+-- Javascript-based in-browser histogram log parser.
 --
 -- 1. https://github.com/HdrHistogram/HdrHistogram
 -- 2. https://github.com/HdrHistogram/HistogramLogAnalyzer
@@ -75,6 +78,7 @@ end
 --
 -- @return table
 -- @function hdr_histogram
+-- luacheck: pop
 local function hdr_histogram(_self)
     return {}
 end

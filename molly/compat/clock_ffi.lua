@@ -19,7 +19,8 @@ int clock_nanosleep(clockid_t clock_id, int flags,
 
 local clock = {}
 
--- The IDs of the various system clocks (for POSIX.1b interval timers).
+-- The IDs of the various system clocks (for POSIX.1b interval
+-- timers).
 local CLOCK_MONOTONIC = 1
 local CLOCK_PROCESS_CPUTIME_ID = 2
 
@@ -35,7 +36,8 @@ function clock.monotonic()
     ---@type any
     local ts = ffi.new("ts[?]", 1)
     ffi.C.clock_gettime(CLOCK_MONOTONIC, ts)
-    return assert(tonumber(ts[0].tv_sec)) + assert(tonumber(ts[0].tv_nsec)) / 10^9
+    return assert(tonumber(ts[0].tv_sec)) +
+        assert(tonumber(ts[0].tv_nsec)) / 10^9
 end
 
 function clock.monotonic64()
@@ -49,7 +51,8 @@ function clock.proc()
     ---@type any
     local ts = ffi.new("ts[?]", 1)
     ffi.C.clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts)
-    return assert(tonumber(ts[0].tv_sec)) + assert(tonumber(ts[0].tv_nsec)) / 10^9
+    return assert(tonumber(ts[0].tv_sec)) +
+        assert(tonumber(ts[0].tv_nsec)) / 10^9
 end
 
 return clock

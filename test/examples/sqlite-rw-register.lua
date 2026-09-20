@@ -41,9 +41,9 @@ local function sqlite_select(stmt, key)
     return ok, val
 end
 
--- `sqlite_rw_register` is a client that performs on database two operations:
--- `read` and `write`. Method `invoke` must apply these operations to a
--- database instance.
+-- `sqlite_rw_register` is a client that performs on database two
+-- operations: `read` and `write`. Method `invoke` must apply
+-- these operations to a database instance.
 local sqlite_rw_register = molly.client.new()
 
 sqlite_rw_register.open = function(self)
@@ -60,9 +60,12 @@ end
 
 sqlite_rw_register.setup = function(self)
     assert(type(self) == 'table')
-    assert(sqlite3.OK == self.db:exec('CREATE TABLE IF NOT EXISTS rw_register (id, val)'))
-    self.insert_stmt = assert(self.db:prepare('INSERT INTO rw_register VALUES (?, ?)'), 'statement prepare')
-    self.select_stmt = assert(self.db:prepare('SELECT val FROM rw_register WHERE id = ?'), 'statement prepare')
+    assert(sqlite3.OK == self.db:exec(
+        'CREATE TABLE IF NOT EXISTS rw_register (id, val)'))
+    self.insert_stmt = assert(self.db:prepare(
+        'INSERT INTO rw_register VALUES (?, ?)'), 'statement prepare')
+    self.select_stmt = assert(self.db:prepare(
+        'SELECT val FROM rw_register WHERE id = ?'), 'statement prepare')
 
     return true
 end
@@ -77,14 +80,16 @@ sqlite_rw_register.invoke = function(self, op)
     local val = op.value[1]
     local type = 'ok'
     if val[OP_TYPE] == 'r' then
-        assert(self.select_stmt:isopen() == true, 'statement has been finalized')
+        assert(self.select_stmt:isopen() == true,
+            'statement has been finalized')
         local ok, v = sqlite_select(self.select_stmt, KEY_ID)
         val[OP_VAL] = v
         if ok == false then
             type = 'fail'
         end
     elseif val[OP_TYPE] == 'w' then
-        assert(self.insert_stmt:isopen() == true, 'statement has been finalized')
+        assert(self.insert_stmt:isopen() == true,
+            'statement has been finalized')
         local ok = sqlite_insert(self.insert_stmt, KEY_ID, val[OP_VAL])
         if ok == false then
             type = 'fail'

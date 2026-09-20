@@ -1,12 +1,14 @@
 ---- Module with thread implementation.
 -- @module molly.thread
 --
--- The module stores an active thread type and delegates generic thread
--- operations (`new`, `yield`, `scheduler`) to the corresponding
--- implementation:
+-- The module stores an active thread type and delegates generic
+-- thread operations (`new`, `yield`, `scheduler`) to the
+-- corresponding implementation:
 --
--- - `molly.compat.thread_fiber` - threads, based on Tarantool fibers.
--- - `molly.compat.thread_coroutine` - threads, based on Lua coroutines.
+-- - `molly.compat.thread_fiber` - threads, based on Tarantool
+--   fibers.
+-- - `molly.compat.thread_coroutine` - threads, based on Lua
+--   coroutines.
 
 local dev_checks = require('molly.dev_checks')
 
@@ -14,8 +16,8 @@ local thread_coroutine = require('molly.compat.thread_coroutine')
 local thread_fiber = require('molly.compat.thread_fiber')
 
 -- A module that returns nil (e.g. `thread_fiber` when fibers are
--- unavailable) is loaded by `require` as `true`, so keep only usable
--- implementations in the map.
+-- unavailable) is loaded by `require` as `true`, so keep only
+-- usable implementations in the map.
 local thread = {}
 if type(thread_fiber) == 'table' then
     thread['fiber'] = thread_fiber
@@ -26,9 +28,9 @@ end
 
 local current = thread_coroutine
 
---- Set an active thread type. Raises an error for an unknown type or
--- for a type with no implementation in the current runtime, e.g.
--- 'fiber' under LuaJIT.
+--- Set an active thread type. Raises an error for an unknown type
+-- or for a type with no implementation in the current runtime,
+-- e.g. 'fiber' under LuaJIT.
 -- @string thread_type Thread type: 'fiber' or 'coroutine'.
 -- @return an active thread implementation
 local function set_type(thread_type)
@@ -58,8 +60,8 @@ local function yield()
     return current.yield()
 end
 
---- Drive coroutine threads to completion. A no-op for fiber threads,
--- which are scheduled by the runtime.
+--- Drive coroutine threads to completion. A no-op for fiber
+-- threads, which are scheduled by the runtime.
 local function scheduler()
     if current.scheduler ~= nil then
         current.scheduler()
