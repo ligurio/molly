@@ -57,6 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Worker errors and `false` results returned by `open`, `setup`,
   `teardown` and `close` are propagated from a thread pool to
   `run_test()`.
+- Generated operations are invoked exactly once: a shared
+  generator cursor is no longer reset by every client thread.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
