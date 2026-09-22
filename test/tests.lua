@@ -915,11 +915,8 @@ local sync_stages = function(backend)
               count_phase(log, 'teardown') == N and
               count_phase(log, 'close') == N,
           name = 'each thread ran open/setup/teardown/close once' },
-        -- A workload generator cursor is shared, but currently
-        -- reset by every client thread, so some operations may be
-        -- invoked more than once.
-        { ok = count_phase(log, 'invoke') >= total_ops,
-          name = 'operations were invoked' },
+        { ok = count_phase(log, 'invoke') == total_ops,
+          name = 'each generated operation was invoked once' },
         { ok = open_l ~= nil and setup_f ~= nil and open_l < setup_f,
           name = 'threads open a connection before any setup' },
         { ok = setup_l ~= nil and invoke_f ~= nil and setup_l < invoke_f,
