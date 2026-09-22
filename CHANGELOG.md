@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- The redundant `fiber` and `coroutine` fields of the `molly.thread`
+  module (a backend is selected with `set_type()`).
+
 ### Fixed
 
 - Executing `close` method in a `Client` instance (#2).
