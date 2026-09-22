@@ -177,8 +177,6 @@ return {
     new = new,
     yield = yield,
     scheduler = scheduler,
-    ['fiber'] = thread['fiber'],
-    ['coroutine'] = thread['coroutine'],
 
     -- Synchronization primitives.
     barrier_new = barrier_new,
