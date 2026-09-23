@@ -57,10 +57,13 @@ install:
 	@install -m 644 $(PROJECT_DIR)/molly/compat/*.lua \
 		        $(LUADIR)/molly/compat
 
-check: luacheck
+check: luacheck emmylua_check
 
 luacheck:
 	@luacheck --config $(PROJECT_DIR)/.luacheckrc --codes $(PROJECT_DIR)
+
+emmylua_check:
+	@emmylua_check --config $(PROJECT_DIR)/.emmyrc.json $(PROJECT_DIR)
 
 test-example:
 	@echo "Run SQLite examples with Tarantool"
