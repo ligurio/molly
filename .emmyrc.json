@@ -14,7 +14,6 @@
       "redefined-local",
       "undefined-global",
       "unresolved-require",
-      "unnecessary-assert",
       "unused"
     ]
   }
