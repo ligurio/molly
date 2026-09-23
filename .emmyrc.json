@@ -13,7 +13,6 @@
       "param-type-mismatch",
       "preferred-local-alias",
       "redefined-local",
-      "undefined-field",
       "undefined-global",
       "unresolved-require",
       "unnecessary-assert",
