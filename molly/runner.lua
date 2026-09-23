@@ -53,6 +53,15 @@
 -- **Disable verbose mode**: see description of `verbose` mode.
 --
 -- **Use fibers**: TODO: performance of fibers vs coroutines.
+--
+-- Client threads are synchronized at stage boundaries with
+-- barriers, see `molly.thread`, similar to Jepsen: all
+-- threads open connections and set up the DB before any of them
+-- runs operations, and none of them tears down until every thread
+-- finished operations. Threads tear down and close connections
+-- independently after the last barrier.
+--
+-- @see molly.thread
 
 local checks = require('molly.dev_checks')
 local math = require('math')
@@ -61,6 +70,7 @@ local clock = require('molly.clock')
 local history_lib = require('molly.history')
 local log = require('molly.log')
 local threadpool = require('molly.threadpool')
+local thread = require('molly.thread')
 local client = require('molly.client')
 local is_tarantool = require('molly.utils').is_tarantool
 
@@ -191,6 +201,12 @@ local function run_test(workload, opts)
     opts.thread_type = opts.thread_type or
                        (is_tarantool() and 'fiber') or 'coroutine'
 
+    -- A fractional number of threads would prevent a barrier from
+    -- ever reaching its expected count and hang the pool.
+    if opts.threads < 1 or opts.threads % 1 ~= 0 then
+        error('opts.threads must be a positive integer')
+    end
+
     if opts.verbose or os.getenv('DEV') == 'ON' then
         log.level = 'debug'
     end
@@ -204,11 +220,23 @@ local function run_test(workload, opts)
     local history = history_lib.new()
     local total_time_begin = clock.proc()
     local pool = threadpool.new(opts.thread_type, opts.threads)
+
+    -- Synchronize client threads at stage boundaries, like Jepsen
+    -- does: all threads open connections and set up the DB before
+    -- any of them runs operations, and none of them tears down
+    -- until every thread finished operations. Barriers are sized
+    -- to a number of client threads.
+    local barriers = {
+        open = thread.barrier_new(opts.threads),
+        setup = thread.barrier_new(opts.threads),
+        invoke = thread.barrier_new(opts.threads),
+    }
     local ok, err = pool:start(client.run, {
         client = workload.client,
         gen = workload.generator,
         history = history,
         nodes = opts.nodes,
+        barriers = barriers,
     })
     if not ok then
         return nil, err

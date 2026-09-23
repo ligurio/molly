@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A bank generator.
 - A `cycle_times()` iterator.
 - A `flip_flop()` iterator.
+- Synchronization primitives (a barrier, a mutex and a wait group)
+  shared by fiber- and coroutine-based threads.
+- Synchronization of client threads at stage boundaries: all
+  threads open connections and set up the DB before any of them
+  runs operations, and no thread tears down until every thread
+  finished operations.
 
 ### Changed
 
@@ -27,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RW-register generator emits every number only once.
 
 ### Removed
+
+- The redundant `fiber` and `coroutine` fields of the `molly.thread`
+  module (a backend is selected with `set_type()`).
 
 ### Fixed
 
@@ -41,11 +50,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a worker function.
 - A client yields to a scheduler through `molly.thread` according
   to the active thread type (fiber or coroutine).
+- A failed worker cancels the rest of a thread pool instead of
+  leaving other workers hanging on synchronization primitives
+  (fail-stop). A failed client stage raises an error, so a single
+  failed client aborts the rest of the pool instead of leaving
+  threads hanging on a barrier.
 - A failed `invoke` is recorded in a history as a `fail` operation
   with an error message.
 - Worker errors and `false` results returned by `open`, `setup`,
   `teardown` and `close` are propagated from a thread pool to
   `run_test()`.
+- Generated operations are invoked exactly once: a shared
+  generator cursor is no longer reset by every client thread.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
