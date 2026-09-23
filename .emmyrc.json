@@ -11,8 +11,7 @@
       "preferred-local-alias",
       "redefined-local",
       "undefined-global",
-      "unresolved-require",
-      "unused"
+      "unresolved-require"
     ]
   }
 }

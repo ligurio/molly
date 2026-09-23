@@ -54,7 +54,7 @@ local function create(self, ...)
     return true
 end
 
-local function cancel(self)
+local function cancel(_self)
     dev_checks('<thread>')
     -- TODO
     return true

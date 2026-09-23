@@ -75,7 +75,7 @@ end
 --
 -- @return table
 -- @function hdr_histogram
-local function hdr_histogram(self)
+local function hdr_histogram(_self)
     return {}
 end
 

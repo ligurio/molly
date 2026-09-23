@@ -494,7 +494,7 @@ local test_dict = {}
 
 local client_dict = client.new()
 
-client_dict.invoke = function(self, op)
+client_dict.invoke = function(_self, op)
     local k = 42
     local val = op.value[1]
     if val[OP_TYPE] == 'r' then
