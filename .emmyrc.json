@@ -8,7 +8,6 @@
       "await-in-sync",
       "call-non-callable",
       "need-check-nil",
-      "param-type-mismatch",
       "preferred-local-alias",
       "redefined-local",
       "undefined-global",

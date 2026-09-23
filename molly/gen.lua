@@ -43,7 +43,8 @@ local tbl = require('molly.compat.tbl')
 
 local fun_mt = debug.getmetatable(fun.range(10))
 local methods = fun_mt.__index
-local exports = tbl.copy(fun)
+---@type table<string, any>
+local exports = assert(tbl.copy(fun))
 
 local unwrap = function(self)
     return self.gen, self.param, self.state
