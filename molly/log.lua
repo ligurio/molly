@@ -104,6 +104,8 @@ for i, x in ipairs(modes) do
         io.write(str)
 
         -- Output to log file.
+        -- log.outfile is a configuration field set by a user.
+        ---@diagnostic disable-next-line: unnecessary-if
         if log.outfile then
             local fp = io.open(log.outfile, "a")
             fp:write(str)

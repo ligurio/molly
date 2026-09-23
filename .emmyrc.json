@@ -16,7 +16,6 @@
       "undefined-global",
       "unresolved-require",
       "unnecessary-assert",
-      "unnecessary-if",
       "unused"
     ]
   }
