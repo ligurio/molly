@@ -26,10 +26,20 @@ local threadpool = require('molly.threadpool')
 local thread = require('molly.thread')
 local utils = molly.utils
 
+-- A thread backend is available when its implementation is
+-- loaded by the runtime: 'fiber' only under Tarantool,
+-- 'coroutine' always.
+local function thread_backend_available(backend)
+    if backend == 'fiber' then
+        return utils.is_tarantool()
+    end
+    return true
+end
+
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(30)
+test:plan(34)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -398,108 +408,127 @@ test:test('gen.flip_flop', function(test)
     test:is(ok, false, 'gen.flip_flop(): error on a single generator')
 end)
 
-test:test('runner', function(test)
-    test:plan(10)
+for _, backend in ipairs({ 'coroutine', 'fiber' }) do
+    test:test('runner (' .. backend .. ')', function(test)
+        if not thread_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
 
-    local workload_opts = {
-        client = {},
-        generator = {},
-    }
-    local test_opts = {}
-    local ok, err = pcall(runner.run_test, workload_opts, test_opts)
-    test:is(ok, false, "runner.run_test(): invalid generator")
-    local res = string.find(tostring(err),
-        'Generator must have an unwrap method')
-    test:isnt(res, nil, "runner.run_test(): err is not nil")
+        test:plan(10)
 
-    local single_gen = gen_lib.range(1, 1):map(function(n)
-        return { f = 'test', value = n }
-    end)
-    local opts_with_nodes = {
-        nodes = { 'a' },
-    }
+        local workload_opts = {
+            client = {},
+            generator = {},
+        }
+        local test_opts = {}
 
-    -- A worker returns (false, err) when open() fails.
-    local cl = client.new()
-    cl.open = function() error('broken open') end
-    ok, err = runner.run_test({
-        client = cl,
-        generator = single_gen,
-    }, opts_with_nodes)
-    test:ok(not ok, "runner.run_test(): broken open")
-    res = string.find(tostring(err), 'broken open')
-    test:isnt(res, nil, "runner.run_test(): broken open error")
+        local ok, err = pcall(runner.run_test, workload_opts, test_opts)
+        test:is(ok, false, "runner.run_test(): invalid generator")
+        local res = string.find(tostring(err),
+            'Generator must have an unwrap method')
+        test:isnt(res, nil, "runner.run_test(): err is not nil")
 
-    -- A worker returns (false, err) when setup() fails.
-    cl = client.new()
-    cl.setup = function() error('broken setup') end
-    ok, err = runner.run_test({
-        client = cl,
-        generator = single_gen,
-    }, opts_with_nodes)
-    test:ok(not ok, "runner.run_test(): broken setup")
-    res = string.find(tostring(err), 'broken setup')
-    test:isnt(res, nil, "runner.run_test(): broken setup error")
-
-    -- A worker returns (false, err) when teardown() fails.
-    cl = client.new()
-    cl.invoke = function(_self, _op)
-        return { type = 'ok', f = 'test' }
-    end
-    cl.teardown = function() error('broken teardown') end
-    ok, err = runner.run_test({
-        client = cl,
-        generator = single_gen,
-    }, opts_with_nodes)
-    test:ok(not ok, "runner.run_test(): broken teardown")
-    res = string.find(tostring(err), 'broken teardown')
-    test:isnt(res, nil, "runner.run_test(): broken teardown error")
-
-    -- A worker panic is propagated to run_test().
-    local crash_gen = {
-        unwrap = function()
-            return function() error('generator boom') end, nil, nil
-        end,
-    }
-    cl = client.new()
-    ok, err = runner.run_test({
-        client = cl,
-        generator = crash_gen,
-    }, opts_with_nodes)
-    test:ok(not ok, "runner.run_test(): crashed worker")
-    res = string.find(tostring(err), 'generator boom')
-    test:isnt(res, nil, "runner.run_test(): crashed worker error")
-end)
-
-test:test('client.invoke_fail', function(test)
-    test:plan(5)
-
-    local thread_type = utils.is_tarantool() and 'fiber' or 'coroutine'
-    local cl = client.new()
-    cl.invoke = function(_self, _op)
-        error('invoke boom')
-    end
-
-    local hist = history.new()
-    local pool = threadpool.new(thread_type, 1)
-    local ok = pool:start(client.run, {
-        client = cl,
-        gen = gen_lib.range(1, 1):map(function(n)
+        local single_gen = gen_lib.range(1, 1):map(function(n)
             return { f = 'test', value = n }
-        end),
-        history = hist,
-        nodes = { 'a' },
-    })
-    test:is(ok, true, 'client.invoke_fail(): run_client returned ok')
+        end)
+        local opts_with_nodes = {
+            nodes = { 'a' },
+            thread_type = backend,
+        }
 
-    local ops = hist.history
-    test:is(#ops, 2, 'client.invoke_fail(): history has invoke and fail ops')
-    test:is(ops[1].type, 'invoke',
-        'client.invoke_fail(): invoke op is recorded')
-    test:is(ops[2].type, 'fail', 'client.invoke_fail(): fail op is recorded')
-    test:isnt(string.find(ops[2].error, 'invoke boom'), nil,
-        'client.invoke_fail(): error message is recorded')
-end)
+        -- A worker returns (false, err) when open() fails.
+        local cl = client.new()
+        cl.open = function() error('broken open') end
+        ok, err = runner.run_test({
+            client = cl,
+            generator = single_gen,
+        }, opts_with_nodes)
+        test:ok(not ok, "runner.run_test(): broken open")
+        res = string.find(tostring(err), 'broken open')
+        test:isnt(res, nil, "runner.run_test(): broken open error")
+
+        -- A worker returns (false, err) when setup() fails.
+        cl = client.new()
+        cl.setup = function() error('broken setup') end
+        ok, err = runner.run_test({
+            client = cl,
+            generator = single_gen,
+        }, opts_with_nodes)
+        test:ok(not ok, "runner.run_test(): broken setup")
+        res = string.find(tostring(err), 'broken setup')
+        test:isnt(res, nil, "runner.run_test(): broken setup error")
+
+        -- A worker returns (false, err) when teardown() fails.
+        cl = client.new()
+        cl.invoke = function(_self, _op)
+            return { type = 'ok', f = 'test' }
+        end
+        cl.teardown = function() error('broken teardown') end
+        ok, err = runner.run_test({
+            client = cl,
+            generator = single_gen,
+        }, opts_with_nodes)
+        test:ok(not ok, "runner.run_test(): broken teardown")
+        res = string.find(tostring(err), 'broken teardown')
+        test:isnt(res, nil, "runner.run_test(): broken teardown error")
+
+        -- A worker panic is propagated to run_test().
+        local crash_gen = {
+            unwrap = function()
+                return function() error('generator boom') end, nil, nil
+            end,
+        }
+        cl = client.new()
+        ok, err = runner.run_test({
+            client = cl,
+            generator = crash_gen,
+        }, opts_with_nodes)
+        test:ok(not ok, "runner.run_test(): crashed worker")
+        res = string.find(tostring(err), 'generator boom')
+        test:isnt(res, nil, "runner.run_test(): crashed worker error")
+    end)
+end
+
+for _, backend in ipairs({ 'coroutine', 'fiber' }) do
+    test:test('client.invoke_fail (' .. backend .. ')', function(test)
+        if not thread_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
+
+        test:plan(5)
+
+        local cl = client.new()
+        cl.invoke = function(_self, _op)
+            error('invoke boom')
+        end
+
+        local hist = history.new()
+        local pool = threadpool.new(backend, 1)
+        local ok = pool:start(client.run, {
+            client = cl,
+            gen = gen_lib.range(1, 1):map(function(n)
+                return { f = 'test', value = n }
+            end),
+            history = hist,
+            nodes = { 'a' },
+        })
+        test:is(ok, true, 'client.invoke_fail(): run_client returned ok')
+
+        local ops = hist.history
+        test:is(#ops, 2,
+            'client.invoke_fail(): history has invoke and fail ops')
+        test:is(ops[1].type, 'invoke',
+            'client.invoke_fail(): invoke op is recorded')
+        test:is(ops[2].type, 'fail',
+            'client.invoke_fail(): fail op is recorded')
+        test:isnt(string.find(ops[2].error, 'invoke boom'), nil,
+            'client.invoke_fail(): error message is recorded')
+    end)
+end
 
 ------------------------
 -- Integration tests  --
@@ -593,31 +622,47 @@ test:test("threadpool", function(test)
     test:isnt(res, nil, "threadpool.new('xxx'): error is correct")
 end)
 
-test:test('threadpool.coroutine_args', function(test)
-    test:plan(3)
+for _, backend in ipairs({ 'coroutine', 'fiber' }) do
+    test:test('threadpool.args (' .. backend .. ')', function(test)
+        if not thread_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
 
-    local seen = {}
-    local pool = threadpool.new('coroutine', 1)
-    local function worker(id, opts)
-        seen = { id = id, opts = opts }
-        return true
-    end
-    local ok = pool:start(worker, { marker = 'x' })
-    test:is(ok, true, 'threadpool.coroutine_args(): start returned ok')
-    test:is(seen.id, 1, 'threadpool.coroutine_args(): thread_id is passed')
-    test:is(seen.opts.marker, 'x',
-        'threadpool.coroutine_args(): worker arguments are passed')
-end)
+        test:plan(3)
 
-test:test('threadpool.worker_error', function(test)
-    test:plan(2)
+        local seen = {}
+        local pool = threadpool.new(backend, 1)
+        local function worker(id, opts)
+            seen = { id = id, opts = opts }
+            return true
+        end
+        local ok = pool:start(worker, { marker = 'x' })
+        test:is(ok, true, 'threadpool.args(): start returned ok')
+        test:is(seen.id, 1, 'threadpool.args(): thread_id is passed')
+        test:is(seen.opts.marker, 'x',
+            'threadpool.args(): worker arguments are passed')
+    end)
+end
 
-    local pool = threadpool.new('coroutine', 1)
-    local ok, err = pool:start(function() error('worker boom') end, {})
-    test:is(ok, nil, 'threadpool.worker_error(): start returned nil')
-    local res = string.find(tostring(err), 'worker boom')
-    test:isnt(res, nil, 'threadpool.worker_error(): error is propagated')
-end)
+for _, backend in ipairs({ 'coroutine', 'fiber' }) do
+    test:test('threadpool.worker_error (' .. backend .. ')', function(test)
+        if not thread_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
+
+        test:plan(2)
+
+        local pool = threadpool.new(backend, 1)
+        local ok, err = pool:start(function() error('worker boom') end, {})
+        test:is(ok, nil, 'threadpool.worker_error(): start returned nil')
+        local res = string.find(tostring(err), 'worker boom')
+        test:isnt(res, nil, 'threadpool.worker_error(): error is propagated')
+    end)
+end
 
 test:test("threads", function(test)
     test:plan(2)
@@ -634,16 +679,9 @@ end)
 -- Thread sync tests  --
 ------------------------
 
-local function sync_backend_available(backend)
-    if backend == 'fiber' then
-        return utils.is_tarantool()
-    end
-    return true
-end
-
 local function sync_subtest(backend, kind, checks_fn)
     test:test('sync.' .. kind .. ' (' .. backend .. ')', function(test)
-        if not sync_backend_available(backend) then
+        if not thread_backend_available(backend) then
             test:plan(1)
             test:skip(backend .. ' is not available')
             return
@@ -935,7 +973,7 @@ end
 
 local function stages_subtest(backend, checks_fn)
     test:test('stages (' .. backend .. ')', function(test)
-        if not sync_backend_available(backend) then
+        if not thread_backend_available(backend) then
             test:plan(1)
             test:skip(backend .. ' is not available')
             return
