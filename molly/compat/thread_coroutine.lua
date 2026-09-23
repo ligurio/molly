@@ -16,7 +16,7 @@ local threads = {}
 
 local function scheduler()
     while true do
-        local n = table.getn(threads)
+        local n = #threads
         if n == 0 then break end   -- No more threads to run.
         local id = math.random(1, n)
         local thread = threads[id]

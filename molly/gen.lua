@@ -459,7 +459,7 @@ local mix_gen
 
 mix_gen = function(_, state)
     assert(type(state) == 'table')
-    local len = table.getn(state)
+    local len = #state
     if len == 0 then
         return nil, nil
     end

@@ -65,7 +65,7 @@ local function run_client(thread_id, opts)
     local ops_generator = opts.gen
     local history = opts.history
 
-    local nth = math.random(1, table.getn(opts.nodes)) -- TODO: Use fun.cycle() and closure.
+    local nth = math.random(1, #opts.nodes) -- TODO: Use fun.cycle() and closure.
     local addr = opts.nodes[nth]
 
     local client_data = {}
