@@ -39,7 +39,7 @@ test:test('clock', function(test)
     test:is(res_tarantool or res_luajit, true, "clock.monotonic64()")
     test:isnumber(clock.monotonic(), "clock.monotonic()")
     local diff = math.abs(clock.monotonic() -
-        tonumber(clock.monotonic64()) / 10^9)
+        assert(tonumber(clock.monotonic64())) / 10^9)
     test:ok(diff < 0.01, "clock.monotonic() in seconds")
     test:isnumber(clock.proc(), "clock.proc()")
     test:isnil(clock.sleep(0.1), "clock.sleep()")

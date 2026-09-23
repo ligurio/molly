@@ -8,7 +8,6 @@
       "box"
     ],
     "disable": [
-      "need-check-nil",
       "preferred-local-alias",
       "redefined-local",
       "unresolved-require"
