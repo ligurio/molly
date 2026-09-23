@@ -58,6 +58,7 @@ local function process_operation(client, history, op, thread_id_str, thread_id, 
     history:add(res)
 end
 
+---@async
 local function run_client(thread_id, opts)
     dev_checks('number', 'table')
 

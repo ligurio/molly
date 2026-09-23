@@ -5,7 +5,6 @@
   },
   "diagnostics": {
     "disable": [
-      "await-in-sync",
       "need-check-nil",
       "preferred-local-alias",
       "redefined-local",
