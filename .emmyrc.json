@@ -8,7 +8,6 @@
       "assign-type-mismatch",
       "await-in-sync",
       "call-non-callable",
-      "deprecated",
       "need-check-nil",
       "param-type-mismatch",
       "preferred-local-alias",
