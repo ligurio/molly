@@ -395,7 +395,7 @@ test:test('runner', function(test)
     local test_opts = {}
     local ok, err = pcall(runner.run_test, workload_opts, test_opts)
     test:is(ok, false, "runner.run_test(): invalid generator")
-    local res = string.find(err, 'Generator must have an unwrap method')
+    local res = string.find(tostring(err), 'Generator must have an unwrap method')
     test:isnt(res, nil, "runner.run_test(): err is not nil")
 
     local single_gen = gen_lib.range(1, 1):map(function(n)
@@ -413,7 +413,7 @@ test:test('runner', function(test)
         generator = single_gen,
     }, opts_with_nodes)
     test:ok(not ok, "runner.run_test(): broken open")
-    res = string.find(err, 'broken open')
+    res = string.find(tostring(err), 'broken open')
     test:isnt(res, nil, "runner.run_test(): broken open error")
 
     -- A worker returns (false, err) when setup() fails.
@@ -424,7 +424,7 @@ test:test('runner', function(test)
         generator = single_gen,
     }, opts_with_nodes)
     test:ok(not ok, "runner.run_test(): broken setup")
-    res = string.find(err, 'broken setup')
+    res = string.find(tostring(err), 'broken setup')
     test:isnt(res, nil, "runner.run_test(): broken setup error")
 
     -- A worker returns (false, err) when teardown() fails.
@@ -438,7 +438,7 @@ test:test('runner', function(test)
         generator = single_gen,
     }, opts_with_nodes)
     test:ok(not ok, "runner.run_test(): broken teardown")
-    res = string.find(err, 'broken teardown')
+    res = string.find(tostring(err), 'broken teardown')
     test:isnt(res, nil, "runner.run_test(): broken teardown error")
 
     -- A worker panic is propagated to run_test().
@@ -453,7 +453,7 @@ test:test('runner', function(test)
         generator = crash_gen,
     }, opts_with_nodes)
     test:ok(not ok, "runner.run_test(): crashed worker")
-    res = string.find(err, 'generator boom')
+    res = string.find(tostring(err), 'generator boom')
     test:isnt(res, nil, "runner.run_test(): crashed worker error")
 end)
 
@@ -572,7 +572,7 @@ test:test("threadpool", function(test)
     local err
     ok, err = pcall(threadpool.new, 'xxx', 1)
     test:is(ok, false, "threadpool.new('xxx'): ok is true")
-    res = string.find(err, 'No thread library with type "xxx"')
+    res = string.find(tostring(err), 'No thread library with type "xxx"')
     test:isnt(res, nil, "threadpool.new('xxx'): error is correct")
 end)
 
@@ -598,7 +598,7 @@ test:test('threadpool.worker_error', function(test)
     local pool = threadpool.new('coroutine', 1)
     local ok, err = pool:start(function() error('worker boom') end, {})
     test:is(ok, nil, 'threadpool.worker_error(): start returned nil')
-    local res = string.find(err, 'worker boom')
+    local res = string.find(tostring(err), 'worker boom')
     test:isnt(res, nil, 'threadpool.worker_error(): error is propagated')
 end)
 

@@ -43,7 +43,7 @@ end
 
 local function ok(test, cond, message, extra)
     test.total = test.total + 1
-    io.write(string.rep(' ', 4 * test.level))
+    io.write(string.rep(' ', math.floor(4 * test.level)))
     if cond then
         io.write(string.format("ok - %s\n", message))
         return true
@@ -241,7 +241,7 @@ end
 
 local function plan(test, planned)
     test.planned = planned
-    io.write(string.rep(' ', 4 * test.level), string.format("1..%d\n", planned))
+    io.write(string.rep(' ', math.floor(4 * test.level)), string.format("1..%d\n", planned))
 end
 
 local function check(test)
