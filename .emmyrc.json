@@ -5,7 +5,6 @@
   },
   "diagnostics": {
     "disable": [
-      "assign-type-mismatch",
       "await-in-sync",
       "call-non-callable",
       "need-check-nil",
