@@ -6,7 +6,6 @@
   "diagnostics": {
     "disable": [
       "await-in-sync",
-      "call-non-callable",
       "need-check-nil",
       "preferred-local-alias",
       "redefined-local",
