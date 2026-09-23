@@ -35,21 +35,21 @@ function clock.monotonic()
     ---@type any
     local ts = ffi.new("ts[?]", 1)
     ffi.C.clock_gettime(CLOCK_MONOTONIC, ts)
-    return tonumber(ts[0].tv_sec) + tonumber(ts[0].tv_nsec) / 10^9
+    return assert(tonumber(ts[0].tv_sec)) + assert(tonumber(ts[0].tv_nsec)) / 10^9
 end
 
 function clock.monotonic64()
     ---@type any
     local ts = ffi.new("ts[?]", 1)
     ffi.C.clock_gettime(CLOCK_MONOTONIC, ts)
-    return tonumber(ts[0].tv_sec * 10^9 + ts[0].tv_nsec)
+    return assert(tonumber(ts[0].tv_sec * 10^9 + ts[0].tv_nsec))
 end
 
 function clock.proc()
     ---@type any
     local ts = ffi.new("ts[?]", 1)
     ffi.C.clock_gettime(CLOCK_PROCESS_CPUTIME_ID, ts)
-    return tonumber(ts[0].tv_sec) + tonumber(ts[0].tv_nsec) / 10^9
+    return assert(tonumber(ts[0].tv_sec)) + assert(tonumber(ts[0].tv_nsec)) / 10^9
 end
 
 return clock

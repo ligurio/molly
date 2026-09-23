@@ -41,7 +41,7 @@ local clock = require('molly.clock')
 local log = require('molly.log')
 local tbl = require('molly.compat.tbl')
 
-local fun_mt = debug.getmetatable(fun.range(10))
+local fun_mt = assert(debug.getmetatable(fun.range(10)))
 local methods = fun_mt.__index
 ---@type table<string, any>
 local exports = assert(tbl.copy(fun))
@@ -470,6 +470,7 @@ mix_gen = function(_, state)
     local state2, value = gen1(param1, state1)
     if value == nil then
         table.remove(state, nth)
+        ---@diagnostic disable-next-line: need-check-nil
         return mix_gen(nil, state)
     end
     state[nth] = fun.wrap(gen1, param1, state2)

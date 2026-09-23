@@ -210,11 +210,11 @@ local function run_test(workload, opts)
         local log_txt = 'history.txt'
         local log_json = 'history.json'
 
-        local fp = io.open(log_txt, 'w')
+        local fp = assert(io.open(log_txt, 'w'))
         fp:write(history:to_txt())
         fp:close()
 
-        fp = io.open(log_json, 'w')
+        fp = assert(io.open(log_json, 'w'))
         fp:write(history:to_json())
         fp:close()
 

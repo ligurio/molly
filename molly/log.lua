@@ -93,7 +93,7 @@ for i, x in ipairs(modes) do
         local msg = string.format(...)
         local lineinfo = ''
         if log.level == 'debug' then
-            local debug_info = debug.getinfo(2, "Sl")
+            local debug_info = assert(debug.getinfo(2, "Sl"))
             local filename = utils.basename(debug_info.short_src)
             lineinfo = (' %s:%d'):format(filename, debug_info.currentline)
         end
@@ -107,7 +107,7 @@ for i, x in ipairs(modes) do
         -- log.outfile is a configuration field set by a user.
         ---@diagnostic disable-next-line: unnecessary-if
         if log.outfile then
-            local fp = io.open(log.outfile, "a")
+            local fp = assert(io.open(log.outfile, "a"))
             fp:write(str)
             fp:close()
         end
