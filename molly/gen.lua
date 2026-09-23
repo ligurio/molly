@@ -416,7 +416,7 @@ local cycle_times = function(...)
     if #times < #gens then
         error('cycle_times: expected a duration before each generator', 2)
     end
-    local stages, cutoffs, period = {}, {}, 0
+    local stages, cutoffs, period = {}, {}, 0.0
     for i, it in ipairs(gens) do
         local duration = times[i]
         if type(duration) ~= 'number' or duration <= 0 then

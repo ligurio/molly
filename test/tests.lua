@@ -560,13 +560,13 @@ test:test("threadpool", function(test)
     test:is(type(pool), 'table', "threadpool.new('coroutine'): type")
 
     local ok
-    ok, pool = pcall(threadpool.new, 'fiber', 1)
+    local fiber_pool
+    ok, fiber_pool = pcall(threadpool.new, 'fiber', 1)
     local res_tarantool = ok == true and
-                          type(pool) == 'table' and
-                          utils.is_tarantool() == true
-    local res_luajit = ok == false and
-                       string.find(pool, 'No thread library with type "fiber"') ~= nil and
-                       utils.is_tarantool() == false
+        type(fiber_pool) == 'table' and
+        utils.is_tarantool() == true
+    local res_luajit = ok == false and utils.is_tarantool() == false and
+        string.find(fiber_pool, 'No thread library with type "fiber"') ~= nil
     test:is(res_luajit or res_tarantool, true, "threadpool.new('fiber'): type")
 
     local err
