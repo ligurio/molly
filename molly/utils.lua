@@ -10,6 +10,7 @@ int setenv(const char *name, const char *value, int overwrite);
 int unsetenv(const char *name);
 int chdir(const char *dirname);
 char* getcwd(char *buffer, int maxlen);
+char* strerror(int errnum);
 ]]
 
 --- Set and unset environment variable.
@@ -27,7 +28,7 @@ local function setenv(key, value)
         rc = ffi.C.unsetenv(key)
     end
     if rc == -1 then
-	error(('Error: %s'):format(ffi.errno().errstring()))
+	error(('Error: %s'):format(ffi.string(ffi.C.strerror(ffi.errno()))))
     end
 
     return true

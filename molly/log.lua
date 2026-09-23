@@ -13,6 +13,7 @@
 local clock = require('molly.clock')
 local utils = require('molly.utils')
 
+---@type table<string, any>
 local log = { _version = "0.1.0" }
 
 log.outfile = nil
