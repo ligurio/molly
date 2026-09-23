@@ -80,6 +80,7 @@ local function join(self)
     return true
 end
 
+---@async
 local function yield()
     coroutine.yield()
     return true

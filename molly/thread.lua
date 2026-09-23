@@ -53,6 +53,7 @@ end
 
 --- Yield control to a scheduler of the active thread type.
 -- @return true
+---@async
 local function yield()
     return current.yield()
 end
