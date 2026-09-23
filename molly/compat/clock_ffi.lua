@@ -19,19 +19,9 @@ int clock_nanosleep(clockid_t clock_id, int flags,
 
 local clock = {}
 
--- luacheck: push no unused
 -- The IDs of the various system clocks (for POSIX.1b interval timers).
-local CLOCK_REALTIME = 0
 local CLOCK_MONOTONIC = 1
 local CLOCK_PROCESS_CPUTIME_ID = 2
-local CLOCK_THREAD_CPUTIME_ID = 3
-local CLOCK_MONOTONIC_RAW = 4
-local CLOCK_REALTIME_COARSE = 5
-local CLOCK_MONOTONIC_COARSE = 6
-local CLOCK_BOOTTIME = 7
-local CLOCK_REALTIME_ALARM = 8
-local CLOCK_BOOTTIME_ALARM = 9
--- luacheck: pop
 
 function clock.sleep(time)
     ---@type any

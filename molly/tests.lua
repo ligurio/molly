@@ -119,7 +119,7 @@ local function rw_register_op_r()
         }},
     }, {
         __type = '<operation>',
-        __tostring = function(self)
+        __tostring = function(_self)
             return '<read>'
         end,
     })
@@ -136,7 +136,7 @@ local function rw_register_op_w(n)
         }}
     }, {
         __type = '<operation>',
-        __tostring = function(self)
+        __tostring = function(_self)
             return '<write>'
         end,
     })
@@ -191,7 +191,7 @@ local function cas_op_r()
         },
     }, {
         __type = '<operation>',
-        __tostring = function(self)
+        __tostring = function(_self)
             return '<read>'
         end,
     })
@@ -206,7 +206,7 @@ local function cas_op_w()
         }
     }, {
         __type = '<operation>',
-        __tostring = function(self)
+        __tostring = function(_self)
             return '<write>'
         end,
     })
@@ -222,7 +222,7 @@ local function cas_op_cas()
         }
     }, {
         __type = '<operation>',
-        __tostring = function(self)
+        __tostring = function(_self)
             return '<cas>'
         end,
     })
@@ -297,7 +297,7 @@ local function list_append_op(param)
         value = mops,
     }, {
         __type = '<operation>',
-        __tostring = function(self)
+        __tostring = function(_self)
             return '<list-append>'
         end,
     })
