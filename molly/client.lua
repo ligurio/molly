@@ -11,6 +11,12 @@
 -- `invoke` boundaries are synchronized; threads tear down and
 -- close connections independently after the last barrier.
 --
+-- An operation that crashed a client is recorded as an `info`
+-- operation (an indeterminate state) and the process is
+-- restarted, as in Jepsen. A client that is not reusable is
+-- reopened before the next operation; see the `reusable`
+-- method below.
+--
 -- @see molly.gen
 -- @see molly.tests
 -- @see molly.thread
@@ -41,9 +47,41 @@ local function sync_stage(opts, stage)
     barrier:wait()
 end
 
-local function process_operation(client, history, op, thread_id_str, thread_id,
+-- Reserve the next index in a history.
+local function next_index()
+    local index = op_index
+    op_index = op_index + 1
+    return index
+end
+
+-- A client is reusable when it survives a crashed invocation
+-- without a restart. By default a client is not reusable, as in
+-- Jepsen. A client may implement an optional
+-- `reusable(client, client_data)` method that returns a boolean.
+local function is_reusable(client, client_data)
+    if type(client.reusable) ~= 'function' then
+        return false
+    end
+    local ok, res = pcall(client.reusable, client, client_data)
+    return ok and res == true
+end
+
+-- Advance a process identifier after an indeterminate operation,
+-- so that subsequent operations are recorded under a new process,
+-- as in Jepsen. Process identifiers are unique within a run.
+local function next_process(state)
+    local context = state.context
+    if context ~= nil and context.next_process ~= nil then
+        state.process = context.next_process
+        context.next_process = context.next_process + 1
+    else
+        state.process = state.process + 1
+    end
+end
+
+local function process_operation(client, history, op, thread_id_str, state,
         client_data)
-    dev_checks('<client>', '<history>', '!', 'string', 'number')
+    dev_checks('<client>', '<history>', '!', 'string', 'table', 'table')
 
     if utils.is_callable(op) then
         op = op()
@@ -52,38 +90,78 @@ local function process_operation(client, history, op, thread_id_str, thread_id,
     assert(type(op) == 'table', 'Type of operation is not a Lua table.')
 
     op.type = 'invoke'
-    op.process = thread_id
-    op.index = op_index
-    op_index = op_index + 1
+    op.process = state.process
+    op.index = next_index()
     op.time = clock.monotonic64()
     log.debug('%-4s %s', thread_id_str, op_lib.to_string(op))
     history:add(op)
+
+    -- A crashed client may be in an unknown state. When it is not
+    -- reusable, reopen the connection before the next operation.
+    -- A failed reconnect is recorded as a 'fail' operation and
+    -- retried on the next operation, as in Jepsen.
+    if state.needs_reopen then
+        if is_reusable(client, client_data) then
+            state.needs_reopen = false
+        else
+            pcall(client.close, client, client_data)
+            local ok, err = pcall(client.open, client, state.addr, client_data)
+            if not ok then
+                log.info('ERROR: %s', err)
+                local failed_op = {
+                    type = 'fail',
+                    f = op.f,
+                    value = op.value,
+                    process = state.process,
+                    index = next_index(),
+                    time = clock.monotonic64(),
+                    error = 'no-client: ' .. tostring(err),
+                }
+                log.debug('%-4s %s', thread_id_str,
+                    op_lib.to_string(failed_op))
+                history:add(failed_op)
+                return
+            end
+            state.needs_reopen = false
+        end
+    end
+
     local ok, res = pcall(client.invoke, client, op, client_data)
     if not ok then
-        log.warn('Process %d crashed (%s)', thread_id, res)
+        log.warn('Process %d crashed (%s)', state.process, res)
+        -- A crashed operation is indeterminate: it may or may
+        -- not have taken place. Record it as 'info' and restart
+        -- the process, as in Jepsen.
+        state.needs_reopen = true
         local failed_op = {
-            type = 'fail',
+            type = 'info',
             f = op.f,
             value = op.value,
-            process = thread_id,
-            index = op_index,
+            process = state.process,
+            index = next_index(),
             time = clock.monotonic64(),
-            error = tostring(res),
+            error = 'indeterminate: ' .. tostring(res),
         }
-        op_index = op_index + 1
         log.debug('%-4s %s', thread_id_str, op_lib.to_string(failed_op))
         history:add(failed_op)
+        next_process(state)
         return
     end
     if res.type == nil then
         error('Operation type is empty.')
     end
-    res.index = op_index
-    op_index = op_index + 1
-    res.process = thread_id
+    res.index = next_index()
+    res.process = state.process
     res.time = clock.monotonic64()
     log.debug('%-4s %s', thread_id_str, op_lib.to_string(res))
     history:add(res)
+
+    -- A client that returned an indeterminate operation has to be
+    -- restarted as well.
+    if res.type == 'info' then
+        state.needs_reopen = true
+        next_process(state)
+    end
 end
 
 ---@async
@@ -98,7 +176,22 @@ local function run_client(thread_id, opts)
     local nth = math.random(1, #opts.nodes)
     local addr = opts.nodes[nth]
 
+    -- A shared context holds the next process identifier. After
+    -- an indeterminate operation a thread gets a fresh process,
+    -- as in Jepsen; identifiers are unique within a run.
+    local context = opts.context
+    if context == nil then
+        context = { next_process = (opts.threads or 1) + 1 }
+        opts.context = context
+    end
+
     local client_data = {}
+    local thread_state = {
+        process = thread_id,
+        needs_reopen = false,
+        context = context,
+        addr = addr,
+    }
     log.debug('Opening connection by thread %d to DB (%s)', thread_id, addr)
     local ok, err = pcall(client.open, client, addr, client_data)
     if not ok then
@@ -138,7 +231,7 @@ local function run_client(thread_id, opts)
         end
         opts.gen_state = state
         ok, err = pcall(process_operation, client, history, op, thread_id_str,
-            thread_id, client_data)
+            thread_state, client_data)
         if ok == false then
             error(('Failed to process an operation: %s'):format(
                 tostring(err)), 0)
@@ -178,6 +271,8 @@ local client_mt = {
         invoke = function() return {} end,
         teardown = function() return true end,
         close = function() return true end,
+        -- A client is not reusable by default, as in Jepsen.
+        reusable = function() return false end,
     }
 }
 
@@ -208,6 +303,11 @@ local client_mt = {
 --   - `op` - an operation generated by a test generator
 --   - `client_data` - a table with client's data
 --
+-- An `invoke` that raises an error crashes the client. The
+-- operation is recorded in a history as `info` (an indeterminate
+-- state: it may or may not have taken place) and the process is
+-- restarted. See `reusable` below.
+--
 -- **teardown** - function that tear down a database instance.
 -- Function must raise an error on failure. Single argument is
 -- passed to the function:
@@ -217,6 +317,16 @@ local client_mt = {
 -- instance. Function must raise an error on failure. Single
 -- argument is passed to the function:
 --   - `client_data` - a table with client's data
+--
+-- **reusable** - optional function that reports whether a client
+-- survives a crashed invocation without a restart. A single
+-- argument is passed to the function:
+--   - `client_data` - a table with client's data
+-- A client is not reusable by default, as in Jepsen: after a
+-- crashed `invoke` (or an `invoke` that returned `info`) the
+-- connection is reopened with `close` and `open` before the next
+-- operation. A failed reconnect is recorded as a `fail`
+-- operation and retried on the next operation.
 --
 -- In general it is recommended to raise an error in case of fatal
 -- errors like failed database setup, teardown or connection and

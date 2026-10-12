@@ -237,6 +237,9 @@ local function run_test(workload, opts)
         history = history,
         nodes = opts.nodes,
         barriers = barriers,
+        -- Process identifiers start after the client threads,
+        -- so a restarted process does not collide with them.
+        context = { next_process = opts.threads + 1 },
     })
     if not ok then
         return nil, err
