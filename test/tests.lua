@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(34)
+test:plan(36)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -524,13 +524,74 @@ for _, backend in ipairs({ 'coroutine', 'fiber' }) do
 
         local ops = hist.history
         test:is(#ops, 2,
-            'client.invoke_fail(): history has invoke and fail ops')
+            'client.invoke_fail(): history has invoke and info ops')
         test:is(ops[1].type, 'invoke',
             'client.invoke_fail(): invoke op is recorded')
-        test:is(ops[2].type, 'fail',
-            'client.invoke_fail(): fail op is recorded')
+        test:is(ops[2].type, 'info',
+            'client.invoke_fail(): info op is recorded')
         test:isnt(string.find(ops[2].error, 'invoke boom'), nil,
             'client.invoke_fail(): error message is recorded')
+    end)
+end
+
+for _, backend in ipairs({ 'coroutine', 'fiber' }) do
+    test:test('client.reopen (' .. backend .. ')', function(test)
+        if not thread_backend_available(backend) then
+            test:plan(1)
+            test:skip(backend .. ' is not available')
+            return
+        end
+
+        test:plan(9)
+
+        local opened, closed = 0, 0
+        local crashed = false
+        local cl = client.new()
+        cl.open = function(_self, _addr, _client_data)
+            opened = opened + 1
+            return true
+        end
+        cl.setup = function(_self, _client_data)
+            return true
+        end
+        cl.close = function(_self, _client_data)
+            closed = closed + 1
+            return true
+        end
+        cl.invoke = function(_self, op)
+            if not crashed then
+                crashed = true
+                error('invoke boom')
+            end
+            return { type = 'ok', f = op.f }
+        end
+
+        local hist = history.new()
+        local pool = threadpool.new(backend, 1)
+        local ok = pool:start(client.run, {
+            client = cl,
+            gen = gen_lib.range(1, 3):map(function(n)
+                return { f = 'test', value = n }
+            end),
+            history = hist,
+            nodes = { 'a' },
+        })
+        test:is(ok, true, 'client.reopen(): run_client returned ok')
+
+        local ops = hist.history
+        test:is(#ops, 6, 'client.reopen(): history has six ops')
+        test:is(ops[2].type, 'info',
+            'client.reopen(): a crash is recorded as info')
+        test:is(ops[1].process, 1, 'client.reopen(): crashed process id')
+        test:is(ops[2].process, 1,
+            'client.reopen(): completion keeps the crashed process id')
+        test:is(ops[3].process, 2,
+            'client.reopen(): the next operation has a new process id')
+        test:is(ops[4].type, 'ok',
+            'client.reopen(): the next operation succeeds')
+        test:is(opened, 2, 'client.reopen(): the client is reopened')
+        test:is(closed, 2,
+            'client.reopen(): the client is closed on reopen and at the end')
     end)
 end
 

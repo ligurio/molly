@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   threads open connections and set up the DB before any of them
   runs operations, and no thread tears down until every thread
   finished operations.
+- An optional `reusable` client method that reports whether a
+  client survives a crashed invocation without a restart.
 
 ### Changed
 
@@ -55,8 +57,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (fail-stop). A failed client stage raises an error, so a single
   failed client aborts the rest of the pool instead of leaving
   threads hanging on a barrier.
-- A failed `invoke` is recorded in a history as a `fail` operation
-  with an error message.
+- A crashed `invoke` is recorded in a history as an `info`
+  operation (an indeterminate state) instead of a `fail`, and
+  restarts a process with a new process identifier, as in Jepsen.
+  A non-reusable client is reopened before the next operation and
+  a failed reconnect is recorded as a `fail` operation.
+- An `info` operation counts as a completed operation.
 - Worker errors and `false` results returned by `open`, `setup`,
   `teardown` and `close` are propagated from a thread pool to
   `run_test()`.
