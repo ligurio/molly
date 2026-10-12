@@ -108,7 +108,7 @@ test:test('history', function(test)
 end)
 
 test:test('op', function(test)
-    test:plan(9)
+    test:plan(10)
     local op = { f = 'read', value = 10, type = 'invoke' }
     local str = op_lib.to_string(op)
     test:is(str,
@@ -130,6 +130,10 @@ test:test('op', function(test)
     op = { type = 'fail' }
     test:is(op_lib.is_completed(op), true,
         "op.is_completed() { type = 'fail' }")
+
+    op = { type = 'info' }
+    test:is(op_lib.is_completed(op), true,
+        "op.is_completed() { type = 'info' }")
 
     op = { type = 'invoke' }
     test:is(op_lib.is_completed(op), false,

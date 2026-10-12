@@ -89,7 +89,8 @@ end
 local function is_completed(op)
     dev_checks('<operation>|table')
     return op.type == 'ok' or
-           op.type == 'fail'
+           op.type == 'fail' or
+           op.type == 'info'
 end
 
 -- Get a string representation of operation.
