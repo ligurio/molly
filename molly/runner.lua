@@ -92,7 +92,7 @@ local function summary(total_time, history)
     local ops_completed = history:ops_completed()
     local ops_planned = history:ops_planned()
     local rps
-    if ops_completed ~= 0 then
+    if ops_completed ~= 0 and total_time > 0 then
         rps = math.floor(ops_completed / total_time)
     end
     return {
@@ -252,7 +252,7 @@ local function run_test(workload, opts)
 
     -- Start workload.
     local history = history_lib.new()
-    local total_time_begin = clock.proc()
+    local total_time_begin = clock.monotonic()
     local pool = threadpool.new(opts.thread_type, opts.threads)
 
     -- Synchronize client threads at stage boundaries, like Jepsen
@@ -278,7 +278,7 @@ local function run_test(workload, opts)
     if not ok then
         return nil, err
     end
-    local total_passed_sec = clock.proc() - total_time_begin
+    local total_passed_sec = clock.monotonic() - total_time_begin
 
     -- Summary.
     print_summary(total_passed_sec, history, opts)

@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(39)
+test:plan(40)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -529,6 +529,25 @@ test:test('runner.time_limit', function(test)
     test:is(err, nil, 'runner.time_limit(): err is nil')
     test:ok(invocations > 0 and elapsed < 5,
             'runner.time_limit(): generator is stopped by time limit')
+end)
+
+test:test('runner.summary', function(test)
+    test:plan(4)
+
+    local history = {
+        ops_completed = function() return 10 end,
+        ops_planned = function() return 10 end,
+    }
+
+    local stats = runner.internal.summary(0, history)
+    test:is(stats.ops_planned, 10, 'runner.summary(): planned requests')
+    test:is(stats.ops_completed, 10,
+        'runner.summary(): completed requests')
+    test:is(stats.rps, nil,
+        'runner.summary(): no RPS on a zero duration')
+
+    stats = runner.internal.summary(2, history)
+    test:is(stats.rps, 5, 'runner.summary(): RPS is based on duration')
 end)
 
 test:test('runner.checkers', function(test)
