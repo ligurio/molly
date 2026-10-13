@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A public `history:is_well_formed()` method that validates an
   operation history against the structure and semantics from the
   Jepsen history documentation.
+- `run_test` validates the collected history with
+  `history:is_well_formed()` and fails with an error when the
+  history is not well-formed.
 
 ### Changed
 
