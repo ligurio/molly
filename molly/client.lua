@@ -89,6 +89,17 @@ local function process_operation(client, history, op, thread_id_str, state,
 
     assert(type(op) == 'table', 'Type of operation is not a Lua table.')
 
+    -- A generator may yield the same operation table more than
+    -- once (for example `gen.duplicate`). The client annotates
+    -- the operation with its type, process, index and time, so
+    -- it must record a private copy to keep history entries
+    -- independent.
+    local invoke_op = {}
+    for key, value in pairs(op) do
+        invoke_op[key] = value
+    end
+    op = invoke_op
+
     op.type = 'invoke'
     op.process = state.process
     op.index = next_index()
