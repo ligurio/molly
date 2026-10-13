@@ -278,6 +278,7 @@ local function run_test(workload, opts)
     if not ok then
         return nil, err
     end
+
     local total_passed_sec = clock.monotonic() - total_time_begin
 
     -- Summary.
@@ -297,6 +298,19 @@ local function run_test(workload, opts)
 
         log.debug('File with operations history (plain text):    %s', log_txt)
         log.debug('File with operations history (JSON):          %s', log_json)
+    end
+
+    -- Every collected history must be well-formed. Log the
+    -- findings and fail the run when it is not. A non-monotonic
+    -- time is only a warning. History reports are written above,
+    -- so an invalid history can still be inspected.
+    local valid, findings = history:is_well_formed()
+    gen_lib.iter(findings or {}):each(function(item)
+        local write = item.severity == 'warning' and log.warn or log.error
+        write('%s', item.message)
+    end)
+    if not valid then
+        return nil, 'history is invalid'
     end
 
     return true
