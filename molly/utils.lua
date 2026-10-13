@@ -62,6 +62,31 @@ local function is_tarantool()
     return _G['_TARANTOOL'] ~= nil
 end
 
+--- Check whether a value is a number or a numeric cdata value.
+-- Accepts Lua numbers and numeric cdata (for example, a Tarantool
+-- 64-bit monotonic clock); rejects strings and non-numeric cdata.
+-- @param x Value to check.
+-- @return boolean
+--
+-- @function is_numeric
+local function is_numeric(x)
+    local t = type(x)
+    return t == 'number' or (t == 'cdata' and tonumber(x) ~= nil)
+end
+
+--- Check whether a value is an integer.
+-- @param x Value to check.
+-- @return boolean
+--
+-- @function is_integer
+local function is_integer(x)
+    if not is_numeric(x) then
+        return false
+    end
+    local n = tonumber(x)
+    return n ~= nil and n % 1 == 0
+end
+
 --- Function equivalent to basename in POSIX systems
 -- @string path
 -- @return string
@@ -118,6 +143,8 @@ end
 return {
     basename = basename,
     is_callable = is_callable,
+    is_integer = is_integer,
+    is_numeric = is_numeric,
     chdir = chdir,
     cwd = cwd,
     setenv = setenv,
