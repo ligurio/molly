@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   finished operations.
 - An optional `reusable` client method that reports whether a
   client survives a crashed invocation without a restart.
+- A public `history:is_well_formed()` method that validates an
+  operation history against the structure and semantics from the
+  Jepsen history documentation. It reports errors for operations
+  without a process, a bad per-process invoke/completion
+  alternation, crash violations, dangling invokes, non-numeric,
+  duplicate or non-ascending indices, and a warning for a
+  non-monotonic time.
 
 ### Changed
 

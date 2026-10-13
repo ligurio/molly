@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(40)
+test:plan(41)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -114,6 +114,147 @@ test:test('history', function(test)
     history_json = h:to_json()
     test:like(history_json, '"type":"invoke"', ":to_json() type is invoke")
     test:like(history_json, '"value":6', ":to_json() value is 6")
+end)
+
+test:test('history.is_well_formed', function(test)
+    test:plan(19)
+
+    -- Collect messages of all findings for assertions.
+    local function messages(findings)
+        local res = {}
+        for _, item in ipairs(findings or {}) do
+            table.insert(res, item.message)
+        end
+        return table.concat(res, '\n')
+    end
+
+    -- Build a history object from an array of operations.
+    local function hist(ops)
+        local h = history.new()
+        for _, o in ipairs(ops) do
+            h:add(o)
+        end
+        return h
+    end
+
+    -- A well-formed history: invoke/ok, invoke/fail and
+    -- invoke/info pairs plus a nemesis operation.
+    local valid = {
+        { type = 'invoke', f = 'read', process = 1, index = 1, time = 1 },
+        { type = 'ok', f = 'read', process = 1, index = 2, time = 2 },
+        { type = 'invoke', f = 'write', process = 2, index = 3, time = 3 },
+        { type = 'fail', f = 'write', process = 2, index = 4, time = 4 },
+        { type = 'invoke', f = 'read', process = 3, index = 5, time = 5 },
+        { type = 'info', f = 'read', process = 3, index = 6, time = 6 },
+        { type = 'info', f = 'start', process = 'nemesis', index = 7,
+          time = 7 },
+    }
+    test:is(hist(valid):is_well_formed(), true,
+        'history.is_well_formed(): a well-formed history is valid')
+
+    -- A completion without an invocation.
+    local ok, findings = hist({
+        { type = 'ok', f = 'read', process = 1, index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): completion without invoke')
+    test:like(messages(findings), 'completed without invoke',
+        'history.is_well_formed(): completion without invoke message')
+
+    -- Two invocations in a row on one process.
+    ok = hist({
+        { type = 'invoke', process = 1, index = 1 },
+        { type = 'invoke', process = 1, index = 2 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): process invoked twice')
+
+    -- An invocation after a crash (an info completion).
+    ok = hist({
+        { type = 'invoke', process = 1, index = 1 },
+        { type = 'info', process = 1, index = 2 },
+        { type = 'invoke', process = 1, index = 3 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): invocation after info')
+
+    -- A dangling invocation.
+    ok = hist({
+        { type = 'invoke', process = 1, index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): dangling invocation')
+
+    -- An invalid operation type.
+    ok = hist({
+        { type = 'unknown', process = 1, index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): an invalid type')
+
+    -- A nemesis with a type other than info.
+    ok = hist({
+        { type = 'ok', process = 'nemesis', index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): a bad nemesis operation')
+
+    -- A duplicate index.
+    ok = hist({
+        { type = 'invoke', process = 1, index = 1 },
+        { type = 'ok', process = 1, index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): a duplicate index')
+
+    -- A non-ascending index.
+    ok = hist({
+        { type = 'invoke', process = 1, index = 2 },
+        { type = 'ok', process = 1, index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): a non-ascending index')
+
+    -- A non-monotonic time is a warning, not an error.
+    ok, findings = hist({
+        { type = 'invoke', process = 1, index = 1, time = 2 },
+        { type = 'ok', process = 1, index = 2, time = 1 },
+    }):is_well_formed()
+    test:is(ok, true, 'history.is_well_formed(): non-monotonic time is valid')
+    local has_warning = false
+    for _, item in ipairs(findings or {}) do
+        if item.severity == 'warning' then
+            has_warning = true
+        end
+    end
+    test:is(has_warning, true,
+        'history.is_well_formed(): non-monotonic time is a warning')
+
+    -- An operation without a process.
+    ok, findings = hist({
+        { type = 'invoke', index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): an operation without process')
+    test:like(messages(findings), 'has no process',
+        'history.is_well_formed(): a missing process message')
+
+    -- A non-numeric index does not crash the checker.
+    ok = hist({
+        { type = 'invoke', process = 1, index = '1' },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): a non-numeric index')
+
+    -- A non-numeric time.
+    ok = hist({
+        { type = 'invoke', process = 1, index = 1, time = 'now' },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): a non-numeric time')
+
+    -- A duplicate index is reported once, not also as a
+    -- non-ascending one.
+    ok, findings = hist({
+        { type = 'invoke', process = 1, index = 1 },
+        { type = 'ok', process = 1, index = 1 },
+    }):is_well_formed()
+    test:is(ok, false, 'history.is_well_formed(): a duplicate index')
+    test:unlike(messages(findings), 'not ascending',
+        'history.is_well_formed(): no extra ascending error for a duplicate')
+
+    -- A non-table argument is rejected by the array form.
+    ok = history.is_well_formed({ history = 'not-a-table' })
+    test:is(ok, false, 'history.is_well_formed(): a non-table ops field')
 end)
 
 test:test('op', function(test)
