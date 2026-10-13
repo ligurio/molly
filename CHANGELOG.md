@@ -74,6 +74,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of `generator`.
 - `json.NULL` is available on LuaJIT too (exposed as an alias of
   `cjson.null`).
+- A test duration and RPS in a summary are based on monotonic
+  (real) time instead of CPU time; requests per second are not
+  computed when the elapsed time is zero.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
