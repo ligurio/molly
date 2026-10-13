@@ -80,6 +80,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A test duration and RPS in a summary are based on monotonic
   (real) time instead of CPU time; requests per second are not
   computed when the elapsed time is zero.
+- A client records a private top-level copy of a generated
+  operation and of a completion returned by a client, so
+  generators and clients that reuse an operation table (for
+  example `gen.duplicate`) do not overwrite already recorded
+  history entries. Nested values are still shared.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
