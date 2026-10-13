@@ -79,6 +79,18 @@ local function next_process(state)
     end
 end
 
+-- Return a top-level copy of an operation. A generator or a
+-- client may reuse the same operation table, but history entries
+-- must not alias the fields annotated by the client (`type`,
+-- `process`, `index` and `time`). Nested values are shared.
+local function copy_operation(op)
+    local copy = {}
+    for key, value in pairs(op) do
+        copy[key] = value
+    end
+    return copy
+end
+
 local function process_operation(client, history, op, thread_id_str, state,
         client_data)
     dev_checks('<client>', '<history>', '!', 'string', 'table', 'table')
@@ -88,6 +100,12 @@ local function process_operation(client, history, op, thread_id_str, state,
     end
 
     assert(type(op) == 'table', 'Type of operation is not a Lua table.')
+
+    -- A generator may yield the same operation table more than
+    -- once (for example `gen.duplicate`). Copy it before
+    -- annotating so that history entries do not alias the
+    -- generator's table.
+    op = copy_operation(op)
 
     op.type = 'invoke'
     op.process = state.process
@@ -150,6 +168,10 @@ local function process_operation(client, history, op, thread_id_str, state,
     if res.type == nil then
         error('Operation type is empty.')
     end
+    -- A client may return the same table it was given. Copy the
+    -- completion before annotating it, so it does not overwrite
+    -- the already recorded invoke.
+    res = copy_operation(res)
     res.index = next_index()
     res.process = state.process
     res.time = clock.monotonic64()
