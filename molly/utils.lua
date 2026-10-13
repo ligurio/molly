@@ -108,6 +108,20 @@ local function pack(...)
     }
 end
 
+--- Return a shallow copy of a table.
+-- Nested tables are shared with the source table.
+-- @param tbl Table to copy.
+-- @return table
+--
+-- @function copy_table
+local function copy_table(tbl)
+    local copy = {}
+    for key, value in pairs(tbl) do
+        copy[key] = value
+    end
+    return copy
+end
+
 local function is_callable(object)
     if type(object) == 'function' then
         return true
@@ -142,6 +156,7 @@ end
 
 return {
     basename = basename,
+    copy_table = copy_table,
     is_callable = is_callable,
     is_integer = is_integer,
     is_numeric = is_numeric,

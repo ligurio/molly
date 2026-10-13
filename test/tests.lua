@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(43)
+test:plan(44)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -459,6 +459,18 @@ test:test('utils.is_integer', function(test)
         'an integer cdata is an integer')
     test:is(utils.is_integer(math.huge), false,
         'an infinite number is not an integer')
+end)
+
+test:test('utils.copy_table', function(test)
+    test:plan(4)
+
+    local source = { a = 1, nested = {} }
+    local copy = utils.copy_table(source)
+    test:is(copy.a, 1, 'a top-level value is copied')
+    test:isnt(copy, source, 'a new table is returned')
+    test:is(copy.nested, source.nested, 'nested values are shared')
+    source.a = 2
+    test:is(copy.a, 1, 'the copy is not affected by source changes')
 end)
 
 local OP_TYPE = 1

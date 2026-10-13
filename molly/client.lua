@@ -89,6 +89,12 @@ local function process_operation(client, history, op, thread_id_str, state,
 
     assert(type(op) == 'table', 'Type of operation is not a Lua table.')
 
+    -- A generator may yield the same operation table more than
+    -- once (for example `gen.duplicate`). Copy it before
+    -- annotating so that history entries do not alias the
+    -- generator's table.
+    op = utils.copy_table(op)
+
     op.type = 'invoke'
     op.process = state.process
     op.index = next_index()
@@ -150,6 +156,10 @@ local function process_operation(client, history, op, thread_id_str, state,
     if res.type == nil then
         error('Operation type is empty.')
     end
+    -- A client may return the same table it was given. Copy the
+    -- completion before annotating it, so it does not overwrite
+    -- the already recorded invoke.
+    res = utils.copy_table(res)
     res.index = next_index()
     res.process = state.process
     res.time = clock.monotonic64()
