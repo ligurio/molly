@@ -30,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   alternation, crash violations, dangling invokes, non-numeric,
   duplicate or non-ascending indices, and a warning for a
   non-monotonic time.
+- `run_test` validates the collected history with
+  `history:is_well_formed()` and fails with an error when the
+  history is not well-formed.
 
 ### Changed
 

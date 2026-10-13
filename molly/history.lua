@@ -14,6 +14,15 @@ local function is_type(t)
     return t == 'invoke' or t == 'ok' or t == 'info' or t == 'fail'
 end
 
+-- Time and index are Lua numbers or, on Tarantool, 64-bit integer
+-- cdata values (a `monotonic64()` clock returns the latter).
+-- Accept Lua numbers and numeric cdata; reject non-numeric cdata
+-- (e.g. pointers) and strings.
+local function is_numeric(x)
+    local t = type(x)
+    return t == 'number' or (t == 'cdata' and tonumber(x) ~= nil)
+end
+
 -- Create a description of a rule violation found in a history.
 local function finding(severity, message, op_item)
     return {
@@ -99,7 +108,7 @@ local function check_op(op_item, findings, state)
     -- absent.
     -- https://github.com/jepsen-io/history#operation-structure
     if op_item.index ~= nil then
-        if type(op_item.index) ~= 'number' then
+        if not is_numeric(op_item.index) then
             add_error(findings, ('index is not a number: %s'):format(
                 tostring(op_item.index)), op_item)
         else
@@ -124,7 +133,7 @@ local function check_op(op_item, findings, state)
     -- non-monotonic time is a warning, not an error.
     -- https://github.com/jepsen-io/history#operation-structure
     if op_item.time ~= nil then
-        if type(op_item.time) ~= 'number' then
+        if not is_numeric(op_item.time) then
             add_error(findings, ('time is not a number: %s'):format(
                 tostring(op_item.time)), op_item)
         else

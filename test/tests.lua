@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(41)
+test:plan(42)
 
 test:test('clock', function(test)
     test:plan(7)
@@ -117,7 +117,7 @@ test:test('history', function(test)
 end)
 
 test:test('history.is_well_formed', function(test)
-    test:plan(19)
+    test:plan(20)
 
     -- Collect messages of all findings for assertions.
     local function messages(findings)
@@ -241,6 +241,14 @@ test:test('history.is_well_formed', function(test)
         { type = 'invoke', process = 1, index = 1, time = 'now' },
     }):is_well_formed()
     test:is(ok, false, 'history.is_well_formed(): a non-numeric time')
+
+    -- A non-numeric cdata is rejected, not compared.
+    ok = hist({
+        { type = 'invoke', process = 1, index = 1,
+          time = ffi.new('void *') },
+    }):is_well_formed()
+    test:is(ok, false,
+        'history.is_well_formed(): a non-numeric cdata time')
 
     -- A duplicate index is reported once, not also as a
     -- non-ascending one.
@@ -951,6 +959,28 @@ test:test("threads", function(test)
         res = true
     end
     test:is(run_test_dict('fiber'), res, "run_test_dict: fiber")
+end)
+
+test:test('runner.invalid_history', function(test)
+    test:plan(2)
+
+    -- Make run_test collect a history with a dangling invoke so
+    -- that history:is_well_formed() fails.
+    local real_new = history.new
+    history.new = function()
+        local h = real_new()
+        h:add({ type = 'invoke', process = 1 })
+        return h
+    end
+    local ok, err = runner.run_test({
+        client = client_dict,
+        generator = tests.rw_register_gen():take(1),
+    }, { threads = 1, nodes = { 'a' } })
+    history.new = real_new
+
+    test:is(ok, nil, 'runner.invalid_history(): run_test returned nil')
+    test:is(err, 'history is invalid',
+        'runner.invalid_history(): an error is returned')
 end)
 
 ------------------------

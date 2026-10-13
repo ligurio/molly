@@ -278,6 +278,19 @@ local function run_test(workload, opts)
     if not ok then
         return nil, err
     end
+
+    -- Every collected history must be well-formed. Log the
+    -- findings and fail the run when it is not. A non-monotonic
+    -- time is only a warning.
+    local valid, findings = history:is_well_formed()
+    gen_lib.iter(findings or {}):each(function(item)
+        local write = item.severity == 'warning' and log.warn or log.error
+        write('%s', item.message)
+    end)
+    if not valid then
+        return nil, 'history is invalid'
+    end
+
     local total_passed_sec = clock.monotonic() - total_time_begin
 
     -- Summary.
