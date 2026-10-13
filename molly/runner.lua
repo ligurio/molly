@@ -32,11 +32,11 @@
 -- a special nemesis process (see `molly.nemesis`) introduces
 -- faults into the system - also scheduled by the generator.
 --
--- Finally, the DB is turn down. Molly uses a checker (see
--- `molly.checker`) to analyze the test's history for correctness,
--- and to generate reports, graphs, etc. The test, history,
--- analysis, and any supplementary results are written to the
--- filesystem for later review.
+-- Finally, the DB is turn down. Molly validates the test's
+-- history for correctness with `history:is_well_formed()` (see
+-- `molly.history`), and generates reports, graphs, etc. The test,
+-- history, analysis, and any supplementary results are written to
+-- the filesystem for later review.
 --
 -- <!-- TODO: https://jepsen.io/consistency -->
 --
