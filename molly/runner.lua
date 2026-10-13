@@ -78,6 +78,30 @@ local is_tarantool = require('molly.utils').is_tarantool
 local has_fun, _ = pcall(require, 'fun')
 local has_json, _ = pcall(require, 'molly.json')
 
+-- Calculate summary metrics of a completed test.
+--
+-- @number total_time Test duration in seconds.
+-- @table history History of a completed test.
+-- @return table with `ops_planned`, `ops_completed` and `rps`
+-- (`rps` is nil when it cannot be calculated).
+--
+-- @function summary
+local function summary(total_time, history)
+    checks('number', 'table')
+
+    local ops_completed = history:ops_completed()
+    local ops_planned = history:ops_planned()
+    local rps
+    if ops_completed ~= 0 then
+        rps = math.floor(ops_completed / total_time)
+    end
+    return {
+        ops_planned = ops_planned,
+        ops_completed = ops_completed,
+        rps = rps,
+    }
+end
+
 local function print_summary(total_time, history, opts)
     checks('number', 'table', 'table')
 
@@ -89,13 +113,12 @@ local function print_summary(total_time, history, opts)
         log.debug('')
     end
 
-    local ops_completed = history:ops_completed()
-    local ops_planned = history:ops_planned()
-    log.debug('Total planned requests: %-35s', tostring(ops_planned))
-    if ops_completed ~= 0 then
-        log.debug('Total completed requests: %-35s', tostring(ops_completed))
-        local rps = math.floor(ops_completed / total_time)
-        log.debug('Requests per sec: %-35s', tostring(rps))
+    local stats = summary(total_time, history)
+    log.debug('Total planned requests: %-35s', tostring(stats.ops_planned))
+    if stats.rps ~= nil then
+        log.debug('Total completed requests: %-35s',
+            tostring(stats.ops_completed))
+        log.debug('Requests per sec: %-35s', tostring(stats.rps))
     end
 end
 
@@ -281,4 +304,8 @@ end
 
 return {
     run_test = run_test,
+    -- Helpers exposed for unit tests.
+    internal = {
+        summary = summary,
+    },
 }
