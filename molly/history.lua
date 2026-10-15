@@ -59,30 +59,6 @@ local function add(self, operation)
     return true
 end
 
--- luacheck: push no max line length
--- Get a HdrHistogram (High Dynamic Range (HDR) Histogram)
---
--- Since Molly uses HdrHistogram and produces HdrHistogram logs,
--- various tools that plot and view histogram logs can be used to
--- analyze Molly's data. Some common tools include
--- HistggramLogAnalyzer, HdrHistogramVisualizer, hdr-plot, and a
--- Javascript-based in-browser histogram log parser.
---
--- 1. https://github.com/HdrHistogram/HdrHistogram
--- 2. https://github.com/HdrHistogram/HistogramLogAnalyzer
--- 3. https://github.com/ennerf/HdrHistogramVisualizer
--- 4. https://hdrhistogram.github.io/HdrHistogramJSDemo/logparser.html
--- 5. https://github.com/BrunoBonacci/hdr-plot
---
--- Format: https://github.com/HdrHistogram/HdrHistogram/blob/master/GoogleChartsExample/example1.txt
---
--- @return table
--- @function hdr_histogram
--- luacheck: pop
-local function hdr_histogram(_self)
-    return {}
-end
-
 local mt = {
     __type = '<history>',
     __index = {
@@ -91,7 +67,6 @@ local mt = {
         ops_completed = ops_completed,
         to_json = to_json,
         to_txt = to_txt,
-        hdr_histogram = hdr_histogram,
     },
 }
 
