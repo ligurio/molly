@@ -79,6 +79,28 @@ local function next_process(state)
     end
 end
 
+-- Record an indeterminate completion for an invocation that
+-- cannot be completed normally: the operation may or may not
+-- have taken place. The process is restarted with a new
+-- identifier and the client is marked for a reopen, as in
+-- Jepsen. Every invocation is paired with a completion, so a
+-- history never has a dangling invoke.
+local function add_indeterminate(history, op, state, thread_id_str, reason)
+    state.needs_reopen = true
+    local failed_op = {
+        type = 'info',
+        f = op.f,
+        value = op.value,
+        process = state.process,
+        index = next_index(),
+        time = clock.monotonic64(),
+        error = 'indeterminate: ' .. tostring(reason),
+    }
+    log.debug('%-4s %s', thread_id_str, op_lib.to_string(failed_op))
+    history:add(failed_op)
+    next_process(state)
+end
+
 local function process_operation(client, history, op, thread_id_str, state,
         client_data)
     dev_checks('<client>', '<history>', '!', 'string', 'table', 'table')
@@ -140,23 +162,22 @@ local function process_operation(client, history, op, thread_id_str, state,
         -- A crashed operation is indeterminate: it may or may
         -- not have taken place. Record it as 'info' and restart
         -- the process, as in Jepsen.
-        state.needs_reopen = true
-        local failed_op = {
-            type = 'info',
-            f = op.f,
-            value = op.value,
-            process = state.process,
-            index = next_index(),
-            time = clock.monotonic64(),
-            error = 'indeterminate: ' .. tostring(res),
-        }
-        log.debug('%-4s %s', thread_id_str, op_lib.to_string(failed_op))
-        history:add(failed_op)
-        next_process(state)
+        add_indeterminate(history, op, state, thread_id_str, res)
+        return
+    end
+    -- A client must return a completion operation. An invalid
+    -- result is indeterminate as well: the invocation is already
+    -- in the history and cannot be left without a completion.
+    -- Record it as 'info' and restart the process, as in Jepsen.
+    if type(res) ~= 'table' then
+        add_indeterminate(history, op, state, thread_id_str,
+            'operation is not a table')
         return
     end
     if res.type == nil then
-        error('Operation type is empty.')
+        add_indeterminate(history, op, state, thread_id_str,
+            'operation type is empty')
+        return
     end
     -- A client may return the same table it was given. Copy the
     -- completion before annotating it, so it does not overwrite
@@ -320,7 +341,11 @@ local client_mt = {
 -- An `invoke` that raises an error crashes the client. The
 -- operation is recorded in a history as `info` (an indeterminate
 -- state: it may or may not have taken place) and the process is
--- restarted. See `reusable` below.
+-- restarted. See `reusable` below. An `invoke` that returns an
+-- invalid completion (not a table or without a `type`) is treated
+-- the same way: the invocation is recorded as `info` and the
+-- process is restarted, so a history never has a dangling
+-- `invoke`.
 --
 -- **teardown** - function that tear down a database instance.
 -- Function must raise an error on failure. Single argument is

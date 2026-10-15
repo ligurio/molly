@@ -322,6 +322,48 @@ local function ops_planned(self)
     return gen.filter(op.is_planned, self.history):length()
 end
 
+-- Get a list of unfinished operations in a history.
+--
+-- An invocation is unfinished when a client process (an integer
+-- process identifier) has an `invoke` without a matching `ok`,
+-- `fail` or `info`. Such a process is either still running the
+-- operation or the run was aborted. In the Jepsen history format
+-- an unfinished invocation is a legal pending state rather than
+-- an error, and checkers treat it as an operation that may have
+-- been applied.
+--
+-- Non-integer (nemesis) processes are ignored: their operations
+-- are recorded as `info` and do not follow the client lifecycle.
+-- The result is sorted by operation index.
+--
+-- @return table
+-- @function pending
+local function pending(self)
+    dev_checks('<history>')
+
+    local open = {}
+    for _, operation in ipairs(self.history) do
+        local process = operation.process
+        if type(process) == 'number' then
+            if operation.type == 'invoke' then
+                open[process] = operation
+            else
+                open[process] = nil
+            end
+        end
+    end
+
+    local result = {}
+    for _, operation in pairs(open) do
+        table.insert(result, operation)
+    end
+    table.sort(result, function(a, b)
+        return (a.index or 0) < (b.index or 0)
+    end)
+
+    return result
+end
+
 -- Add an operation to a history.
 -- @return true
 -- @function add
@@ -336,6 +378,7 @@ mt = {
     __type = '<history>',
     __index = {
         add = add,
+        pending = pending,
         ops_planned = ops_planned,
         ops_completed = ops_completed,
         to_json = to_json,

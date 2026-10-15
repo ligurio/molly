@@ -78,6 +78,12 @@
 --   It includes nemesis `info` operations that have no matching
 --   `invoke`, so `ops_completed` may be greater than
 --   `ops_planned`.
+-- - **Total unfinished requests** (`ops_unfinished`) is a number
+--   of client invocations without a matching completion, that is
+--   `#history:pending()`. It is not necessarily
+--   `ops_planned` - `ops_completed`, because `ops_completed`
+--   also counts nemesis `info` operations. For a history without
+--   nemesis operations the equality holds.
 -- - **Requests per sec** (`rps`) is an average number of
 --   completed operations per second:
 --   `ops_completed / total_time`, rounded down, where
@@ -86,9 +92,12 @@
 --   completed or when the duration is not positive. The number of
 --   completed operations includes nemesis completions.
 --
--- Planned requests are always logged at the debug level, while
--- completed requests and requests per second are logged only when
--- RPS can be calculated.
+-- Planned requests are always logged at the debug level.
+-- Completed requests and requests per second are logged at the
+-- debug level only when RPS can be calculated. Unfinished
+-- requests are logged as a warning with their processes, indices
+-- and operations when there are any, otherwise as a debug message
+-- with zero.
 --
 -- @see molly.thread
 
@@ -111,8 +120,9 @@ local has_json, _ = pcall(require, 'molly.json')
 --
 -- @number total_time Test duration in seconds.
 -- @table history History of a completed test.
--- @return table with `ops_planned`, `ops_completed` and `rps`
--- (`rps` is nil when it cannot be calculated).
+-- @return table with `ops_planned`, `ops_completed`,
+-- `ops_unfinished` and `rps` (`rps` is nil when it cannot be
+-- calculated).
 --
 -- @function summary
 local function summary(total_time, history)
@@ -120,6 +130,7 @@ local function summary(total_time, history)
 
     local ops_completed = history:ops_completed()
     local ops_planned = history:ops_planned()
+    local ops_unfinished = #history:pending()
     local rps
     if ops_completed ~= 0 and total_time > 0 then
         rps = math.floor(ops_completed / total_time)
@@ -127,6 +138,7 @@ local function summary(total_time, history)
     return {
         ops_planned = ops_planned,
         ops_completed = ops_completed,
+        ops_unfinished = ops_unfinished,
         rps = rps,
     }
 end
@@ -148,6 +160,18 @@ local function print_summary(total_time, history, opts)
         log.debug('Total completed requests: %-35s',
             tostring(stats.ops_completed))
         log.debug('Requests per sec: %-35s', tostring(stats.rps))
+    end
+    if stats.ops_unfinished > 0 then
+        log.warn('Total unfinished requests: %s',
+            tostring(stats.ops_unfinished))
+        for _, operation in ipairs(history:pending()) do
+            log.warn('  process %s index %s %s is unfinished',
+                tostring(operation.process),
+                tostring(operation.index),
+                tostring(operation.f))
+        end
+    else
+        log.debug('Total unfinished requests: %-35s', tostring(0))
     end
 end
 

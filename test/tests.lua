@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(47)
+test:plan(62)
 
 test:test('clock', function(test)
     test:plan(9)
@@ -79,7 +79,7 @@ test:test('json.NULL', function(test)
 end)
 
 test:test('history', function(test)
-    test:plan(12)
+    test:plan(16)
     test:isnt(history.new(), nil, "history.new()")
 
     local h = history.new()
@@ -105,6 +105,24 @@ test:test('history', function(test)
     h:add({ type = 'fail', value = 3 })
     h:add({ type = 'ok', value = 6 })
     test:is(h:ops_planned(), 1, "history_obj:ops_planned()")
+
+    h = history.new()
+    h:add({ type = 'invoke', process = 1, index = 1 })
+    h:add({ type = 'ok', process = 1, index = 2 })
+    h:add({ type = 'invoke', process = 1, index = 3 })
+    local pending = h:pending()
+    test:is(#pending, 1, "history_obj:pending() length")
+    test:is(pending[1].index, 3, "history_obj:pending() op")
+
+    h = history.new()
+    h:add({ type = 'invoke', process = 1, index = 1 })
+    h:add({ type = 'ok', process = 1, index = 2 })
+    test:is(#h:pending(), 0, "history_obj:pending() completed")
+
+    h = history.new()
+    h:add({ type = 'invoke', process = 'nemesis', index = 1 })
+    test:is(#h:pending(), 0,
+        "history_obj:pending() ignores nemesis")
 
     h = history.new()
     h:add({ type = 'ok', value = 2 })
@@ -824,17 +842,20 @@ test:test('runner.time_limit', function(test)
 end)
 
 test:test('runner.summary', function(test)
-    test:plan(4)
+    test:plan(5)
 
     local history = {
         ops_completed = function() return 10 end,
         ops_planned = function() return 10 end,
+        pending = function() return { {}, {}, {} } end,
     }
 
     local stats = runner.internal.summary(0, history)
     test:is(stats.ops_planned, 10, 'runner.summary(): planned requests')
     test:is(stats.ops_completed, 10,
         'runner.summary(): completed requests')
+    test:is(stats.ops_unfinished, 3,
+        'runner.summary(): unfinished requests')
     test:is(stats.rps, nil,
         'runner.summary(): no RPS on a zero duration')
 
@@ -958,6 +979,491 @@ for _, backend in ipairs({ 'coroutine', 'fiber' }) do
             'client.reopen(): the client is closed on reopen and at the end')
     end)
 end
+
+-- Run a single client over a small workload and return the
+-- history it produced. Pins down how client behaviours are
+-- recorded.
+local function run_client(cl, n, gen)
+    local hist = history.new()
+    local pool = threadpool.new('coroutine', 1)
+    if gen == nil then
+        gen = gen_lib.range(1, n):map(function(i)
+            return { f = 'test', value = i }
+        end)
+    end
+    local ok, err = pool:start(client.run, {
+        client = cl,
+        gen = gen,
+        history = hist,
+        nodes = { 'a' },
+    })
+    return ok, err, hist
+end
+
+-- A matrix of client behaviours and their expected effect on a
+-- history. A case returns a client and a state table, an optional
+-- generator (a simple range by default) and a check function that
+-- receives the recorded operations, the state and the history.
+local client_behaviors = {
+    {
+        name = 'ok completion',
+        n = 2,
+        make = function()
+            local cl = client.new()
+            cl.invoke = function(_self, op)
+                return { type = 'ok', f = op.f, value = op.value }
+            end
+            return cl, {}
+        end,
+        check = function(ops, _state, hist)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[1].type == 'invoke' and ops[1].process == 1,
+                  name = 'invoke is recorded' },
+                { ok = ops[2].type == 'ok' and ops[2].process == 1,
+                  name = 'ok is recorded' },
+                { ok = ops[4].type == 'ok',
+                  name = 'second ok is recorded' },
+                { ok = hist:ops_planned() == 2,
+                  name = 'two planned operations' },
+                { ok = hist:ops_completed() == 2,
+                  name = 'two completed operations' },
+                { ok = #hist:pending() == 0,
+                  name = 'no unfinished operations' },
+            }
+        end,
+    },
+    {
+        name = 'fail completion',
+        n = 1,
+        make = function()
+            local cl = client.new()
+            cl.invoke = function(_self, op)
+                return { type = 'fail', f = op.f, value = op.value,
+                         error = 'key not found' }
+            end
+            return cl, {}
+        end,
+        check = function(ops)
+            return {
+                { ok = #ops == 2, name = 'two ops' },
+                { ok = ops[2].type == 'fail', name = 'fail is recorded' },
+                { ok = ops[2].process == 1,
+                  name = 'process is unchanged' },
+                { ok = ops[2].error == 'key not found',
+                  name = 'error is preserved' },
+            }
+        end,
+    },
+    {
+        name = 'info completion restarts a process',
+        n = 2,
+        make = function()
+            local state = { opened = 0 }
+            local cl = client.new()
+            cl.open = function(_self, _addr, _data)
+                state.opened = state.opened + 1
+                return true
+            end
+            cl.invoke = function(_self, op)
+                return { type = 'info', f = op.f, value = op.value }
+            end
+            return cl, state
+        end,
+        check = function(ops, state)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[2].type == 'info' and ops[2].process == 1,
+                  name = 'first info keeps process 1' },
+                { ok = ops[3].type == 'invoke' and ops[3].process == 2,
+                  name = 'next op has a new process' },
+                { ok = ops[4].type == 'info' and ops[4].process == 2,
+                  name = 'second info keeps process 2' },
+                { ok = state.opened == 2,
+                  name = 'client is reopened after info' },
+            }
+        end,
+    },
+    {
+        name = 'completion fields are overwritten',
+        n = 1,
+        make = function()
+            local cl = client.new()
+            cl.invoke = function(_self, op)
+                return { type = 'ok', f = op.f, process = 999,
+                         index = 999, time = 0 }
+            end
+            return cl, {}
+        end,
+        check = function(ops)
+            return {
+                { ok = ops[1].type == 'invoke' and ops[1].process == 1,
+                  name = 'invoke fields are set' },
+                { ok = ops[2].process == 1,
+                  name = 'process is overwritten' },
+                { ok = ops[2].index == ops[1].index + 1,
+                  name = 'index is overwritten' },
+                { ok = ops[2].time ~= 0, name = 'time is overwritten' },
+            }
+        end,
+    },
+    {
+        name = 'invoke error is indeterminate',
+        n = 1,
+        make = function()
+            local cl = client.new()
+            cl.invoke = function()
+                error('invoke boom')
+            end
+            return cl, {}
+        end,
+        check = function(ops)
+            return {
+                { ok = #ops == 2, name = 'two ops' },
+                { ok = ops[2].type == 'info', name = 'info is recorded' },
+                { ok = type(ops[2].error) == 'string' and
+                      ops[2].error:find('invoke boom', 1, true) ~= nil,
+                  name = 'error message is recorded' },
+            }
+        end,
+    },
+    {
+        name = 'crash with a reusable client',
+        n = 2,
+        make = function()
+            local state = { opened = 0 }
+            local crashed = false
+            local cl = client.new()
+            cl.open = function(_self, _addr, _data)
+                state.opened = state.opened + 1
+                return true
+            end
+            cl.reusable = function() return true end
+            cl.invoke = function(_self, op)
+                if not crashed then
+                    crashed = true
+                    error('invoke boom')
+                end
+                return { type = 'ok', f = op.f }
+            end
+            return cl, state
+        end,
+        check = function(ops, state)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[2].type == 'info', name = 'crash is info' },
+                { ok = ops[3].process == 2,
+                  name = 'new process after crash' },
+                { ok = state.opened == 1,
+                  name = 'a reusable client is not reopened' },
+            }
+        end,
+    },
+    {
+        name = 'a reusable error means not reusable',
+        n = 2,
+        make = function()
+            local state = { opened = 0 }
+            local crashed = false
+            local cl = client.new()
+            cl.open = function(_self, _addr, _data)
+                state.opened = state.opened + 1
+                return true
+            end
+            cl.reusable = function() error('reusable boom') end
+            cl.invoke = function(_self, op)
+                if not crashed then
+                    crashed = true
+                    error('invoke boom')
+                end
+                return { type = 'ok', f = op.f }
+            end
+            return cl, state
+        end,
+        check = function(ops, state)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[3].process == 2,
+                  name = 'new process after crash' },
+                { ok = state.opened == 2, name = 'the client is reopened' },
+            }
+        end,
+    },
+    {
+        name = 'reopen after a crash',
+        n = 3,
+        make = function()
+            local state = { opened = 0, closed = 0 }
+            local crashed = false
+            local cl = client.new()
+            cl.open = function(_self, _addr, _data)
+                state.opened = state.opened + 1
+                return true
+            end
+            cl.close = function(_self, _data)
+                state.closed = state.closed + 1
+                return true
+            end
+            cl.invoke = function(_self, op)
+                if not crashed then
+                    crashed = true
+                    error('invoke boom')
+                end
+                return { type = 'ok', f = op.f }
+            end
+            return cl, state
+        end,
+        check = function(ops, state)
+            return {
+                { ok = #ops == 6, name = 'six ops' },
+                { ok = ops[2].type == 'info' and ops[2].process == 1,
+                  name = 'crash is info on process 1' },
+                { ok = ops[3].process == 2 and ops[4].type == 'ok',
+                  name = 'next operation succeeds on process 2' },
+                { ok = state.opened == 2, name = 'the client is reopened' },
+                { ok = state.closed == 2,
+                  name = 'close on reopen and at the end' },
+            }
+        end,
+    },
+    {
+        name = 'a failed reopen is a fail operation',
+        n = 2,
+        make = function()
+            local state = { opened = 0 }
+            local crashed = false
+            local cl = client.new()
+            cl.open = function(_self, _addr, _data)
+                state.opened = state.opened + 1
+                if state.opened > 1 then
+                    error('open boom')
+                end
+                return true
+            end
+            cl.invoke = function(_self, op)
+                if not crashed then
+                    crashed = true
+                    error('invoke boom')
+                end
+                return { type = 'ok', f = op.f }
+            end
+            return cl, state
+        end,
+        check = function(ops, state)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[3].type == 'invoke' and ops[3].process == 2,
+                  name = 'invoke before a failed reopen' },
+                { ok = ops[4].type == 'fail' and ops[4].process == 2,
+                  name = 'failed reopen is fail' },
+                { ok = type(ops[4].error) == 'string' and
+                      ops[4].error:find('no-client', 1, true) ~= nil,
+                  name = 'fail error mentions no-client' },
+                { ok = state.opened == 2, name = 'open was attempted' },
+            }
+        end,
+    },
+    {
+        name = 'a failed close on reopen is ignored',
+        n = 2,
+        make = function()
+            local state = { closed = 0 }
+            local crashed = false
+            local cl = client.new()
+            cl.close = function(_self, _data)
+                state.closed = state.closed + 1
+                if state.closed == 1 then
+                    error('close boom')
+                end
+                return true
+            end
+            cl.invoke = function(_self, op)
+                if not crashed then
+                    crashed = true
+                    error('invoke boom')
+                end
+                return { type = 'ok', f = op.f }
+            end
+            return cl, state
+        end,
+        check = function(ops, state)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[3].process == 2 and ops[4].type == 'ok',
+                  name = 'the op succeeds after a failed close' },
+                { ok = state.closed >= 2, name = 'close was retried' },
+            }
+        end,
+    },
+    {
+        name = 'a completion without a type is indeterminate',
+        n = 2,
+        make = function()
+            local cl = client.new()
+            cl.invoke = function(_self, op)
+                return { f = op.f, value = op.value }
+            end
+            return cl, {}
+        end,
+        check = function(ops, _state, hist)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[2].type == 'info' and ops[2].process == 1,
+                  name = 'missing type is info' },
+                { ok = type(ops[2].error) == 'string' and
+                      ops[2].error:find('type is empty', 1, true) ~= nil,
+                  name = 'error explains the empty type' },
+                { ok = ops[3].process == 2,
+                  name = 'process is restarted' },
+                { ok = #hist:pending() == 0,
+                  name = 'no dangling invoke' },
+            }
+        end,
+    },
+    {
+        name = 'a non-table completion is indeterminate',
+        n = 1,
+        make = function()
+            local cl = client.new()
+            cl.invoke = function()
+                return 'not a table'
+            end
+            return cl, {}
+        end,
+        check = function(ops)
+            return {
+                { ok = #ops == 2, name = 'two ops' },
+                { ok = ops[2].type == 'info',
+                  name = 'non-table is info' },
+                { ok = type(ops[2].error) == 'string' and
+                      ops[2].error:find('not a table', 1, true) ~= nil,
+                  name = 'error explains the non-table' },
+            }
+        end,
+    },
+    {
+        name = 'a callable operation',
+        n = 2,
+        gen = function(n)
+            return gen_lib.range(1, n):map(function(i)
+                return function()
+                    return { f = 'callable', value = i }
+                end
+            end)
+        end,
+        make = function()
+            local cl = client.new()
+            cl.invoke = function(_self, op)
+                return { type = 'ok', f = op.f, value = op.value }
+            end
+            return cl, {}
+        end,
+        check = function(ops)
+            return {
+                { ok = #ops == 4, name = 'four ops' },
+                { ok = ops[1].type == 'invoke' and ops[1].f == 'callable',
+                  name = 'callable op is resolved to a table' },
+                { ok = ops[1].value == 1,
+                  name = 'callable value is used' },
+            }
+        end,
+    },
+    {
+        name = 'a failed close aborts the run',
+        n = 1,
+        error_contains = 'broken close',
+        make = function()
+            local cl = client.new()
+            cl.invoke = function(_self, op)
+                return { type = 'ok', f = op.f }
+            end
+            cl.close = function()
+                error('broken close')
+            end
+            return cl, {}
+        end,
+        check = function(ops)
+            return {
+                { ok = #ops == 2, name = 'invoke and ok are recorded' },
+                { ok = ops[2].type == 'ok',
+                  name = 'the operation completed' },
+            }
+        end,
+    },
+}
+
+for _, case in ipairs(client_behaviors) do
+    test:test('client.behavior: ' .. case.name, function(test)
+        local cl, state = case.make()
+        local gen
+        if case.gen ~= nil then
+            gen = case.gen(case.n)
+        end
+        local ok, err, hist = run_client(cl, case.n, gen)
+
+        local checks = {}
+        if case.error_contains ~= nil then
+            checks[#checks + 1] = {
+                ok = ok == nil and err ~= nil and
+                    tostring(err):find(case.error_contains, 1, true) ~= nil,
+                name = 'run aborts with an error',
+            }
+        else
+            checks[#checks + 1] = {
+                ok = ok == true and err == nil,
+                name = 'run completes',
+            }
+        end
+        for _, c in ipairs(case.check(hist.history, state, hist)) do
+            checks[#checks + 1] = c
+        end
+
+        test:plan(#checks)
+        for _, c in ipairs(checks) do
+            test:is(c.ok, true, case.name .. ': ' .. c.name)
+        end
+    end)
+end
+
+test:test('client.behavior: restart a process with threads', function(test)
+    local crashed = false
+    local cl = client.new()
+    cl.invoke = function(_self, op)
+        if not crashed then
+            crashed = true
+            error('invoke boom')
+        end
+        return { type = 'ok', f = op.f }
+    end
+
+    local hist = history.new()
+    local pool = threadpool.new('coroutine', 2)
+    local ok = pool:start(client.run, {
+        client = cl,
+        gen = gen_lib.range(1, 10):map(function(i)
+            return { f = 'test', value = i }
+        end),
+        history = hist,
+        nodes = { 'a' },
+        context = { next_process = 3 },
+    })
+
+    local restart, crash = false, false
+    for _, op in ipairs(hist.history) do
+        if op.type == 'info' then
+            crash = true
+        end
+        if op.process == 3 then
+            restart = true
+        end
+    end
+
+    test:plan(3)
+    test:is(ok, true, 'run completes')
+    test:is(crash, true, 'a crash is recorded')
+    test:is(restart, true,
+        'a restarted process starts after the thread processes')
+end)
 
 ------------------------
 -- Integration tests  --
