@@ -32,11 +32,11 @@
 -- a special nemesis process (see `molly.nemesis`) introduces
 -- faults into the system - also scheduled by the generator.
 --
--- Finally, the DB is turn down. Molly uses a checker (see
--- `molly.checker`) to analyze the test's history for correctness,
--- and to generate reports, graphs, etc. The test, history,
--- analysis, and any supplementary results are written to the
--- filesystem for later review.
+-- Finally, the DB is turn down. Molly validates the test's
+-- history for correctness with `history:is_well_formed()` (see
+-- `molly.history`), and generates reports, graphs, etc. The test,
+-- history, analysis, and any supplementary results are written to
+-- the filesystem for later review.
 --
 -- <!-- TODO: https://jepsen.io/consistency -->
 --
@@ -278,6 +278,19 @@ local function run_test(workload, opts)
     if not ok then
         return nil, err
     end
+
+    -- Every collected history must be well-formed. Log the
+    -- findings and fail the run when it is not. A non-monotonic
+    -- time is only a warning.
+    local valid, findings = history:is_well_formed()
+    gen_lib.iter(findings or {}):each(function(item)
+        local write = item.severity == 'warning' and log.warn or log.error
+        write('%s', item.message)
+    end)
+    if not valid then
+        return nil, 'history is invalid'
+    end
+
     local total_passed_sec = clock.monotonic() - total_time_begin
 
     -- Summary.

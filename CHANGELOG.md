@@ -23,6 +23,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   finished operations.
 - An optional `reusable` client method that reports whether a
   client survives a crashed invocation without a restart.
+- A public `history:is_well_formed()` method that validates an
+  operation history against the structure and semantics from the
+  Jepsen history documentation. It reports errors for operations
+  without a process, a bad per-process invoke/completion
+  alternation, crash violations, dangling invokes, non-numeric,
+  duplicate or non-ascending indices, and a warning for a
+  non-monotonic time.
+- `run_test` validates the collected history with
+  `history:is_well_formed()` and fails with an error when the
+  history is not well-formed.
 
 ### Changed
 
@@ -77,6 +87,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A test duration and RPS in a summary are based on monotonic
   (real) time instead of CPU time; requests per second are not
   computed when the elapsed time is zero.
+- A client records a private copy of a generated operation, so a
+  generator that reuses an operation table (for example
+  `gen.duplicate`) does not make history entries alias each
+  other.
 
 [Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
 
