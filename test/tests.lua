@@ -49,9 +49,13 @@ test:test('clock', function(test)
     local res_luajit = type(res) == 'number' and not utils.is_tarantool()
     test:is(res_tarantool or res_luajit, true, "clock.monotonic64()")
     test:isnumber(clock.monotonic(), "clock.monotonic()")
+    -- The clocks are sampled in separate calls, so the difference
+    -- includes scheduling jitter. The tolerance is wide enough to
+    -- tolerate a delay between the calls while still catching a
+    -- unit mismatch (seconds vs nanoseconds).
     local diff = math.abs(clock.monotonic() -
         assert(tonumber(clock.monotonic64())) / 10^9)
-    test:ok(diff < 0.01, "clock.monotonic() in seconds")
+    test:ok(diff < 1, "clock.monotonic() in seconds")
     test:isnumber(clock.proc(), "clock.proc()")
     test:isnil(clock.sleep(0.1), "clock.sleep()")
     local before = clock.monotonic()
