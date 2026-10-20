@@ -291,8 +291,14 @@ local function to_json(self)
     return json.encode(self.history)
 end
 
--- Get a table with completed operations in a history.
--- @return table
+-- Get a number of completed operations in a history.
+--
+-- An operation is completed when its type is `ok`, `fail` or
+-- `info`; an `info` operation is a completion as well. The count
+-- includes completions of nemesis processes, which have no
+-- matching `invoke` operation.
+--
+-- @return number
 -- @function ops_completed
 local function ops_completed(self)
     dev_checks('<history>')
@@ -300,8 +306,15 @@ local function ops_completed(self)
     return gen.filter(op.is_completed, self.history):length()
 end
 
--- Get a table with planned operations in a history.
--- @return table
+-- Get a number of planned operations in a history.
+--
+-- An operation is planned when its type is `invoke`, that is a
+-- client process has started (and possibly finished) it. The
+-- count is not a number of operations a generator was asked to
+-- produce. Nemesis processes are recorded as `info`, so they do
+-- not add planned operations.
+--
+-- @return number
 -- @function ops_planned
 local function ops_planned(self)
     dev_checks('<history>')

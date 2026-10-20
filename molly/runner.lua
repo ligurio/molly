@@ -61,6 +61,35 @@
 -- finished operations. Threads tear down and close connections
 -- independently after the last barrier.
 --
+--### Test Summary
+--
+-- When a test finishes, `run_test()` logs a summary. The same
+-- values are available in a table returned by the internal
+-- `summary()` function. Each number in the summary means the
+-- following:
+--
+-- - **Total planned requests** (`ops_planned`) is a number of
+--   operations of type `invoke` in the history, that is requests
+--   actually issued by client processes. It is not a number of
+--   operations a generator was asked to produce.
+-- - **Total completed requests** (`ops_completed`) is a number of
+--   operations of type `ok`, `fail` or `info`, that is operations
+--   that got a result. An `info` operation is a completion too.
+--   It includes nemesis `info` operations that have no matching
+--   `invoke`, so `ops_completed` may be greater than
+--   `ops_planned`.
+-- - **Requests per sec** (`rps`) is an average number of
+--   completed operations per second:
+--   `ops_completed / total_time`, rounded down, where
+--   `total_time` is a monotonic wall-clock duration. It is not
+--   logged when it cannot be calculated: when no operations
+--   completed or when the duration is not positive. The number of
+--   completed operations includes nemesis completions.
+--
+-- Planned requests are always logged at the debug level, while
+-- completed requests and requests per second are logged only when
+-- RPS can be calculated.
+--
 -- @see molly.thread
 
 local checks = require('molly.dev_checks')
