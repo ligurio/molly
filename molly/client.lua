@@ -11,7 +11,8 @@
 -- `invoke` boundaries are synchronized; threads tear down and
 -- close connections independently after the last barrier.
 --
--- An operation that crashed a client is recorded as an `info`
+-- An operation that crashed a client, or an `invoke` that
+-- returned an invalid completion, is recorded as an `info`
 -- operation (an indeterminate state) and the process is
 -- restarted, as in Jepsen. A client that is not reusable is
 -- reopened before the next operation; see the `reusable`
@@ -58,12 +59,42 @@ end
 -- without a restart. By default a client is not reusable, as in
 -- Jepsen. A client may implement an optional
 -- `reusable(client, client_data)` method that returns a boolean.
+-- An error raised by the method propagates to the caller, which
+-- records the operation as indeterminate, as in Jepsen.
 local function is_reusable(client, client_data)
     if type(client.reusable) ~= 'function' then
         return false
     end
-    local ok, res = pcall(client.reusable, client, client_data)
-    return ok and res == true
+    return client.reusable(client, client_data) == true
+end
+
+-- Completion types accepted by Jepsen. An invocation is not a
+-- valid completion.
+local completion_types = {
+    ok = true,
+    info = true,
+    fail = true,
+}
+
+-- Validate a completion against its invocation, as the Jepsen
+-- client validator does. A completion must be a table with a
+-- valid type and must preserve the process and the function of
+-- the invocation.
+local function validate_completion(op, res)
+    if type(res) ~= 'table' then
+        return false, 'completion is not a table'
+    end
+    if not completion_types[res.type] then
+        return false, ('invalid completion type "%s"'):format(
+            tostring(res.type))
+    end
+    if res.process ~= op.process then
+        return false, 'completion process does not match the invocation'
+    end
+    if res.f ~= op.f then
+        return false, 'completion f does not match the invocation'
+    end
+    return true
 end
 
 -- Advance a process identifier after an indeterminate operation,
@@ -87,15 +118,12 @@ end
 -- history never has a dangling invoke.
 local function add_indeterminate(history, op, state, thread_id_str, reason)
     state.needs_reopen = true
-    local failed_op = {
-        type = 'info',
-        f = op.f,
-        value = op.value,
-        process = state.process,
-        index = next_index(),
-        time = clock.monotonic64(),
-        error = 'indeterminate: ' .. tostring(reason),
-    }
+    local failed_op = utils.copy_table(op)
+    failed_op.type = 'info'
+    failed_op.process = state.process
+    failed_op.index = next_index()
+    failed_op.time = clock.monotonic64()
+    failed_op.error = 'indeterminate: ' .. tostring(reason)
     log.debug('%-4s %s', thread_id_str, op_lib.to_string(failed_op))
     history:add(failed_op)
     next_process(state)
@@ -129,12 +157,30 @@ local function process_operation(client, history, op, thread_id_str, state,
     -- A crashed client may be in an unknown state. When it is not
     -- reusable, reopen the connection before the next operation.
     -- A failed reconnect is recorded as a 'fail' operation and
-    -- retried on the next operation, as in Jepsen.
+    -- retried on the next operation, as in Jepsen. An error
+    -- raised by reusable() or close() is a crash of the current
+    -- invocation: the operation is indeterminate, so it is
+    -- recorded as 'info' and the process is restarted.
     if state.needs_reopen then
-        if is_reusable(client, client_data) then
+        local reuse_ok, reusable = pcall(is_reusable, client, client_data)
+        if not reuse_ok then
+            log.warn('Process %d crashed (reusable failed: %s)',
+                state.process, reusable)
+            add_indeterminate(history, op, state, thread_id_str, reusable)
+            return
+        end
+        if reusable then
             state.needs_reopen = false
         else
-            pcall(client.close, client, client_data)
+            local close_ok, close_err = pcall(client.close, client,
+                client_data)
+            if not close_ok then
+                log.warn('Process %d crashed (close failed: %s)',
+                    state.process, close_err)
+                add_indeterminate(history, op, state, thread_id_str,
+                    close_err)
+                return
+            end
             local ok, err = pcall(client.open, client, state.addr, client_data)
             if not ok then
                 log.info('ERROR: %s', err)
@@ -165,26 +211,25 @@ local function process_operation(client, history, op, thread_id_str, state,
         add_indeterminate(history, op, state, thread_id_str, res)
         return
     end
-    -- A client must return a completion operation. An invalid
-    -- result is indeterminate as well: the invocation is already
-    -- in the history and cannot be left without a completion.
-    -- Record it as 'info' and restart the process, as in Jepsen.
-    if type(res) ~= 'table' then
-        add_indeterminate(history, op, state, thread_id_str,
-            'operation is not a table')
-        return
-    end
-    if res.type == nil then
-        add_indeterminate(history, op, state, thread_id_str,
-            'operation type is empty')
+    -- A client must return a valid completion operation. An
+    -- invalid result is indeterminate as well: the invocation is
+    -- already in the history and cannot be left without a
+    -- completion. Record it as 'info' and restart the process,
+    -- as in Jepsen. Jepsen's validator requires a map with a
+    -- type of ok, info or fail and the process and f of the
+    -- invocation.
+    local valid, reason = validate_completion(op, res)
+    if not valid then
+        log.warn('Process %d crashed (%s)', state.process, reason)
+        add_indeterminate(history, op, state, thread_id_str, reason)
         return
     end
     -- A client may return the same table it was given. Copy the
     -- completion before annotating it, so it does not overwrite
-    -- the already recorded invoke.
+    -- the already recorded invoke. The index and time of a
+    -- completion are always assigned by Molly, as in Jepsen.
     res = utils.copy_table(res)
     res.index = next_index()
-    res.process = state.process
     res.time = clock.monotonic64()
     if log.is_enabled('debug') then
         log.debug('%-4s %s', thread_id_str, op_lib.to_string(res))
@@ -303,7 +348,9 @@ local client_mt = {
     __index = {
         open = function() return true end,
         setup = function() return true end,
-        invoke = function() return {} end,
+        invoke = function(_self, op)
+            return { type = 'ok', f = op.f, process = op.process }
+        end,
         teardown = function() return true end,
         close = function() return true end,
         -- A client is not reusable by default, as in Jepsen.
@@ -315,7 +362,8 @@ local client_mt = {
 --
 -- Default implementation of a client defines open, setup,
 -- teardown and close methods with empty implementation that
--- always returns true.
+-- always returns true. Its invoke method completes every
+-- operation with `ok`, like a no-op client in Jepsen.
 --
 -- Client must implement the following methods:
 --
@@ -342,10 +390,11 @@ local client_mt = {
 -- operation is recorded in a history as `info` (an indeterminate
 -- state: it may or may not have taken place) and the process is
 -- restarted. See `reusable` below. An `invoke` that returns an
--- invalid completion (not a table or without a `type`) is treated
--- the same way: the invocation is recorded as `info` and the
--- process is restarted, so a history never has a dangling
--- `invoke`.
+-- invalid completion is treated the same way: the invocation is
+-- recorded as `info` and the process is restarted, so a history
+-- never has a dangling `invoke`. A completion is invalid when it
+-- is not a table, its type is not `ok`, `info` or `fail`, or its
+-- `process` or `f` differs from the invocation, as in Jepsen.
 --
 -- **teardown** - function that tear down a database instance.
 -- Function must raise an error on failure. Single argument is
@@ -364,7 +413,9 @@ local client_mt = {
 -- A client is not reusable by default, as in Jepsen: after a
 -- crashed `invoke` (or an `invoke` that returned `info`) the
 -- connection is reopened with `close` and `open` before the next
--- operation. A failed reconnect is recorded as a `fail`
+-- operation. An error raised by `reusable` or `close` during a
+-- reopen marks the next invocation as `info` and restarts the
+-- process, as in Jepsen. A failed `open` is recorded as a `fail`
 -- operation and retried on the next operation.
 --
 -- In general it is recommended to raise an error in case of fatal
