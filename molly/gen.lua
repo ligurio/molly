@@ -467,9 +467,7 @@ end
 methods.cycle_times = cycle_times
 exports.cycle_times = cycle_times
 
-local mix_gen
-
-mix_gen = function(_, state)
+local function mix_gen(_, state)
     assert(type(state) == 'table')
     local len = #state
     if len == 0 then
@@ -482,13 +480,11 @@ mix_gen = function(_, state)
     if state2 == nil then
         -- The generator is exhausted.
         table.remove(state, nth)
-        ---@diagnostic disable-next-line: need-check-nil
         return mix_gen(nil, state)
     end
     state[nth] = fun.wrap(gen1, param1, state2)
     if value == nil then
         -- The generator is alive, but has no value yet; retry.
-        ---@diagnostic disable-next-line: need-check-nil
         return mix_gen(nil, state)
     end
     return state, value
