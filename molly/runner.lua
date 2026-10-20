@@ -355,8 +355,10 @@ local function run_test(workload, opts)
 
     -- Every collected history must be well-formed. Log the
     -- findings and fail the run when it is not. A non-monotonic
-    -- time is only a warning. History reports are written above,
-    -- so an invalid history can still be inspected.
+    -- time is only a warning, and invocations without completions
+    -- are legal pending operations, as in Jepsen. History reports
+    -- are written above, so an invalid history can still be
+    -- inspected.
     local valid, findings = history:is_well_formed()
     gen_lib.iter(findings or {}):each(function(item)
         local write = item.severity == 'warning' and log.warn or log.error

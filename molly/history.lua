@@ -176,8 +176,13 @@ end
 --   unique (error) and strictly ascending (error); a duplicate is
 --   reported once;
 -- - `time` is present and is a numeric integer (error) and
---   monotonic (warning);
--- - no `invoke` is left without a completion at the end (error).
+--   monotonic (warning).
+--
+-- An `invoke` left without a completion at the end of the
+-- history is a legal pending state, not an error, as in Jepsen:
+-- the operation may still be running or the run was aborted.
+-- Checkers treat such an operation as possibly applied. See
+-- `pending`.
 --
 -- "Numeric" means a Lua number or a numeric cdata value (for
 -- example, a Tarantool 64-bit monotonic clock). Warnings do not
@@ -245,12 +250,9 @@ local function is_well_formed(x)
         add_error(findings, 'history is not a dense array', nil)
     end
 
-    -- A history must not contain dangling invocations without a
-    -- completion.
-    for process, invoke_op in pairs(state.pending) do
-        add_error(findings, ('process %s has a dangling invoke')
-            :format(tostring(process)), invoke_op)
-    end
+    -- A dangling invocation at the end of a history is a legal
+    -- pending state, as in Jepsen, so it is not reported as an
+    -- error here.
 
     local ok = true
     for _, item in ipairs(findings) do

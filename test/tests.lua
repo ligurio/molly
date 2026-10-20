@@ -39,7 +39,7 @@ end
 local seed = os.time()
 math.randomseed(seed)
 
-test:plan(65)
+test:plan(66)
 
 test:test('clock', function(test)
     test:plan(9)
@@ -205,13 +205,14 @@ test:test('history.is_well_formed', function(test)
     }):is_well_formed()
     test:is(ok, false, 'history.is_well_formed(): invocation after info')
 
-    -- A dangling invocation.
+    -- A dangling invocation is a legal pending operation.
     ok, findings = hist({
         { type = 'invoke', process = 1, index = 1, time = 1 },
     }):is_well_formed()
-    test:is(ok, false, 'history.is_well_formed(): dangling invocation')
-    test:is(findings and findings[1] and findings[1]['index'], 1,
-        'history.is_well_formed(): dangling invoke has an index')
+    test:is(ok, true,
+        'history.is_well_formed(): dangling invocation is pending')
+    test:is(findings, nil,
+        'history.is_well_formed(): dangling invoke has no findings')
 
     -- An invalid operation type.
     ok = hist({
@@ -1709,13 +1710,14 @@ end)
 test:test('runner.invalid_history', function(test)
     test:plan(3)
 
-    -- Make run_test collect a history with a dangling invoke so
-    -- that history:is_well_formed() fails. The process identifier
-    -- is outside the range used by client threads.
+    -- Make run_test collect a history with a completion without
+    -- an invocation so that history:is_well_formed() fails. The
+    -- process identifier is outside the range used by client
+    -- threads.
     local real_new = history.new
     history.new = function()
         local h = real_new()
-        h:add({ type = 'invoke', process = -1, time = 1 })
+        h:add({ type = 'ok', process = -1, time = 1 })
         return h
     end
     local pok, ok, err = pcall(runner.run_test, {
@@ -1728,6 +1730,34 @@ test:test('runner.invalid_history', function(test)
     test:is(ok, nil, 'runner.invalid_history(): run_test returned nil')
     test:is(err, 'history is invalid',
         'runner.invalid_history(): an error is returned')
+end)
+
+test:test('runner.pending_history', function(test)
+    test:plan(4)
+
+    -- A dangling invoke is a legal pending operation. It must not
+    -- fail the run, and it must be reported as unfinished.
+    local real_new = history.new
+    local captured = {}
+    history.new = function()
+        local h = real_new()
+        captured.history = h
+        h:add({ type = 'invoke', f = 'pending', process = -1, time = 1 })
+        return h
+    end
+    local pok, ok, err = pcall(runner.run_test, {
+        client = client_dict,
+        generator = tests.rw_register_gen():take(1),
+    }, { threads = 1, nodes = { 'a' } })
+    history.new = real_new
+
+    test:is(pok, true, 'runner.pending_history(): run_test did not raise')
+    test:is(ok, true, 'runner.pending_history(): run_test returned true')
+    test:is(err, nil, 'runner.pending_history(): no error')
+    local pending_history = captured.history
+    ---@cast pending_history table
+    test:is(#pending_history:pending(), 1,
+        'runner.pending_history(): pending operation is counted')
 end)
 
 test:test('runner.history_warning', function(test)
