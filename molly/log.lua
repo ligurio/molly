@@ -34,6 +34,16 @@ for i, v in ipairs(modes) do
     levels[v.name] = i
 end
 
+--- Report whether messages of the given level are emitted.
+-- Useful to skip expensive formatting of message arguments.
+-- @string level Message level.
+-- @return boolean
+--
+-- @function is_enabled
+log.is_enabled = function(level)
+    return levels[level] >= levels[log.level]
+end
+
 --- Log message with verbose level 'trace'.
 -- @string message Message.
 -- @return nil

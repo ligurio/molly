@@ -99,7 +99,9 @@ local function process_operation(client, history, op, thread_id_str, state,
     op.process = state.process
     op.index = next_index()
     op.time = clock.monotonic64()
-    log.debug('%-4s %s', thread_id_str, op_lib.to_string(op))
+    if log.is_enabled('debug') then
+        log.debug('%-4s %s', thread_id_str, op_lib.to_string(op))
+    end
     history:add(op)
 
     -- A crashed client may be in an unknown state. When it is not
@@ -163,7 +165,9 @@ local function process_operation(client, history, op, thread_id_str, state,
     res.index = next_index()
     res.process = state.process
     res.time = clock.monotonic64()
-    log.debug('%-4s %s', thread_id_str, op_lib.to_string(res))
+    if log.is_enabled('debug') then
+        log.debug('%-4s %s', thread_id_str, op_lib.to_string(res))
+    end
     history:add(res)
 
     -- A client that returned an indeterminate operation has to be
