@@ -43,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is enabled; the client no longer JSON-encodes every operation
   twice when debug logging is off (in-memory list-append benchmark
   is about 1.6x faster).
+- On LuaJIT, clock calls reuse a single scratch `timespec` instead
+  of allocating one on every call (50-70 -> 30 ns per
+  `clock.monotonic64()` call).
 
 ### Removed
 
