@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Using of SQL prepared statements in test examples.
 - Generated operation can be any callable Lua object.
 - RW-register generator emits every number only once.
+- Log message arguments are formatted only when the message level
+  is enabled; the client no longer JSON-encodes every operation
+  twice when debug logging is off (in-memory list-append benchmark
+  is about 1.6x faster).
 
 ### Removed
 
