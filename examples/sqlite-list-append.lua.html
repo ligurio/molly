@@ -26,6 +26,7 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -33,29 +34,29 @@
 
 
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><strong>sqlite-list-append.lua</strong></li>
 </ul>
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 
@@ -63,7 +64,8 @@
 
 <div id="content">
 
-    <pre>
+    <h2>sqlite-list-append.lua</h2>
+<pre>
 <span class="comment">-- https://www.sqlite.org/isolation.html
 </span><span class="comment">-- https://www.sqlite.org/threadsafe.html
 </span><span class="comment">-- https://www.sqlite.org/atomiccommit.html
@@ -72,52 +74,57 @@
 <span class="keyword">local</span> molly = <span class="global">require</span>(<span class="string">'molly'</span>)
 <span class="keyword">local</span> <span class="global">os</span> = <span class="global">require</span>(<span class="string">'os'</span>)
 
-<span class="global">print</span>(<span class="string">'SQLite version:'</span>, sqlite3.version())
-<span class="global">print</span>(<span class="string">'lsqlite3 library version:'</span>, sqlite3.lversion())
+<span class="global">print</span>(<span class="string">'SQLite version:'</span>, sqlite3.<span class="function-name">version</span>())
+<span class="global">print</span>(<span class="string">'lsqlite3 library version:'</span>, sqlite3.<span class="function-name">lversion</span>())
 
-<span class="keyword">local</span> <span class="keyword">function</span> insert(stmt, key, val) <span class="comment">-- luacheck: no unused
-</span>    <span class="keyword">local</span> ok = stmt:bind_values(key, val)
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function-name">sqlite_insert</span>(stmt, key, val)
+    <span class="keyword">local</span> ok = stmt:<span class="function-name">bind_values</span>(key, val)
     <span class="keyword">if</span> ok ~= sqlite3.OK <span class="keyword">then</span>
         <span class="keyword">return</span> <span class="keyword">false</span>
     <span class="keyword">end</span>
-    ok = stmt:step()
+    ok = stmt:<span class="function-name">step</span>()
     <span class="keyword">if</span> ok ~= sqlite3.DONE <span class="keyword">then</span>
         <span class="keyword">return</span> <span class="keyword">false</span>
     <span class="keyword">end</span>
-    stmt:reset()
+    stmt:<span class="function-name">reset</span>()
 
     <span class="keyword">return</span> <span class="keyword">true</span>
 <span class="keyword">end</span>
 
-<span class="keyword">local</span> <span class="keyword">function</span> <span class="global">select</span>(stmt, key) <span class="comment">-- luacheck: no unused
-</span>    <span class="keyword">local</span> values = {}
-    <span class="keyword">for</span> row <span class="keyword">in</span> stmt:nrows() <span class="keyword">do</span>
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function-name">sqlite_select</span>(stmt, key)
+    <span class="keyword">local</span> values = {}
+    <span class="keyword">for</span> row <span class="keyword">in</span> stmt:<span class="function-name">nrows</span>() <span class="keyword">do</span>
         <span class="keyword">if</span> row.key == key <span class="keyword">then</span>
-            <span class="global">table</span>.insert(values, row.val)
+            <span class="global">table</span>.<span class="function-name">insert</span>(values, row.val)
         <span class="keyword">end</span>
     <span class="keyword">end</span>
     <span class="keyword">return</span> values
 <span class="keyword">end</span>
 
-<span class="keyword">local</span> sqlite_list_append = molly.client.new()
+<span class="keyword">local</span> sqlite_list_append = molly.client.<span class="function-name">new</span>()
 
 sqlite_list_append.open = <span class="keyword">function</span>(self)
-    self.db = <span class="global">assert</span>(sqlite3.open_memory(), <span class="string">'database handle is nil'</span>)
+    <span class="global">assert</span>(<span class="global">type</span>(self) == <span class="string">'table'</span>)
+    self.db = <span class="global">assert</span>(sqlite3.<span class="function-name">open_memory</span>(), <span class="string">'database handle is nil'</span>)
     <span class="keyword">if</span> self.db == <span class="keyword">nil</span> <span class="keyword">then</span>
-        error(<span class="string">'database handle is nil'</span>)
+        <span class="global">error</span>(<span class="string">'database handle is nil'</span>)
     <span class="keyword">end</span>
     <span class="comment">-- See explanation in https://www.sqlite.org/pragma.html
-</span>    <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA journal_mode = WAL'</span>))
-    <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA synchronous = normal'</span>))
-    <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA mmap_size = 30000000000'</span>))
-    <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'PRAGMA page_size = 32768'</span>))
-    <span class="comment">--self.insert_stmt = assert(self.db:prepare('INSERT INTO list_append VALUES (?, ?)'))
-</span>    <span class="comment">--self.select_stmt = assert(self.db:prepare('SELECT key, val FROM list_append ORDER BY key'))
-</span>    <span class="keyword">return</span> <span class="keyword">true</span>
+</span>    <span class="global">assert</span>(sqlite3.OK == self.db:<span class="function-name">exec</span>(<span class="string">'PRAGMA journal_mode = WAL'</span>))
+    <span class="global">assert</span>(sqlite3.OK == self.db:<span class="function-name">exec</span>(<span class="string">'PRAGMA synchronous = normal'</span>))
+    <span class="global">assert</span>(sqlite3.OK == self.db:<span class="function-name">exec</span>(<span class="string">'PRAGMA mmap_size = 30000000000'</span>))
+    <span class="global">assert</span>(sqlite3.OK == self.db:<span class="function-name">exec</span>(<span class="string">'PRAGMA page_size = 32768'</span>))
+    <span class="keyword">return</span> <span class="keyword">true</span>
 <span class="keyword">end</span>
 
 sqlite_list_append.setup = <span class="keyword">function</span>(self)
-    <span class="global">assert</span>(sqlite3.OK == self.db:exec(<span class="string">'CREATE TABLE IF NOT EXISTS list_append (key INT NOT NULL, val INT)'</span>))
+    <span class="global">assert</span>(<span class="global">type</span>(self) == <span class="string">'table'</span>)
+    <span class="global">assert</span>(sqlite3.OK == self.db:<span class="function-name">exec</span>(
+        <span class="string">'CREATE TABLE IF NOT EXISTS list_append (key INT NOT NULL, val INT)'</span>))
+    self.insert_stmt = <span class="global">assert</span>(self.db:<span class="function-name">prepare</span>(
+        <span class="string">'INSERT INTO list_append VALUES (?, ?)'</span>))
+    self.select_stmt = <span class="global">assert</span>(self.db:<span class="function-name">prepare</span>(
+        <span class="string">'SELECT key, val FROM list_append ORDER BY key'</span>))
     <span class="keyword">return</span> <span class="keyword">true</span>
 <span class="keyword">end</span>
 
@@ -126,20 +133,20 @@ sqlite_list_append.setup = <span class="keyword">function</span>(self)
 <span class="keyword">local</span> IDX_MOP_VAL = <span class="number">3</span>
 
 sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
-    <span class="keyword">local</span> mop = op.value[<span class="number">1</span>] <span class="comment">-- TODO: Support more than one mop in operation.
-</span>    <span class="keyword">local</span> mop_key = mop[IDX_MOP_KEY]
+    <span class="global">assert</span>(<span class="global">type</span>(self) == <span class="string">'table'</span>)
+    <span class="comment">-- TODO: Support more than one mop in operation.
+</span>    <span class="keyword">local</span> mop = op.value[<span class="number">1</span>]
+    <span class="keyword">local</span> mop_key = mop[IDX_MOP_KEY]
     <span class="keyword">local</span> <span class="global">type</span> = <span class="string">'ok'</span>
     <span class="keyword">if</span> mop[IDX_MOP_TYPE] == <span class="string">'r'</span> <span class="keyword">then</span>
-        <span class="comment">--mop[IDX_MOP_VAL] = select(self.select_stmt, mop_key)
-</span>        mop[IDX_MOP_VAL] = self.db:exec(<span class="string">'SELECT key, val FROM list_append ORDER BY key'</span>)
+        mop[IDX_MOP_VAL] = <span class="function-name">sqlite_select</span>(self.select_stmt, mop_key)
     <span class="keyword">elseif</span> mop[IDX_MOP_TYPE] == <span class="string">'append'</span> <span class="keyword">then</span>
-        <span class="keyword">local</span> ok = self.db:exec(<span class="global">string</span>.format(<span class="string">'INSERT INTO list_append VALUES (%s, %s)'</span>, mop_key, mop[IDX_MOP_VAL]))
-        <span class="comment">--local ok = insert(self.insert_stmt, mop_key, mop[IDX_MOP_VAL])
-</span>        <span class="keyword">if</span> ok == <span class="keyword">false</span> <span class="keyword">then</span>
+        <span class="keyword">local</span> ok = <span class="function-name">sqlite_insert</span>(self.insert_stmt, mop_key, mop[IDX_MOP_VAL])
+        <span class="keyword">if</span> ok == <span class="keyword">false</span> <span class="keyword">then</span>
             <span class="global">type</span> = <span class="string">'fail'</span>
         <span class="keyword">end</span>
     <span class="keyword">else</span>
-        error(<span class="string">'Unknown operation'</span>)
+        <span class="global">error</span>(<span class="string">'Unknown operation'</span>)
     <span class="keyword">end</span>
 
     <span class="keyword">return</span> {
@@ -151,16 +158,19 @@ sqlite_list_append.invoke = <span class="keyword">function</span>(self, op)
 <span class="keyword">end</span>
 
 sqlite_list_append.teardown = <span class="keyword">function</span>(self)
-    <span class="comment">--self.insert_stmt:finalize()
-</span>    <span class="comment">--self.select_stmt:finalize()
-</span>    <span class="keyword">local</span> changes = self.db:total_changes()
-    <span class="comment">--assert(changes == 500, string.format('Number of operations is wrong (%d != 500)', changes))
-</span>    <span class="global">print</span>(<span class="string">'Total changes in SQLite DB:'</span>, changes)
+    <span class="global">assert</span>(<span class="global">type</span>(self) == <span class="string">'table'</span>)
     <span class="keyword">return</span> <span class="keyword">true</span>
 <span class="keyword">end</span>
 
 sqlite_list_append.close = <span class="keyword">function</span>(self)
-    self.db:close()
+    <span class="global">assert</span>(<span class="global">type</span>(self) == <span class="string">'table'</span>)
+    <span class="comment">-- Close database. All SQL statements prepared using
+</span>    <span class="comment">-- db:prepare() should have been finalized before this
+</span>    <span class="comment">-- function is called. The function returns sqlite3.OK on
+</span>    <span class="comment">-- success or else a numerical error code.
+</span>    <span class="keyword">if</span> self.db:<span class="function-name">isopen</span>() <span class="keyword">then</span>
+        <span class="global">assert</span>(self.db:<span class="function-name">close</span>() == sqlite3.OK)
+    <span class="keyword">end</span>
     <span class="keyword">return</span> <span class="keyword">true</span>
 <span class="keyword">end</span>
 
@@ -168,25 +178,26 @@ sqlite_list_append.close = <span class="keyword">function</span>(self)
     create_reports = <span class="keyword">true</span>,
     threads = <span class="number">1</span>,
 }
-<span class="keyword">local</span> ok, err = molly.runner.run_test({
+<span class="keyword">local</span> ok, err = molly.runner.<span class="function-name">run_test</span>({
     client = sqlite_list_append,
-    generator = molly.tests.list_append_gen()
+    generator = molly.gen.<span class="function-name">time_limit</span>(molly.tests.<span class="function-name">list_append_gen</span>(), <span class="number">0.05</span>)
 }, test_options)
 
 <span class="keyword">if</span> <span class="keyword">not</span> ok <span class="keyword">then</span>
     <span class="global">print</span>(<span class="string">'Test has failed:'</span>, err)
 <span class="keyword">end</span>
 
-<span class="keyword">if</span> <span class="global">os</span>.getenv(<span class="string">'DEV'</span>) ~= <span class="string">'ON'</span> <span class="keyword">then</span>
-    <span class="global">os</span>.remove(<span class="string">'history.json'</span>)
-    <span class="global">os</span>.remove(<span class="string">'history.txt'</span>)
+<span class="keyword">if</span> <span class="global">os</span>.<span class="function-name">getenv</span>(<span class="string">'DEV'</span>) ~= <span class="string">'ON'</span> <span class="keyword">then</span>
+    <span class="global">os</span>.<span class="function-name">remove</span>(<span class="string">'history.json'</span>)
+    <span class="global">os</span>.<span class="function-name">remove</span>(<span class="string">'history.txt'</span>)
 <span class="keyword">end</span></pre>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

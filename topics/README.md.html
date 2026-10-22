@@ -26,6 +26,7 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -37,28 +38,28 @@
 
 
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><strong>README</strong></li>
 </ul>
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -80,12 +81,13 @@
 <h3>Prerequisites</h3>
 
 <ul>
-    <li>Lua interpreter: LuaJIT or LuaJIT-based is recommended.</li>
+    <li>Lua interpreter: LuaJIT or a LuaJIT-based runtime is recommended (for
+    example, Tarantool).</li>
     <li><a href="https://luafun.github.io/">luafun</a> - Lua functional library, built-in into
     Tarantool.</li>
     <li><a href="https://github.com/mpx/lua-cjson">lua-cjson</a> - Lua library for fast JSON
     encoding and decoding, built-in into Tarantool.</li>
-    <li>(optional) Jepsen-compatible consistency checker. For example
+    <li>(optional) a Jepsen-compatible consistency checker. For example,
     <a href="https://github.com/ligurio/elle-cli">elle-cli</a>, based on Jepsen, Elle and
     Knossos.</li>
 </ul>
@@ -93,22 +95,21 @@
 <h3>Installation</h3>
 
 <ul>
-    <li>Download and setup Lua interpreter, <a href="https://luajit.org/install.html">LuaJIT</a>
-    or LuaJIT-based is recommended (for example
+    <li>Download and set up a Lua interpreter. <a href="https://luajit.org/install.html">LuaJIT</a>
+    or a LuaJIT-based runtime is recommended (for example,
     <a href="https://www.tarantool.io/download/">Tarantool</a>).</li>
-    <li>Install library using LuaRocks:</li>
+    <li>Install the library using LuaRocks:</li>
 </ul>
 
 
 <pre>
-$ luarocks install <span class="comment">--local molly
-</span>
+$ luarocks install <span class="comment">--local molly</span>
 </pre>
 
 
-<p>NOTE: Installation of modules <code>luafun</code> and <code>lua-cjson</code> is not required when
-Tarantool is used, both modules are built-in there. Install them manually in
-case of using LuaJIT:</p>
+<p>NOTE: Installing the <code>luafun</code> and <code>lua-cjson</code> modules is not required when
+Tarantool is used because both are built in. Install them manually when using
+LuaJIT:</p>
 
 
 <pre>
@@ -118,16 +119,15 @@ $ make deps-runtime
 
 <h3>Documentation</h3>
 
-<p>See documentation in https://ligurio.github.io/molly/.</p>
+<p>See the documentation at https://ligurio.github.io/molly/.</p>
 
 <h3>Examples</h3>
 
-<p>See also an examples in <a href="/test/examples/">test/examples/</a> for SQLite database
-engine:
-- <a href="../examples/sqlite-rw-register.lua.html#">sqlite-rw-register.lua</a>  contains a simple test that concurrently runs <code>get</code>
-  and <code>set</code> operations on SQLite DB
-- <a href="../examples/sqlite-list-append.lua.html#">sqlite-list-append.lua</a>  contains a simple test that concurrently runs <code>read</code>
-  and <code>append</code> operations on SQLite DB</p>
+<p>See also SQLite examples in <a href="/test/examples/">test/examples/</a>:
+- <a href="../examples/sqlite-rw-register.lua.html#">sqlite-rw-register.lua</a> contains a simple test that concurrently runs <code>get</code>
+  and <code>set</code> operations on a SQLite database
+- <a href="../examples/sqlite-list-append.lua.html#">sqlite-list-append.lua</a> contains a simple test that concurrently runs <code>read</code>
+  and <code>append</code> operations on a SQLite database</p>
 
 <p>For running examples you need installed an SQLite development package and
 <a href="https://github.com/luarocks/luarocks/wiki/Download">LuaRocks</a>.</p>
@@ -140,13 +140,13 @@ $ make test-example
 </pre>
 
 
-<p>Example produces two files with history: <code>history.txt</code> and <code>history.json</code>. With
-<a href="https://github.com/ligurio/elle-cli#usage">elle-cli</a> history can be checked
-for consistency:</p>
+<p>The example produces two history files: <code>history.txt</code> and <code>history.json</code>. The
+history can be checked for consistency with
+<a href="https://github.com/ligurio/elle-cli#usage">elle-cli</a>:</p>
 
 
 <pre>
-$ VER=<span class="number">0.1</span>.<span class="number">4</span>
+$ VER=<span class="number">0.1</span>.<span class="number">8</span>
 $ curl -O -L https://github.com/ligurio/elle-cli/releases/download/${VER}/elle-cli-bin-${VER}.zip
 $ unzip elle-cli-bin-${VER}.zip
 $ java -jar ./target/elle-cli-${VER}-standalone.jar -m elle-rw-register history.json
@@ -154,12 +154,13 @@ history.json        <span class="keyword">true</span>
 </pre>
 
 
-<p>See tests that uses Molly library in https://github.com/ligurio/molly-tests.</p>
+<p>See the tests that use the Molly library in
+https://github.com/ligurio/molly-tests.</p>
 
 <h3>Hacking</h3>
 
-<p>For developing <a href="../modules/molly.html#">molly</a>  you need to install: either LuaJIT or LuaJIT-based
-and <a href="https://github.com/luarocks/luarocks/wiki/Download">LuaRocks</a>.</p>
+<p>To develop <a href="../modules/molly.html#">molly</a>, install either LuaJIT or a LuaJIT-based runtime, and
+<a href="https://github.com/luarocks/luarocks/wiki/Download">LuaRocks</a>.</p>
 
 
 <pre>
@@ -174,14 +175,15 @@ $ make test
 
 <h3>License</h3>
 
-<p>Copyright © 2021-2023 <a href="https://bronevichok.ru/">Sergey Bronnikov</a></p>
+<p>Copyright © 2021-2026 <a href="https://bronevichok.ru/">Sergey Bronnikov</a></p>
 
 <p>Distributed under the ISC License.
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

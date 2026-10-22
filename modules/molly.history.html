@@ -26,35 +26,40 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><strong>molly.history</strong></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><strong>molly.history</strong></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -70,17 +75,87 @@
 </p>
 
 
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#is_well_formed">is_well_formed (x)</a></td>
+	<td class="summary">Check whether a history is well-formed.</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "is_well_formed"></a>
+    <strong>is_well_formed (x)</strong>
+    </dt>
+    <dd>
+    Check whether a history is well-formed. </p>
+
+<p> Accepts a <a href="../modules/molly.history.html#">molly.history</a> object (as a method) or a plain array
+ of operations (as a function) and verifies the structure and
+ semantics from the Jepsen history documentation.</p>
+
+<p> Rules checked (severity in parentheses):</p>
+
+<ul>
+    <li>the history (or the <a href="../modules/molly.history.html">history</a> field of an object) is a
+    table (error);</li>
+    <li>every operation is a table (error);</li>
+    <li><a href="https://www.lua.org/manual/5.1/manual.html#pdf-type">type</a> is one of <code>invoke</code>, <code>ok</code>, <code>info</code> or <code>fail</code> (error);</li>
+    <li><code>process</code> is present and is an integer for clients or a
+    string for nemeses (error);</li>
+    <li>for a string (nemesis) <code>process</code>, <a href="https://www.lua.org/manual/5.1/manual.html#pdf-type">type</a> is <code>info</code> (error);</li>
+    <li>for a numeric (client) <code>process</code>:</li>
+    <li>an <code>invoke</code> does not follow an unfinished <code>invoke</code> (error);</li>
+    <li>an <code>invoke</code> does not follow an <code>info</code> completion, i.e. no
+     invocation by a crashed process (error);</li>
+    <li>a completion (<code>ok</code>, <code>fail</code>, <code>info</code>) follows an <code>invoke</code>
+     (error);</li>
+    <li>if <code>index</code> is present, it is a numeric integer (error),
+    unique (error) and strictly ascending (error); a duplicate is
+    reported once;</li>
+    <li><code>time</code> is present and is a numeric integer (error) and
+    monotonic (warning);</li>
+    <li>no <code>invoke</code> is left without a completion at the end (error).</li>
+</ul>
+
+<p> "Numeric" means a Lua number or a numeric cdata value (for
+ example, a Tarantool 64-bit monotonic clock). Warnings do not
+ make a history invalid: the function then returns <code>true</code>
+ together with a non-empty list of findings.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+         History object or array of operations.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean, table|nil
+    </ol>
+
+
+
+
+</dd>
+</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

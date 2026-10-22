@@ -26,6 +26,7 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -33,28 +34,28 @@
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><strong>molly.op</strong></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><strong>molly.op</strong></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -68,69 +69,84 @@
 <p>
 
 
-<p> An operation is a transition from state to state. For instance, a
- single-variable system might have operations like read and write, which get
- and set the value of that variable, respectively. A counter might have
- operations like increments, decrements, and reads. An SQL store might have
- operations like selects and updates.</p>
+<p> An operation is a transition from state to state. For instance,
+ a single-variable system might have operations like read and
+ write, which get and set the value of that variable,
+ respectively. A counter might have operations like increments,
+ decrements, and reads. An SQL store might have operations like
+ selects and updates.</p>
 
-<p> An observed history should be a list of operations in real-time order, where
- each operation is a map of the form:</p>
+<p> An observed history should be a list of operations in real-time
+ order, where each operation is a map of the form:</p>
 
-<pre><code> {
-     type    One of &lt;code&gt;invoke&lt;/code&gt;, &lt;code&gt;ok&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;fail&lt;/code&gt;.
-     process A logical identifier for a single thread of execution.
-     value   A transaction; structure and semantics vary.
- }
-</code></pre>
+<ul>
+    <li><a href="https://www.lua.org/manual/5.1/manual.html#pdf-type">type</a> is one of <code>invoke</code>, <code>ok</code>, <code>info</code>, <code>fail</code>.</li>
+    <li><code>process</code> is a logical identifier for a single thread of
+    execution.</li>
+    <li><code>value</code> is a transaction; structure and semantics vary.</li>
+</ul>
 
-<p> Each process should perform alternating <code>invoke</code> and <code>ok</code>, <code>info</code>, <code>fail</code>
- operations. <code>ok</code> indicates the operation definitely committed. <code>fail</code>
- indicates it definitely did not occur - e.g. it was aborted, was never
- submitted to the database, etc. <code>info</code> indicates an indeterminate state; the
- transaction may or may not have taken place. After an <code>info</code>, a process may
- not perform another operation; the invocation remains open for the rest of
- the history.</p>
+<p> Each process should perform alternating <code>invoke</code> and <code>ok</code>,
+ <code>info</code>, <code>fail</code> operations. <code>ok</code> indicates the operation
+ definitely committed. <code>fail</code> indicates it definitely did not
+ occur - e.g. it was aborted, was never submitted to the
+ database, etc. <code>info</code> indicates an indeterminate state; the
+ transaction may or may not have taken place. After an <code>info</code>,
+ a process may not perform another operation; the invocation
+ remains open for the rest of the history.</p>
 
-<p> We define each operation as a table, that contains following keys:</p>
+<p> We define each operation as a table or a callable object that
+ return a table, that contains following keys:</p>
 
 <ul>
     <li>state, can be nil (invoke), true (ok) or false (fail);</li>
-    <li>f is an action defined in a test, for example 'transfer', 'read' or
-    'write';</li>
-    <li>v is a valued defined in a test, usually it is generated automatically;</li>
+    <li>f is an action defined in a test, for example 'transfer',
+    'read' or 'write';</li>
+    <li>v is a valued defined in a test, usually it is generated
+    automatically;</li>
 </ul>
 
-<p>  For example an operation with 'read' action, value is 'nil' because it is
-  unknown before invoking of operation:</p>
+<p>  For example an operation with 'read' action, value is 'nil'
+  because it is unknown before invoking of operation:</p>
 
-<pre><code>{
-    f = 'read',
-    value = nil,
+
+<pre>
+{
+    f = <span class="string">'read'</span>,
+    value = <span class="keyword">nil</span>,
 }
 
-4  ok       read       {0 5, 1 10, 2 12, 8 10, 9 17}
-4  invoke   read       nil
-3  ok       read       {0 5, 1 9, 2 12, 3 10, 4 11}
-3  invoke   read       nil
-</code></pre>
+<span class="number">4</span>  ok       <span class="function-name">read</span>       {<span class="number">0</span> <span class="number">5</span>, <span class="number">1</span> <span class="number">10</span>, <span class="number">2</span> <span class="number">12</span>, <span class="number">8</span> <span class="number">10</span>, <span class="number">9</span> <span class="number">17</span>}
+<span class="number">4</span>  invoke   read       <span class="keyword">nil</span>
+<span class="number">3</span>  ok       <span class="function-name">read</span>       {<span class="number">0</span> <span class="number">5</span>, <span class="number">1</span> <span class="number">9</span>, <span class="number">2</span> <span class="number">12</span>, <span class="number">3</span> <span class="number">10</span>, <span class="number">4</span> <span class="number">11</span>}
+<span class="number">3</span>  invoke   read       <span class="keyword">nil</span>
+</pre>
 
-<p>  or operation with 'transfer' action for test that transfers money between
-  accounts:</p>
+<p>  or operation with 'transfer' action for test that transfers
+  money between accounts:</p>
 
-<pre><code>{
-    f = 'transfer',
+
+<pre>
+{
+    f = <span class="string">'transfer'</span>,
     value = {
-        from = math.random(1, 10),
-        to = math.random(1, 10),
-        amount = math.random(1, 100),
+        from = <span class="global">math</span>.<span class="function-name">random</span>(<span class="number">1</span>, <span class="number">10</span>),
+        to = <span class="global">math</span>.<span class="function-name">random</span>(<span class="number">1</span>, <span class="number">10</span>),
+        amount = <span class="global">math</span>.<span class="function-name">random</span>(<span class="number">1</span>, <span class="number">100</span>),
     }
 }
 
-3  ok       transfer   {from = 8, to = 2, amount = 3}
-0  ok       transfer   {from = 1, to = 9, amount = 1}
-0  invoke   transfer   {from = 3, to = 9, amount = 5}
-</code></pre>
+<span class="number">3</span>  ok       <span class="function-name">transfer</span>   {from = <span class="number">8</span>, to = <span class="number">2</span>, amount = <span class="number">3</span>}
+<span class="number">0</span>  ok       <span class="function-name">transfer</span>   {from = <span class="number">1</span>, to = <span class="number">9</span>, amount = <span class="number">1</span>}
+<span class="number">0</span>  invoke   <span class="function-name">transfer</span>   {from = <span class="number">3</span>, to = <span class="number">9</span>, amount = <span class="number">5</span>}
+</pre>
+
+<p> Learn more about operation structure and operation semantics in
+ [1].</p>
+
+<ol>
+    <li>https://github.com/jepsen-io/history</li>
+</ol>
 </p>
 
 
@@ -144,7 +160,8 @@
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

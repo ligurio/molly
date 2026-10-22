@@ -26,39 +26,40 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_table">Class table </a></li>
 </ul>
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><strong>molly.log</strong></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -74,30 +75,34 @@
 </p>
 
 
-<h2><a href="#Functions">Functions</a></h2>
+<h2><a href="#Class_table">Class table </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#trace">trace (message)</a></td>
+	<td class="name" nowrap><a href="#table:is_enabled">table:is_enabled (level)</a></td>
+	<td class="summary">Report whether messages of the given level are emitted.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#table:trace">table:trace (message)</a></td>
 	<td class="summary">Log message with verbose level 'trace'.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#debug">debug (message)</a></td>
+	<td class="name" nowrap><a href="#table:debug">table:debug (message)</a></td>
 	<td class="summary">Log message with verbose level 'debug'.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#info">info (message)</a></td>
+	<td class="name" nowrap><a href="#table:info">table:info (message)</a></td>
 	<td class="summary">Log message with verbose level 'info'.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#warn">warn (message)</a></td>
+	<td class="name" nowrap><a href="#table:warn">table:warn (message)</a></td>
 	<td class="summary">Log message with verbose level 'warn'.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#error">error (message)</a></td>
+	<td class="name" nowrap><a href="#table:error">table:error (message)</a></td>
 	<td class="summary">Log message with verbose level 'error'.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#fatal">fatal (message)</a></td>
+	<td class="name" nowrap><a href="#table:fatal">table:fatal (message)</a></td>
 	<td class="summary">Log message with verbose level 'fatal'.</td>
 	</tr>
 </table>
@@ -106,11 +111,42 @@
 <br/>
 
 
-    <h2><a name="Functions"></a>Functions</h2>
+    <h2 class="section-header has-description"><a name="Class_table"></a>Class table </h2>
+
+          <div class="section-description">
+          <string, any>
+          </div>
     <dl class="function">
     <dt>
-    <a name = "trace"></a>
-    <strong>trace (message)</strong>
+    <a name = "table:is_enabled"></a>
+    <strong>table:is_enabled (level)</strong>
+    </dt>
+    <dd>
+    Report whether messages of the given level are emitted.
+ Useful to skip expensive formatting of message arguments.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">level</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Message level.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "table:trace"></a>
+    <strong>table:trace (message)</strong>
     </dt>
     <dd>
     Log message with verbose level 'trace'.
@@ -119,7 +155,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">message</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Message.
         </li>
     </ul>
@@ -135,8 +171,8 @@
 
 </dd>
     <dt>
-    <a name = "debug"></a>
-    <strong>debug (message)</strong>
+    <a name = "table:debug"></a>
+    <strong>table:debug (message)</strong>
     </dt>
     <dd>
     Log message with verbose level 'debug'.
@@ -145,7 +181,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">message</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Message.
         </li>
     </ul>
@@ -160,16 +196,15 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'molly.log'</span>)
- &gt; log.<span class="global">debug</span>(<span class="string">'Total planned requests: 1010'</span>)
- [DEBUG <span class="number">2021</span>-<span class="number">12</span>-<span class="number">1</span> <span class="number">12</span>:<span class="number">26</span>:<span class="number">8</span>:<span class="number">689379</span>] /home/sergeyb/sources/molly/jepsen/runner.lua:<span class="number">80</span>: Total planned requests: <span class="number">1010</span></pre>
+        <pre class="example">&gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'molly.log'</span>)
+&gt; log.<span class="global">debug</span>(<span class="string">'Message'</span>)
+[DEBUG <span class="number">2021</span>-<span class="number">12</span>-<span class="number">1</span> <span class="number">12</span>:<span class="number">26</span>:<span class="number">8</span>:<span class="number">689379</span>] runner.lua:<span class="number">80</span>: Message</pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "info"></a>
-    <strong>info (message)</strong>
+    <a name = "table:info"></a>
+    <strong>table:info (message)</strong>
     </dt>
     <dd>
     Log message with verbose level 'info'.
@@ -178,7 +213,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">message</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Message.
         </li>
     </ul>
@@ -193,16 +228,15 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'molly.log'</span>)
- &gt; log.info(<span class="string">'Message'</span>)
- [INFO  <span class="number">2021</span>-<span class="number">12</span>-<span class="number">7</span> <span class="number">13</span>:<span class="number">17</span>:<span class="number">46</span>:<span class="number">073544</span>]: Message</pre>
+        <pre class="example">&gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'molly.log'</span>)
+&gt; log.<span class="function-name">info</span>(<span class="string">'Message'</span>)
+[INFO  <span class="number">2021</span>-<span class="number">12</span>-<span class="number">7</span> <span class="number">13</span>:<span class="number">17</span>:<span class="number">46</span>:<span class="number">073544</span>]: Message</pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "warn"></a>
-    <strong>warn (message)</strong>
+    <a name = "table:warn"></a>
+    <strong>table:warn (message)</strong>
     </dt>
     <dd>
     Log message with verbose level 'warn'.
@@ -211,7 +245,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">message</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Message.
         </li>
     </ul>
@@ -226,16 +260,15 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'jepsen.log'</span>)
- &gt; log.warn(<span class="string">'Message'</span>)
- [WARN  <span class="number">2021</span>-<span class="number">12</span>-<span class="number">7</span> <span class="number">13</span>:<span class="number">17</span>:<span class="number">46</span>:<span class="number">073544</span>]: Message</pre>
+        <pre class="example">&gt; <span class="keyword">local</span> log = <span class="global">require</span>(<span class="string">'molly.log'</span>)
+&gt; log.<span class="function-name">warn</span>(<span class="string">'Message'</span>)
+[WARN  <span class="number">2021</span>-<span class="number">12</span>-<span class="number">7</span> <span class="number">13</span>:<span class="number">17</span>:<span class="number">46</span>:<span class="number">073544</span>]: Message</pre>
     </ul>
 
 </dd>
     <dt>
-    <a name = "error"></a>
-    <strong>error (message)</strong>
+    <a name = "table:error"></a>
+    <strong>table:error (message)</strong>
     </dt>
     <dd>
     Log message with verbose level 'error'.
@@ -244,7 +277,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">message</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Message.
         </li>
     </ul>
@@ -260,8 +293,8 @@
 
 </dd>
     <dt>
-    <a name = "fatal"></a>
-    <strong>fatal (message)</strong>
+    <a name = "table:fatal"></a>
+    <strong>table:fatal (message)</strong>
     </dt>
     <dd>
     Log message with verbose level 'fatal'.
@@ -270,7 +303,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">message</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Message.
         </li>
     </ul>
@@ -291,7 +324,8 @@
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

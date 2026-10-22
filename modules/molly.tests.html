@@ -26,6 +26,7 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -37,28 +38,28 @@
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><strong>molly.tests</strong></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><strong>molly.tests</strong></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -76,87 +77,277 @@
 
 <p> list-append operations are either appends or reads</p>
 
-<p> Detects cycles in histories where operations are transactions over named
- lists lists, and operations are either appends or reads.</p>
+<p> Detects cycles in histories where operations are transactions
+ over named lists lists, and operations are either appends or
+ reads.</p>
 
-<p> The <em>append</em> test models the database as a collection of named lists,
- and performs transactions comprised of read and append operations. A
- read returns the value of a particular list, and an append adds a single
- unique element to the end of a particular list. We derive ordering
- dependencies between these transactions, and search for cycles in that
- dependency graph to identify consistency anomalies.</p>
+<p> The <em>append</em> test models the database as a collection of named
+ lists, and performs transactions comprised of read and append
+ operations. A read returns the value of a particular list, and
+ an append adds a single unique element to the end of a
+ particular list. We derive ordering dependencies between these
+ transactions, and search for cycles in that dependency graph to
+ identify consistency anomalies.</p>
 
-<p> In terms of Molly, values in operation are lists of integers. Each operation
- performs a transaction, comprised of micro-operations which are either reads
- of some value (returning the entire list) or appends (adding a single number
- to whatever the present value of the given list is). We detect cycles in
- these transactions using Elle's cycle-detection system.</p>
+<p> In terms of Molly, values in operation are lists of integers.
+ Each operation performs a transaction, comprised of
+ micro-operations which are either reads of some value
+ (returning the entire list) or appends (adding a single number
+ to whatever the present value of the given list is). We detect
+ cycles in these transactions using Elle's cycle-detection
+ system.</p>
 
-<p> Generator <a href="../modules/molly.tests.html#list_append_gen">molly.tests.list_append_gen</a>  produces an operations
+<p> Generator <a href="../modules/molly.tests.html#list_append_gen">molly.tests.list_append_gen</a> produces an operations
  compatible with Molly:</p>
 
-<pre><code> { index = 2, type = "invoke", value = {{ "append", 255, 8 } { "r", 253, null }}}
- { index = 3, type = "ok",     value = {{ "append", 255, 8 } { "r", 253, { 1, 3, 4 }}}}
- { index = 4, type = "invoke", value = {{ "append", 256, 4 } { "r", 255, null } { "r", 256, nil } { "r", 253, null }}}
- { index = 5, type = "ok",     value = {{ "append", 256, 4 } { "r", 255, { 2, 3, 4, 5, 8 }} { "r", 256, { 1, 2, 4 }} {{ "r", 253, { 1, 3, 4 }}}}
- { index = 6, type = "invoke", value = {{ "append", 250, 10 } { "r", 253, null }{ "r", 255, null } { "append", 256, 3 }}}
-</code></pre>
 
-<p> A partial test, including a generator and checker. You'll need to provide a
- client which can understand operations of the form:</p>
+<pre>
+{
+    index = <span class="number">2</span>,
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    value = {{ <span class="string">"append"</span>, <span class="number">255</span>, <span class="number">8</span> } { <span class="string">"r"</span>, <span class="number">253</span>, null }}
+}
+{
+    index = <span class="number">3</span>,
+    <span class="global">type</span> = <span class="string">"ok"</span>,
+    value = {{ <span class="string">"append"</span>, <span class="number">255</span>, <span class="number">8</span> } { <span class="string">"r"</span>, <span class="number">253</span>, { <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span> }}}
+}
+{
+    index = <span class="number">4</span>,
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    value = {
+        { <span class="string">"append"</span>, <span class="number">256</span>, <span class="number">4</span> }
+        { <span class="string">"r"</span>, <span class="number">255</span>, null }
+        { <span class="string">"r"</span>, <span class="number">256</span>, <span class="keyword">nil</span> }
+        { <span class="string">"r"</span>, <span class="number">253</span>, null }
+    }
+}
+{
+    index = <span class="number">5</span>,
+    <span class="global">type</span> = <span class="string">"ok"</span>,
+    value = {
+        { <span class="string">"append"</span>, <span class="number">256</span>, <span class="number">4</span> }
+        { <span class="string">"r"</span>, <span class="number">255</span>, { <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">8</span> }}
+        { <span class="string">"r"</span>, <span class="number">256</span>, { <span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span> }}
+        { <span class="string">"r"</span>, <span class="number">253</span>, { <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span> }}
+    }
+}
+{
+    index = <span class="number">6</span>,
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    value = {
+        { <span class="string">"append"</span>, <span class="number">250</span>, <span class="number">10</span> }
+        { <span class="string">"r"</span>, <span class="number">253</span>, null }
+        { <span class="string">"r"</span>, <span class="number">255</span>, null }
+        { <span class="string">"append"</span>, <span class="number">256</span>, <span class="number">3</span> }
+    }
+</pre>
 
-<pre><code> { type = "invoke", f = "txn", value = {{ "r", 3, null } { "append", 3, 2 } { "r", 3, null }}}
-</code></pre>
+<p> A partial test, including a generator and checker. You'll need
+ to provide a client which can understand operations of the
+ form:</p>
+
+
+<pre>
+{
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    f = <span class="string">"txn"</span>,
+    value = {
+        { <span class="string">"r"</span>, <span class="number">3</span>, null }
+        { <span class="string">"append"</span>, <span class="number">3</span>, <span class="number">2</span> }
+        { <span class="string">"r"</span>, <span class="number">3</span>, null }
+    }
+</pre>
 
 <p> and return completions like:</p>
 
-<pre><code> { type = "invoke", f = "txn", value = {{ "r", 3, { 1 }} { "append", 3, 2 } { "r", 3, { 1, 2 }}}}
-</code></pre>
 
-<p> where the key <code>3</code> identifies some list, whose value is initially <code>[1]</code>, and
- becomes <code>[1 2]</code>.</p>
+<pre>
+{
+     <span class="global">type</span> = <span class="string">"invoke"</span>,
+     f = <span class="string">"txn"</span>,
+     value = {
+         { <span class="string">"r"</span>, <span class="number">3</span>, { <span class="number">1</span> }}
+         { <span class="string">"append"</span>, <span class="number">3</span>, <span class="number">2</span> }
+         { <span class="string">"r"</span>, <span class="number">3</span>, { <span class="number">1</span>, <span class="number">2</span> }}
+     }
+}
+</pre>
 
-<p> Lists are encoded as rows in a table; key names are table names, and the set
- of all rows determines the list contents.</p>
+<p> where the key <code>3</code> identifies some list, whose value is
+ initially <code>[1]</code>, and becomes <code>[1 2]</code>.</p>
+
+<p> Lists are encoded as rows in a table; key names are table
+ names, and the set of all rows determines the list contents.</p>
 
 <p> This test requires a way to order table contents.</p>
 
 <h3>RW Register</h3>
 
-<p> Generator produces concurrent atomic updates to a shared register. Writes
- are assumed to be unique, but this is the only constraint.</p>
+<p> Generator produces concurrent atomic updates to a shared
+ register. Writes are assumed to be unique, but this is the only
+ constraint.</p>
 
-<p> Operations are of two forms:</p>
-
-<pre><code> { "r", "x", 1 } denotes a read of &lt;code&gt;x&lt;/code&gt; observing the value 1.
- { "w", "x", 2 } denotes a write of &lt;code&gt;x&lt;/code&gt;, settings its value to 2.
-</code></pre>
+<p> Operations are of two forms: <code>{ &quot;r&quot;, &quot;x&quot;, 1 }</code> denotes a read
+ of <code>x</code> observing the value 1. <code>{ &quot;w&quot;, &quot;x&quot;, 2 }</code> denotes a write
+ of <code>x</code>, settings its value to 2.</p>
 
 <p> Example of history:</p>
 
-<pre><code> { type = "invoke", f = "txn", value = {{ "w", "x", 1 }},   process = 0, index = 1}
- { type = "ok",     f = "txn", value = {{ "w", "x", 1 }},   process = 0, index = 2}
- { type = "invoke", f = "txn", value = {{ "r", "x", null }}, process = 0, index = 3}
- { type = "ok",     f = "txn", value = {{ "r", "x", 2 }},   process = 0, index = 4}
-</code></pre>
 
-<p> Note that in Lua associative array is an array that can be indexed not only
- with numbers, but also with strings or any other value of the language,
- except nil. Null values in Lua tables are represented as JSON null
- (<code>json.NULL</code>, a Lua <code>lightuserdata</code> NULL pointer). is provided for
- comparison.</p>
+<pre>
+{
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    f = <span class="string">"txn"</span>,
+    value = {{ <span class="string">"w"</span>, <span class="string">"x"</span>, <span class="number">1</span> }},
+    process = <span class="number">0</span>,
+    index = <span class="number">1</span>,
+}
+{
+    <span class="global">type</span> = <span class="string">"ok"</span>,
+    f = <span class="string">"txn"</span>,
+    value = {{ <span class="string">"w"</span>, <span class="string">"x"</span>, <span class="number">1</span> }},
+    process = <span class="number">0</span>,
+    index = <span class="number">2</span>,
+}
+{
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    f = <span class="string">"txn"</span>,
+    value = {{ <span class="string">"r"</span>, <span class="string">"x"</span>, null }},
+    process = <span class="number">0</span>,
+    index = <span class="number">3</span>,
+}
+{
+    <span class="global">type</span> = <span class="string">"ok"</span>,
+    f = <span class="string">"txn"</span>,
+    value = {{ <span class="string">"r"</span>, <span class="string">"x"</span>, <span class="number">2</span> }},
+    process = <span class="number">0</span>,
+    index = <span class="number">4</span>
+}
+</pre>
+
+<p> Note that in Lua associative array is an array that can be
+ indexed not only with numbers, but also with strings or any
+ other value of the language, except nil. Null values in Lua
+ tables are represented as JSON null (<code>json.NULL</code>, a Lua
+ <code>lightuserdata</code> NULL pointer) is provided for comparison.</p>
+
+<h3>CAS-Register</h3>
+
+<p> Generator produces concurrent atomic updates to a shared
+ register. Writes are assumed to be unique, but this is the only
+ constraint.</p>
+
+<p> Operations are of three forms:</p>
+
+<ul>
+    <li><code>{ &quot;r&quot;, &quot;x&quot;, 1 }</code> denotes a read of <code>x</code> observing the value
+    1.</li>
+    <li><code>{ &quot;w&quot;, &quot;x&quot;, 2 }</code> denotes a write of <code>x</code>, settings its value
+    to 2.</li>
+    <li><code>{ &quot;cas&quot;, &quot;x&quot;, 2 }</code> denotes a CAS of <code>x</code>, settings its value
+    to 2.</li>
+</ul>
+
+<p> Example of history:</p>
+
+
+<pre>
+{
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    f = <span class="string">"cas"</span>,
+    value = { <span class="number">1</span>, <span class="number">5</span> },
+    process = <span class="number">0</span>,
+    index = <span class="number">1</span>
+}
+{
+    <span class="global">type</span> = <span class="string">"ok"</span>,
+    f = <span class="string">"fail"</span>,
+    value = { <span class="number">1</span>, <span class="number">5</span> },
+    process = <span class="number">0</span>,
+    index = <span class="number">2</span>
+}
+{
+    <span class="global">type</span> = <span class="string">"invoke"</span>,
+    f = <span class="string">"write"</span>,
+    value = { <span class="number">2</span> },
+    process = <span class="number">0</span>,
+    index = <span class="number">3</span>
+}
+{
+    <span class="global">type</span> = <span class="string">"ok"</span>,
+    f = <span class="string">"write"</span>,
+    value = { <span class="number">2</span> },
+    process = <span class="number">0</span>,
+    index = <span class="number">4</span>
+}
+</pre>
+
+<h3>Bank</h3>
+
+<p> Generator produces updates to a set of bank accounts and
+ transfers money between them at random, ensuring that no
+ account goes negative.</p>
+
+<p> Example of a history:</p>
+
+
+<pre>
+{
+    :<span class="global">type</span> :invoke,
+    :f :transfer,
+    :process <span class="number">0</span>,
+    :time <span class="number">12613722542</span>,
+    :index <span class="number">34</span>,
+    :<span class="function-name">value</span> {:from <span class="number">1</span>, :to <span class="number">0</span>, :amount <span class="number">5</span>}
+}
+{
+    :<span class="global">type</span> :fail,
+    :f :transfer,
+    :process <span class="number">0</span>,
+    :time <span class="number">12686176735</span>,
+    :index <span class="number">35</span>,
+    :<span class="function-name">value</span> {:from <span class="number">1</span>, :to <span class="number">0</span>, :amount <span class="number">5</span>}
+}
+{
+    :<span class="global">type</span> :invoke,
+    :f :read,
+    :process <span class="number">0</span>,
+    :time <span class="number">12686563291</span>,
+    :index <span class="number">36</span>
+}
+{
+    :<span class="global">type</span> :ok,
+    :f :read,
+    :process <span class="number">0</span>,
+    :time <span class="number">12799165489</span>,
+    :index <span class="number">37</span>,
+    :<span class="function-name">value</span> {
+        <span class="number">0</span> <span class="number">97</span>, <span class="number">1</span> <span class="number">0</span>, <span class="number">2</span> <span class="number">0</span>, <span class="number">3</span> <span class="number">0</span>, <span class="number">4</span> <span class="number">0</span>, <span class="number">5</span> <span class="number">3</span>, <span class="number">6</span> <span class="number">0</span>, <span class="number">7</span> <span class="number">0</span>, <span class="number">8</span> <span class="number">0</span>, <span class="number">9</span> <span class="number">0</span>
+    }
+}
+</pre>
+
 </p>
 
 
 <h2><a href="#Functions">Functions</a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#rw_register_gen">rw_register_gen ()</a></td>
-	<td class="summary">Write/Read operations generator.</td>
+	<td class="name" nowrap><a href="#rw_register_gen">rw_register_gen ([opts])</a></td>
+	<td class="summary">An RW-register operations generator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cas_register_gen">cas_register_gen ()</a></td>
+	<td class="summary">CAS (Compare-And-Set) operations generator.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#list_append_gen">list_append_gen ([opts])</a></td>
 	<td class="summary">List-Append operations generator.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#bank_gen">bank_gen ([opts])</a></td>
+	<td class="summary">A bank operations generator.</td>
 	</tr>
 </table>
 
@@ -164,81 +355,28 @@
 <br/>
 
 
-    <h2><a name="Functions"></a>Functions</h2>
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
     <dl class="function">
     <dt>
     <a name = "rw_register_gen"></a>
-    <strong>rw_register_gen ()</strong>
+    <strong>rw_register_gen ([opts])</strong>
     </dt>
     <dd>
-    Write/Read operations generator.
+    An RW-register operations generator. </p>
 
-
-
-    <h3>Returns:</h3>
-    <ol>
-
-        an iterator
-    </ol>
-
-
-
-    <h3>Usage:</h3>
-    <ul>
-        <pre class="example">
-
- &gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
- &gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
- &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> tests.rw_register_gen() <span class="keyword">do</span> log.info(v()) <span class="keyword">end</span>
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",58]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",80]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",46]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",19]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",66]]</span>}
- <span class="comment">---
-</span> ...</pre>
-    </ul>
-
-</dd>
-    <dt>
-    <a name = "list_append_gen"></a>
-    <strong>list_append_gen ([opts])</strong>
-    </dt>
-    <dd>
-    List-Append operations generator. </p>
-
-<p> A generator for operations where values are transactions made up of reads
- and appends to various integer keys.
+<p> A generator for operations where values are transactions made
+ up of reads and appends to various integer keys.
 
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">opts</span> Table with options.
+        <li><span class="parameter">opts</span> A table with options.
         <ul>
-        <li><span class="parameter">key_count</span>
+        <li><span class="parameter">max_n</span>
             <span class="types"><span class="type">number</span></span>
-         Number of distinct keys at any point. Default is
- 3.
-        </li>
-        <li><span class="parameter">min_txn_len</span>
-            <span class="types"><span class="type">number</span></span>
-         Minimum number of operations per txn. Default
- is 1.
-        </li>
-        <li><span class="parameter">max_txn_len</span>
-            <span class="types"><span class="type">number</span></span>
-         Maximum number of operations per txn. Default
- is 2.
-        </li>
-        <li><span class="parameter">max_writes_per_key</span>
-            <span class="types"><span class="type">number</span></span>
-         Maximum number of operations per key.
- Default is 32.
+         A maximum number. Default is 1000.
+         (<em>optional</em>)
         </li>
         </li></ul>
     </ul>
@@ -253,23 +391,189 @@
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
+        <pre class="example">&gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
+&gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> tests.<span class="function-name">rw_register_gen</span>() <span class="keyword">do</span> log.<span class="function-name">info</span>(<span class="function-name">v</span>()) <span class="keyword">end</span>
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",58]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",80]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",46]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",19]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r","x",null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["w","x",66]]</span>}
+<span class="comment">---
+</span>...</pre>
+    </ul>
 
- &gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
- &gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
- &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> tests.list_append_gen() <span class="keyword">do</span> log.info(v()) <span class="keyword">end</span>
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",3,null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,1]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,2]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",1,null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",2,3]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,4]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
- {<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",2,5]]</span>}
- <span class="comment">---
-</span> ...</pre>
+</dd>
+    <dt>
+    <a name = "cas_register_gen"></a>
+    <strong>cas_register_gen ()</strong>
+    </dt>
+    <dd>
+    CAS (Compare-And-Set) operations generator.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
+&gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> tests.<span class="function-name">cas_register_gen</span>() <span class="keyword">do</span> log.<span class="function-name">info</span>(<span class="function-name">v</span>()) <span class="keyword">end</span>
+{<span class="string">"f"</span>:<span class="string">"read"</span>,<span class="string">"value"</span>:[null]}
+{<span class="string">"f"</span>:<span class="string">"write"</span>,<span class="string">"value"</span>:[<span class="number">80</span>]}
+{<span class="string">"f"</span>:<span class="string">"cas"</span>,<span class="string">"value"</span>:[<span class="number">70</span>,<span class="number">60</span>]}
+{<span class="string">"f"</span>:<span class="string">"read"</span>,<span class="string">"value"</span>:[null]}
+{<span class="string">"f"</span>:<span class="string">"write"</span>,<span class="string">"value"</span>:[<span class="number">76</span>]}
+{<span class="string">"f"</span>:<span class="string">"cas"</span>,<span class="string">"value"</span>:[<span class="number">9</span>,<span class="number">67</span>]}
+{<span class="string">"f"</span>:<span class="string">"read"</span>,<span class="string">"value"</span>:[null]}
+{<span class="string">"f"</span>:<span class="string">"write"</span>,<span class="string">"value"</span>:[<span class="number">34</span>]}
+{<span class="string">"f"</span>:<span class="string">"cas"</span>,<span class="string">"value"</span>:[<span class="number">74</span>,<span class="number">43</span>]}
+{<span class="string">"f"</span>:<span class="string">"read"</span>,<span class="string">"value"</span>:[null]}
+<span class="comment">---
+</span>...</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "list_append_gen"></a>
+    <strong>list_append_gen ([opts])</strong>
+    </dt>
+    <dd>
+    List-Append operations generator. </p>
+
+<p> A generator for operations where values are transactions made
+ up of reads and appends to various integer keys.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">opts</span> Table with options.
+        <ul>
+        <li><span class="parameter">key_count</span>
+            <span class="types"><span class="type">number</span></span>
+         Number of distinct keys at any
+ point. Default is 3.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">min_txn_len</span>
+            <span class="types"><span class="type">number</span></span>
+         Minimum number of operations per
+ txn. Default is 1.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">max_txn_len</span>
+            <span class="types"><span class="type">number</span></span>
+         Maximum number of operations per
+ txn. Default is 2.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">max_writes_per_key</span>
+            <span class="types"><span class="type">number</span></span>
+         Maximum number of
+ operations per key. Default is 32.
+         (<em>optional</em>)
+        </li>
+        </li></ul>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
+&gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> tests.<span class="function-name">list_append_gen</span>() <span class="keyword">do</span> log.<span class="function-name">info</span>(<span class="function-name">v</span>()) <span class="keyword">end</span>
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",3,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,1]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,2]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",1,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",2,3]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",3,4]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["r",2,null]]</span>}
+{<span class="string">"f"</span>:<span class="string">"txn"</span>,<span class="string">"value"</span>:<span class="string">[["append",2,5]]</span>}
+<span class="comment">---
+</span>...</pre>
+    </ul>
+
+</dd>
+    <dt>
+    <a name = "bank_gen"></a>
+    <strong>bank_gen ([opts])</strong>
+    </dt>
+    <dd>
+    A bank operations generator. </p>
+
+<p> A generator of operations that simulate transfers between bank
+ accounts, checker should verify that reads always show the same
+ balance.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">opts</span> Table with options.
+        <ul>
+        <li><span class="parameter">accounts</span>
+            <span class="types"><span class="type">number</span></span>
+         A collection of account identifiers.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">max_transfer</span>
+            <span class="types"><span class="type">number</span></span>
+         A largest transfer the test will
+ try to execute.
+         (<em>optional</em>)
+        </li>
+        </li></ul>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an iterator
+    </ol>
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; log = <span class="global">require</span>(<span class="string">'log'</span>)
+&gt; tests = <span class="global">require</span>(<span class="string">'molly.tests'</span>)
+&gt; tests.<span class="function-name">bank_gen</span>():<span class="function-name">map</span>(
+&gt;   <span class="keyword">function</span>(op)
+&gt;     <span class="keyword">return</span> <span class="global">type</span>(op) == <span class="string">'function'</span> <span class="keyword">and</span> <span class="function-name">op</span>() <span class="keyword">or</span> op <span class="keyword">end</span>
+&gt;   ):<span class="function-name">take</span>(<span class="number">10</span>):<span class="function-name">each</span>(log.info)
+{<span class="string">"f"</span>:<span class="string">"read"</span>}
+{<span class="string">"f"</span>:<span class="string">"transfer"</span>,<span class="string">"value"</span>:{<span class="string">"amount"</span>:<span class="number">2</span>,<span class="string">"from"</span>:<span class="number">8</span>,<span class="string">"to"</span>:<span class="number">7</span>}}
+{<span class="string">"f"</span>:<span class="string">"read"</span>}
+{<span class="string">"f"</span>:<span class="string">"transfer"</span>,<span class="string">"value"</span>:{<span class="string">"amount"</span>:<span class="number">2</span>,<span class="string">"from"</span>:<span class="number">8</span>,<span class="string">"to"</span>:<span class="number">1</span>}}
+{<span class="string">"f"</span>:<span class="string">"read"</span>}
+{<span class="string">"f"</span>:<span class="string">"transfer"</span>,<span class="string">"value"</span>:{<span class="string">"amount"</span>:<span class="number">1</span>,<span class="string">"from"</span>:<span class="number">4</span>,<span class="string">"to"</span>:<span class="number">8</span>}}
+{<span class="string">"f"</span>:<span class="string">"read"</span>}
+{<span class="string">"f"</span>:<span class="string">"transfer"</span>,<span class="string">"value"</span>:{<span class="string">"amount"</span>:<span class="number">1</span>,<span class="string">"from"</span>:<span class="number">6</span>,<span class="string">"to"</span>:<span class="number">2</span>}}
+{<span class="string">"f"</span>:<span class="string">"read"</span>}
+{<span class="string">"f"</span>:<span class="string">"transfer"</span>,<span class="string">"value"</span>:{<span class="string">"amount"</span>:<span class="number">1</span>,<span class="string">"from"</span>:<span class="number">10</span>,<span class="string">"to"</span>:<span class="number">8</span>}}
+<span class="comment">---
+</span>...</pre>
     </ul>
 
 </dd>
@@ -279,7 +583,8 @@
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

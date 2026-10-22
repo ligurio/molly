@@ -26,6 +26,7 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -37,28 +38,28 @@
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><strong>molly.utils</strong></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><strong>molly.utils</strong></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -93,6 +94,14 @@
 	<td class="summary">Defines whether we run under Tarantool.</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#is_numeric">is_numeric (x)</a></td>
+	<td class="summary">Check whether a value is a number or a numeric cdata value.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_integer">is_integer (x)</a></td>
+	<td class="summary">Check whether a value is an integer.</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#basename">basename (path)</a></td>
 	<td class="summary">Function equivalent to basename in POSIX systems</td>
 	</tr>
@@ -101,13 +110,18 @@
 	<td class="summary">Packs the given arguments into a table with an <code>n</code> key
  denoting the number of elements.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#copy_table">copy_table (tbl)</a></td>
+	<td class="summary">Return a shallow copy of a table.</td>
+	</tr>
 </table>
 
 <br/>
 <br/>
 
 
-    <h2><a name="Functions"></a>Functions</h2>
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
     <dl class="function">
     <dt>
     <a name = "setenv"></a>
@@ -120,11 +134,11 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">key</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Variable name.
         </li>
         <li><span class="parameter">value</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          Variable value.
         </li>
     </ul>
@@ -171,7 +185,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">dir</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
 
 
 
@@ -208,6 +222,58 @@
 
 </dd>
     <dt>
+    <a name = "is_numeric"></a>
+    <strong>is_numeric (x)</strong>
+    </dt>
+    <dd>
+    Check whether a value is a number or a numeric cdata value.
+ Accepts Lua numbers and numeric cdata (for example, a Tarantool
+ 64-bit monotonic clock); rejects strings and non-numeric cdata.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+         Value to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_integer"></a>
+    <strong>is_integer (x)</strong>
+    </dt>
+    <dd>
+    Check whether a value is an integer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">x</span>
+         Value to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        boolean
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "basename"></a>
     <strong>basename (path)</strong>
     </dt>
@@ -218,7 +284,7 @@
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">path</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
 
 
 
@@ -255,13 +321,40 @@
 
 
 </dd>
+    <dt>
+    <a name = "copy_table"></a>
+    <strong>copy_table (tbl)</strong>
+    </dt>
+    <dd>
+    Return a shallow copy of a table.
+ Nested tables are shared with the source table.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">tbl</span>
+         Table to copy.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table
+    </ol>
+
+
+
+
+</dd>
 </dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

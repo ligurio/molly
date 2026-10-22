@@ -26,35 +26,41 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
 
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
+</ul>
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><strong>molly.thread</strong></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><strong>molly.thread</strong></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -68,24 +74,319 @@
 <p>
 
 
+<p> The module stores an active thread type and delegates generic
+ thread operations (<a href="../modules/molly.thread.html#new">new</a>, <a href="../modules/molly.thread.html#yield">yield</a>, <a href="../modules/molly.thread.html#scheduler">scheduler</a>) and
+ synchronization primitives to the corresponding implementation:</p>
+
 <ul>
-    <li><code>jepsen.compat.thread_fiber</code> - threads, based on Tarantool fibers.</li>
-    <li><code>jepsen.compat.thread_coroutine</code> - threads, based on Lua coroutines.</li>
+    <li><code>molly.compat.thread_fiber</code> - threads, based on Tarantool
+    fibers.</li>
+    <li><code>molly.compat.thread_coroutine</code> - threads, based on Lua
+    coroutines.</li>
 </ul>
+
+<p> This is the single entry point for thread synchronization
+ primitives: a barrier, a mutex and a wait group. All of them
+ are bound to the active thread backend through <a href="../modules/molly.thread.html#yield">yield</a>, so they
+ behave identically for fibers and coroutines.</p>
+
+<p> All primitives are designed for a cooperative environment:
+ a thread that cannot proceed yet yields control to a scheduler
+ instead of blocking an OS thread. Semantics follow well-known
+ counterparts from other languages:</p>
+
+<ul>
+    <li>a barrier resembles <code>pthread_barrier_wait</code> from POSIX
+    threads;</li>
+    <li>a mutex resembles <code>sync.Mutex</code> from Go;</li>
+    <li>a wait group resembles <code>sync.WaitGroup</code> from Go.</li>
+</ul>
+
+<p> Primitives are plain shared objects and are not tied to the
+ lifetime of a thread that created or uses them.</p>
+
+<p> A barrier releases a group of threads once every thread reaches
+ it:</p>
+
+
+<pre>
+ <span class="keyword">local</span> thread = <span class="global">require</span>(<span class="string">'molly.thread'</span>)
+ <span class="comment">-- 'coroutine' is used by default.
+</span> thread.<span class="function-name">set_type</span>(<span class="string">'fiber'</span>)
+ <span class="keyword">local</span> n = <span class="number">3</span>
+ <span class="keyword">local</span> barrier = thread.<span class="function-name">barrier_new</span>(n)
+
+ <span class="keyword">local</span> <span class="keyword">function</span> <span class="function-name">worker</span>(thread_id, opts)
+     <span class="comment">-- Wait until every thread has finished the first stage.
+</span>     barrier:<span class="function-name">wait</span>()
+     <span class="comment">-- ... run the second stage ...
+</span> <span class="keyword">end</span>
+</pre>
+
+
+<p> A mutex serializes access to shared data and a wait group waits
+ until all threads are done:</p>
+
+
+<pre>
+ <span class="keyword">local</span> mutex = thread.<span class="function-name">mutex_new</span>()
+ mutex:<span class="function-name">lock</span>()
+ <span class="comment">-- ... protected shared data ...
+</span> mutex:<span class="function-name">unlock</span>()
+
+ <span class="keyword">local</span> wg = thread.<span class="function-name">wg_new</span>()
+ wg:<span class="function-name">add</span>(n)
+ <span class="comment">-- ... each thread calls wg:done() ...
+</span> wg:<span class="function-name">wait</span>()
+</pre>
+
 </p>
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/molly.thread_fiber.html#">molly.thread_fiber</a></li>
+         <li><a href="../modules/molly.thread_coroutine.html#">molly.thread_coroutine</a></li>
+    </ul>
 
 
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#barrier_new">barrier_new (n)</a></td>
+	<td class="summary">Create a barrier that releases a group of <code>n</code> threads.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mutex_new">mutex_new ()</a></td>
+	<td class="summary">Create an unlocked mutex.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#wg_new">wg_new ()</a></td>
+	<td class="summary">Create a wait group with a zero counter.</td>
+	</tr>
+</table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#set_type">set_type (thread_type)</a></td>
+	<td class="summary">Set an active thread type.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#new">new (thread_id)</a></td>
+	<td class="summary">Create a new thread of the active type.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#yield">yield ()</a></td>
+	<td class="summary">Yield control to a scheduler of the active thread type.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#scheduler">scheduler ()</a></td>
+	<td class="summary">Drive coroutine threads to completion.</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "barrier_new"></a>
+    <strong>barrier_new (n)</strong>
+    </dt>
+    <dd>
+    Create a barrier that releases a group of <code>n</code> threads.  A
+ barrier is reusable: when the last thread arrives, all threads
+ are released and the barrier starts to count a next round.</p>
+
+<p> A barrier has a single method, <code>wait()</code>, that blocks the
+ calling thread until all <code>n</code> threads arrive at the barrier.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         A number of threads.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        barrier
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mutex_new"></a>
+    <strong>mutex_new ()</strong>
+    </dt>
+    <dd>
+    Create an unlocked mutex. </p>
+
+<p> A mutex has the following methods:</p>
+
+<ul>
+    <li><strong>lock()</strong> - acquire the mutex, yielding until it becomes
+    available;</li>
+    <li><strong>unlock()</strong> - release the mutex, an error to unlock an
+    unlocked mutex;</li>
+    <li><strong>trylock()</strong> - try to acquire the mutex without blocking and
+    report whether it succeeded.</li>
+</ul>
+
+<p> A mutex does not track its owner: any thread may call
+ <code>unlock()</code>. If a thread is terminated while holding a mutex,
+ the mutex stays locked and <code>lock()</code> yields forever, so use a
+ non-blocking <code>trylock()</code> to detect such a state.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        mutex
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "wg_new"></a>
+    <strong>wg_new ()</strong>
+    </dt>
+    <dd>
+
+<p>Create a wait group with a zero counter. </p>
+
+<p> A wait group has the following methods:</p>
+
+<ul>
+    <li><strong>add(delta)</strong> - add <code>delta</code>, which may be negative, to the
+    counter;</li>
+    <li><strong>done()</strong> - decrement the counter by one;</li>
+    <li><strong>wait()</strong> - block until the counter is zero.</li>
+</ul>
+
+
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        wg
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "set_type"></a>
+    <strong>set_type (thread_type)</strong>
+    </dt>
+    <dd>
+    Set an active thread type.  Raises an error for an unknown type
+ or for a type with no implementation in the current runtime,
+ e.g. 'fiber' under LuaJIT.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">thread_type</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         Thread type: 'fiber' or 'coroutine'.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        an active thread implementation
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "new"></a>
+    <strong>new (thread_id)</strong>
+    </dt>
+    <dd>
+    Create a new thread of the active type.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">thread_id</span>
+            <span class="types"><span class="type">number</span></span>
+         A thread identifier.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        a thread object
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "yield"></a>
+    <strong>yield ()</strong>
+    </dt>
+    <dd>
+    Yield control to a scheduler of the active thread type.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        true
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "scheduler"></a>
+    <strong>scheduler ()</strong>
+    </dt>
+    <dd>
+    Drive coroutine threads to completion.  A no-op for fiber
+ threads, which are scheduled by the runtime.
+
+
+
+
+
+
+
+</dd>
+</dl>
 
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

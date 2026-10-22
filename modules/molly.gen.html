@@ -26,6 +26,7 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -48,28 +49,28 @@
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><strong>molly.gen</strong></li>
+<ul class="nowrap">
   <li><a href="../modules/molly.client.html">molly.client</a></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><strong>molly.gen</strong></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -83,32 +84,36 @@
 <p>
 
 
-<p> One of the key pieces of a Molly test is a generators for client and
- nemesis operations. These generators will create a finite or infinite
- sequence of operations. It is often test have its own nemesis generator, but
- most likely shares a common client generator with other tests. A nemesis
- generator, for instance, might be a sequence of partition, sleep, and
- restore, repeated infinitely. A client generator will specify a random,
- infinite sequence of client operation, as well as the associated parameters
- such as durability level, the document key, the new value to write or CAS
- (Compare-And-Set), etc. When a test starts, the client generator feeds
- client operations to the client and the nemesis generator feeds operations
- to the nemesis. The test will continue until either the nemesis generator
- has completed a specified number of operations, a time limit is reached, or
- an error is thrown.</p>
+<p> One of the key pieces of a Molly test is a generators for
+ client and nemesis operations. These generators will create a
+ finite or infinite sequence of operations. It is often test
+ have its own nemesis generator, but most likely shares a common
+ client generator with other tests. A nemesis generator, for
+ instance, might be a sequence of partition, sleep, and restore,
+ repeated infinitely. A client generator will specify a random,
+ infinite sequence of client operation, as well as the
+ associated parameters such as durability level, the document
+ key, the new value to write or CAS (Compare-And-Set), etc. When
+ a test starts, the client generator feeds client operations to
+ the client and the nemesis generator feeds operations to the
+ nemesis. The test will continue until either the nemesis
+ generator has completed a specified number of operations, a
+ time limit is reached, or an error is thrown.</p>
 
 <p> Example of generator that generates two operations <code>w</code> and <code>r</code>:</p>
 
-<pre><code>local w = function() return { f = 'w', v = math.random(1, 10) } end
-local r = function() return { f = 'r', v = nil } end
-gen.rands(0, 2):map(function(x)
-                        return (x == 0 and r()) or
-                               (x == 1 and w()))
-                    end):take(100)
 
-local w = function(x) return { f = 'w', v = x } end
-gen.map(w, gen.rands(1, 10):take(50))
-</code></pre>
+<pre>
+<span class="keyword">local</span> w = <span class="keyword">function</span>() <span class="keyword">return</span> { f = <span class="string">'w'</span>, v = <span class="global">math</span>.<span class="function-name">random</span>(<span class="number">1</span>, <span class="number">10</span>) } <span class="keyword">end</span>
+<span class="keyword">local</span> r = <span class="keyword">function</span>() <span class="keyword">return</span> { f = <span class="string">'r'</span>, v = <span class="keyword">nil</span> } <span class="keyword">end</span>
+gen.<span class="function-name">rands</span>(<span class="number">0</span>, <span class="number">2</span>):<span class="function-name">map</span>(<span class="keyword">function</span>(x)
+                        <span class="keyword">return</span> (x == <span class="number">0</span> <span class="keyword">and</span> <span class="function-name">r</span>()) <span class="keyword">or</span>
+                               (x == <span class="number">1</span> <span class="keyword">and</span> <span class="function-name">w</span>()))
+                    <span class="keyword">end</span>):<span class="function-name">take</span>(<span class="number">100</span>)
+
+<span class="keyword">local</span> w = <span class="keyword">function</span>(x) <span class="keyword">return</span> { f = <span class="string">'w'</span>, v = x } <span class="keyword">end</span>
+gen.<span class="function-name">map</span>(w, gen.<span class="function-name">rands</span>(<span class="number">1</span>, <span class="number">10</span>):<span class="function-name">take</span>(<span class="number">50</span>))
+</pre>
 
 <h3>References:</h3>
 
@@ -118,8 +123,11 @@ gen.map(w, gen.rands(1, 10):take(50))
     <li><a href="http://lua-users.org/wiki/IteratorsTutorial">Lua iterators tutorial</a></li>
     <li><a href="http://jepsen-io.github.io/jepsen/jepsen.generator.html">Jepsen generators in a nutshell</a></li>
 </ul>
-
 </p>
+    <h3>See also:</h3>
+    <ul>
+         <a href="../modules/molly.op.html#">molly.op</a>
+    </ul>
 
 
 <h2><a href="#Basic_Functions">Basic Functions </a></h2>
@@ -268,7 +276,8 @@ gen.map(w, gen.rands(1, 10):take(50))
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#filter">filter ()</a></td>
-	<td class="summary">Return a new iterator of those elements that satisfy the <code>predicate</code>.</td>
+	<td class="summary">Return a new iterator of those elements that satisfy the
+ <code>predicate</code>.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#remove_if">remove_if ()</a></td>
@@ -276,21 +285,21 @@ gen.map(w, gen.rands(1, 10):take(50))
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#grep">grep ()</a></td>
-	<td class="summary">If <code>regexp<em>or</em>predicate</code> is string then the parameter is used as a regular
- expression to build filtering predicate.</td>
+	<td class="summary">If <code>regexp_or_predicate</code> is string then the parameter is used
+ as a regular expression to build filtering predicate.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#partition">partition ()</a></td>
-	<td class="summary">The function returns two iterators where elements do and do not satisfy the
- predicate.</td>
+	<td class="summary">The function returns two iterators where elements do and do
+ not satisfy the predicate.</td>
 	</tr>
 </table>
 <h2><a href="#Reducing__Folds">Reducing: Folds </a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#foldl">foldl ()</a></td>
-	<td class="summary">The function reduces the iterator from left to right using the binary
- operator <code>accfun</code> and the initial value <code>initval</code>.</td>
+	<td class="summary">The function reduces the iterator from left to right using the
+ binary operator <code>accfun</code> and the initial value <code>initval</code>.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#reduce">reduce ()</a></td>
@@ -369,8 +378,8 @@ gen.map(w, gen.rands(1, 10):take(50))
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#zip">zip (...)</a></td>
-	<td class="summary">Return a new iterator where i-th return value contains the i-th element
- from each of the iterators.</td>
+	<td class="summary">Return a new iterator where i-th return value contains the
+ i-th element from each of the iterators.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#cycle">cycle (iterator)</a></td>
@@ -378,34 +387,35 @@ gen.map(w, gen.rands(1, 10):take(50))
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#chain">chain (...)</a></td>
-	<td class="summary">Make an iterator that returns elements from the first iterator until it is
- exhausted, then proceeds to the next iterator, until all of the iterators are
- exhausted.</td>
+	<td class="summary">Make an iterator that returns elements from the first iterator
+ until it is exhausted, then proceeds to the next iterator,
+ until all of the iterators are exhausted.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#cycle_times">cycle_times (...)</a></td>
-	<td class="summary">(TODO) Cycles between several generators on a rotating schedule.</td>
+	<td class="summary">Cycles between several generators on a rotating schedule.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#mix">mix (...)</a></td>
-	<td class="summary">(TODO) A random mixture of several generators.</td>
+	<td class="summary">A random mixture of a number generators.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#flip_flop">flip_flop (a, b)</a></td>
-	<td class="summary">(TODO) Emits an operation from generator A, then B, then A again, then B again,
- etc.</td>
+	<td class="summary">Emits an operation from generator A, then B, then A again,
+ then B again, etc.</td>
 	</tr>
 </table>
 <h2><a href="#Special_generators">Special generators </a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#log">log ()</a></td>
-	<td class="summary">(TODO) A generator which, when asked for an operation, logs a message and yields
-  nil.</td>
+	<td class="summary">A generator which, when asked for an operation, logs
+ a message and yields <code>nil</code>.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#stagger">stagger (dt)</a></td>
-	<td class="summary">(TODO) Operations from that generator are scheduled at uniformly random intervals
+	<td class="summary">(TODO) Operations from that generator are scheduled at
+ uniformly random intervals
  between <code>0</code> to <code>2 * (dt seconds)</code>.</td>
 	</tr>
 	<tr>
@@ -418,7 +428,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 <br/>
 
 
-    <h2><a name="Basic_Functions"></a>Basic Functions </h2>
+    <h2 class="section-header "><a name="Basic_Functions"></a>Basic Functions </h2>
 
     <dl class="function">
     <dt>
@@ -451,27 +461,26 @@ gen.map(w, gen.rands(1, 10):take(50))
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
- <span class="number">1</span>
- <span class="number">2</span>
- <span class="number">3</span>
- <span class="comment">---
-</span> ...
+        <pre class="example">&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.<span class="function-name">iter</span>({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="comment">---
+</span>...
 
- &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter({a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
- b
- a
- c
- <span class="comment">---
-</span> ...
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.<span class="function-name">iter</span>({a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>}) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+b
+a
+c
+<span class="comment">---
+</span>...
 
- &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.iter(<span class="string">"abc"</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
- a
- b
- c
- <span class="comment">---
-</span> ...</pre>
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.<span class="function-name">iter</span>(<span class="string">"abc"</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+a
+b
+c
+<span class="comment">---
+</span>...</pre>
     </ul>
 
 </dd>
@@ -510,14 +519,12 @@ gen.map(w, gen.rands(1, 10):take(50))
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
-
- &gt; gen.each(<span class="global">print</span>, { a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})
- b       <span class="number">2</span>
- a       <span class="number">1</span>
- c       <span class="number">3</span>
- <span class="comment">---
-</span> ...</pre>
+        <pre class="example">&gt; gen.<span class="function-name">each</span>(<span class="global">print</span>, { a = <span class="number">1</span>, b = <span class="number">2</span>, c = <span class="number">3</span>})
+b       <span class="number">2</span>
+a       <span class="number">1</span>
+c       <span class="number">3</span>
+<span class="comment">---
+</span>...</pre>
     </ul>
 
 </dd>
@@ -527,7 +534,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for each().
- See <a href="../modules/molly.gen.html#each">gen.each</a> .
+ See <a href="../modules/molly.gen.html#each">gen.each</a>.
 
 
 
@@ -542,7 +549,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for each().
- See <a href="../modules/molly.gen.html#each">gen.each</a> .
+ See <a href="../modules/molly.gen.html#each">gen.each</a>.
 
 
 
@@ -552,7 +559,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Generators__Finite_Generators"></a>Generators: Finite Generators </h2>
+    <h2 class="section-header "><a name="Generators__Finite_Generators"></a>Generators: Finite Generators </h2>
 
     <dl class="function">
     <dt>
@@ -561,14 +568,16 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     The iterator to create arithmetic progressions.
- Iteration values are generated within closed interval <code>[start, stop]</code> (i.e.
- <code>stop</code> is included). If the <code>start</code> argument is omitted, it defaults to 1 (<code>stop
- > 0</code>) or to -1 (<code>stop &lt; 0</code>). If the <code>step</code> argument is omitted, it defaults to 1
- (<code>start &lt;= stop</code>) or to -1 (<code>start > stop</code>). If <code>step</code> is positive, the last
- element is the largest <code>start + i * step</code> less than or equal to <code>stop</code>; if <code>step</code>
- is negative, the last element is the smallest <code>start + i * step</code> greater than
- or equal to <code>stop</code>. <code>step</code> must not be zero (or else an error is raised).
- <code>range(0)</code> returns empty iterator.
+ Iteration values are generated within closed interval
+ <code>[start, stop]</code> (i.e. <code>stop</code> is included). If the <code>start</code>
+ argument is omitted, it defaults to 1 (<code>stop &gt; 0</code>) or to -1
+ (<code>stop &lt; 0</code>). If the <code>step</code> argument is omitted, it defaults to
+ 1 (<code>start &lt;= stop</code>) or to -1 (<code>start &gt; stop</code>). If <code>step</code> is
+ positive, the last element is the largest <code>start + i * step</code>
+ less than or equal to <code>stop</code>; if <code>step</code> is negative, the last
+ element is the smallest <code>start + i * step</code> greater than or
+ equal to <code>stop</code>. <code>step</code> must not be zero (or else an error is
+ raised). <code>range(0)</code> returns empty iterator.
  See <a href="https://luafun.github.io/generators.html#fun.range">fun.range</a>.
 
 
@@ -577,6 +586,7 @@ gen.map(w, gen.rands(1, 10):take(50))
         <li><span class="parameter">start</span>
             <span class="types"><span class="type">number</span></span>
          – an endpoint of the interval.
+         (<em>optional</em>)
         </li>
         <li><span class="parameter">stop</span>
             <span class="types"><span class="type">number</span></span>
@@ -585,6 +595,7 @@ gen.map(w, gen.rands(1, 10):take(50))
         <li><span class="parameter">step</span>
             <span class="types"><span class="type">number</span></span>
          – a step.
+         (<em>optional</em>)
         </li>
     </ul>
 
@@ -598,28 +609,27 @@ gen.map(w, gen.rands(1, 10):take(50))
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
- <span class="number">1</span>
- <span class="number">2</span>
- <span class="number">3</span>
- <span class="number">4</span>
- <span class="number">5</span>
- <span class="number">6</span>
- <span class="comment">---
-</span> ...
+        <pre class="example">&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.<span class="function-name">range</span>(<span class="number">1</span>, <span class="number">6</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="number">4</span>
+<span class="number">5</span>
+<span class="number">6</span>
+<span class="comment">---
+</span>...
 
- &gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.range(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
- <span class="number">1</span>
- <span class="number">3</span>
- <span class="number">5</span>
- <span class="comment">---
-</span> ...</pre>
+&gt; <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.<span class="function-name">range</span>(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">3</span>
+<span class="number">5</span>
+<span class="comment">---
+</span>...</pre>
     </ul>
 
 </dd>
 </dl>
-    <h2><a name="Generators__Infinity_Generators"></a>Generators: Infinity Generators </h2>
+    <h2 class="section-header "><a name="Generators__Infinity_Generators"></a>Generators: Infinity Generators </h2>
 
     <dl class="function">
     <dt>
@@ -627,8 +637,9 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>duplicate ()</strong>
     </dt>
     <dd>
-    The iterator returns values over and over again indefinitely.  All values
- that passed to the iterator are returned as-is during the iteration.
+    The iterator returns values over and over again indefinitely.
+ All values that passed to the iterator are returned as-is
+ during the iteration.
  See <a href="https://luafun.github.io/generators.html#fun.duplicate">fun.duplicate</a>.
 
 
@@ -638,13 +649,12 @@ gen.map(w, gen.rands(1, 10):take(50))
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt; gen.each(<span class="global">print</span>, gen.take(<span class="number">3</span>, gen.duplicate(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)))
- a       b       c
- a       b       c
- a       b       c
- <span class="comment">---
-</span> ...</pre>
+        <pre class="example">&gt; gen.<span class="function-name">each</span>(<span class="global">print</span>, gen.<span class="function-name">take</span>(<span class="number">3</span>, gen.<span class="function-name">duplicate</span>(<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>)))
+a       b       c
+a       b       c
+a       b       c
+<span class="comment">---
+</span>...</pre>
     </ul>
 
 </dd>
@@ -654,7 +664,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for duplicate().
- See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a> .
+ See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a>.
 
 
 
@@ -669,7 +679,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for duplicate().
- See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a> .
+ See <a href="../modules/molly.gen.html#duplicate">gen.duplicate</a>.
 
 
 
@@ -694,7 +704,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Generators__Random_sampling"></a>Generators: Random sampling </h2>
+    <h2 class="section-header "><a name="Generators__Random_sampling"></a>Generators: Random sampling </h2>
 
     <dl class="function">
     <dt>
@@ -702,8 +712,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>rands ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/generators.html#fun.rands">fun.rands</a>.
+     See <a href="https://luafun.github.io/generators.html#fun.rands">fun.rands</a>.
 
 
 
@@ -713,7 +722,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Slicing__Subsequences"></a>Slicing: Subsequences </h2>
+    <h2 class="section-header "><a name="Slicing__Subsequences"></a>Slicing: Subsequences </h2>
 
     <dl class="function">
     <dt>
@@ -721,8 +730,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>take_n ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/slicing.html#fun.take_n">fun.take_n</a>.
+     See <a href="https://luafun.github.io/slicing.html#fun.take_n">fun.take_n</a>.
 
 
 
@@ -736,8 +744,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>take_while ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/slicing.html#fun.take_while">fun.take_while</a>.
+     See <a href="https://luafun.github.io/slicing.html#fun.take_while">fun.take_while</a>.
 
 
 
@@ -751,8 +758,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>take ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/slicing.html#fun.take">fun.take</a>.
+     See <a href="https://luafun.github.io/slicing.html#fun.take">fun.take</a>.
 
 
 
@@ -766,8 +772,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>drop_n ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/slicing.html#fun.drop_n">fun.drop_n</a>.
+     See <a href="https://luafun.github.io/slicing.html#fun.drop_n">fun.drop_n</a>.
 
 
 
@@ -781,8 +786,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>drop_while ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/slicing.html#fun.drop_while">fun.drop_while</a>.
+     See <a href="https://luafun.github.io/slicing.html#fun.drop_while">fun.drop_while</a>.
 
 
 
@@ -796,8 +800,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>drop ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/slicing.html#fun.drop">fun.drop</a>.
+     See <a href="https://luafun.github.io/slicing.html#fun.drop">fun.drop</a>.
 
 
 
@@ -811,8 +814,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>span ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/slicing.html#fun.span">fun.span</a>.
+     See <a href="https://luafun.github.io/slicing.html#fun.span">fun.span</a>.
 
 
 
@@ -827,7 +829,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for span().
- See <code>fun.span</code>.
+ See <a href="../modules/molly.gen.html#span">gen.span</a>.
 
 
 
@@ -842,7 +844,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for span().
- See <code>fun.span</code>.
+ See <a href="../modules/molly.gen.html#span">gen.span</a>.
 
 
 
@@ -852,7 +854,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Indexing"></a>Indexing </h2>
+    <h2 class="section-header "><a name="Indexing"></a>Indexing </h2>
 
     <dl class="function">
     <dt>
@@ -860,8 +862,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>index ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/indexing.html#fun.index">fun.index</a>.
+     See <a href="https://luafun.github.io/indexing.html#fun.index">fun.index</a>.
 
 
 
@@ -876,7 +877,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for index().
- See <code>fun.index</code>.
+ See <a href="../modules/molly.gen.html#index">gen.index</a>.
 
 
 
@@ -891,7 +892,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for index().
- See <code>fun.index</code>.
+ See <a href="../modules/molly.gen.html#index">gen.index</a>.
 
 
 
@@ -905,8 +906,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>indexes ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
+     See <a href="https://luafun.github.io/indexing.html#fun.indexes">fun.indexes</a>.
 
 
 
@@ -921,7 +921,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for indexes().
- See <code>fun.indexes</code>.
+ See <a href="../modules/molly.gen.html#indexes">gen.indexes</a>.
 
 
 
@@ -936,7 +936,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for indexes().
- See <code>fun.indexes</code>.
+ See <a href="../modules/molly.gen.html#indexes">gen.indexes</a>.
 
 
 
@@ -951,7 +951,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for indexes().
- See <code>fun.indexes</code>.
+ See <a href="../modules/molly.gen.html#indexes">gen.indexes</a>.
 
 
 
@@ -961,7 +961,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Filtering"></a>Filtering </h2>
+    <h2 class="section-header "><a name="Filtering"></a>Filtering </h2>
 
     <dl class="function">
     <dt>
@@ -969,7 +969,8 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>filter ()</strong>
     </dt>
     <dd>
-    Return a new iterator of those elements that satisfy the <code>predicate</code>.
+    Return a new iterator of those elements that satisfy the
+ <code>predicate</code>.
  See <a href="https://luafun.github.io/filtering.html#fun.filter">fun.filter</a>.
 
 
@@ -985,7 +986,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for filter().
- See <a href="../modules/molly.gen.html#filter">gen.filter</a> .
+ See <a href="../modules/molly.gen.html#filter">gen.filter</a>.
 
 
 
@@ -999,9 +1000,9 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>grep ()</strong>
     </dt>
     <dd>
-    If <code>regexp<em>or</em>predicate</code> is string then the parameter is used as a regular
- expression to build filtering predicate.  Otherwise the function is just an
- alias for gen.filter().
+    If <code>regexp_or_predicate</code> is string then the parameter is used
+ as a regular expression to build filtering predicate.  Otherwise
+ the function is just an alias for <a href="../modules/molly.gen.html#filter">gen.filter</a>.
  See <a href="https://luafun.github.io/filtering.html#fun.grep">fun.grep</a>.
 
 
@@ -1016,8 +1017,8 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>partition ()</strong>
     </dt>
     <dd>
-    The function returns two iterators where elements do and do not satisfy the
- predicate.
+    The function returns two iterators where elements do and do
+ not satisfy the predicate.
  See <a href="https://luafun.github.io/filtering.html#fun.partition">fun.partition</a>.
 
 
@@ -1028,7 +1029,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Reducing__Folds"></a>Reducing: Folds </h2>
+    <h2 class="section-header "><a name="Reducing__Folds"></a>Reducing: Folds </h2>
 
     <dl class="function">
     <dt>
@@ -1036,8 +1037,8 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>foldl ()</strong>
     </dt>
     <dd>
-    The function reduces the iterator from left to right using the binary
- operator <code>accfun</code> and the initial value <code>initval</code>.
+    The function reduces the iterator from left to right using the
+ binary operator <code>accfun</code> and the initial value <code>initval</code>.
  See <a href="https://luafun.github.io/reducing.html#fun.foldl">fun.foldl</a>.
 
 
@@ -1053,7 +1054,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias to foldl().
- See <a href="../modules/molly.gen.html#foldl">gen.foldl</a> .
+ See <a href="../modules/molly.gen.html#foldl">gen.foldl</a>.
 
 
 
@@ -1108,7 +1109,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Reducing__Predicates"></a>Reducing: Predicates </h2>
+    <h2 class="section-header "><a name="Reducing__Predicates"></a>Reducing: Predicates </h2>
 
     <dl class="function">
     <dt>
@@ -1116,8 +1117,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>is_prefix_of ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/reducing.html#fun.is_prefix_of">fun.is<em>prefix</em>of</a>.
+     See <a href="https://luafun.github.io/reducing.html#fun.is_prefix_of">fun.is<em>prefix</em>of</a>.
 
 
 
@@ -1131,8 +1131,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>is_null ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/reducing.html#fun.is_null">fun.is_null</a>.
+     See <a href="https://luafun.github.io/reducing.html#fun.is_null">fun.is_null</a>.
 
 
 
@@ -1146,8 +1145,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>all ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/reducing.html#fun.all">fun.all</a>.
+     See <a href="https://luafun.github.io/reducing.html#fun.all">fun.all</a>.
 
 
 
@@ -1162,7 +1160,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for all().
- See <code>fun.all</code>.
+ See <a href="../modules/molly.gen.html#all">gen.all</a>.
 
 
 
@@ -1176,8 +1174,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>any ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/reducing.html#fun.any">fun.any</a>.
+     See <a href="https://luafun.github.io/reducing.html#fun.any">fun.any</a>.
 
 
 
@@ -1192,7 +1189,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     An alias for any().
- See <code>fun.any</code>.
+ See <a href="../modules/molly.gen.html#any">gen.any</a>.
 
 
 
@@ -1202,7 +1199,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Transformations"></a>Transformations </h2>
+    <h2 class="section-header "><a name="Transformations"></a>Transformations </h2>
 
     <dl class="function">
     <dt>
@@ -1210,8 +1207,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>map ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/transformations.html#fun.map">fun.map</a>.
+     See <a href="https://luafun.github.io/transformations.html#fun.map">fun.map</a>.
 
 
 
@@ -1225,8 +1221,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>enumerate ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/transformations.html#fun.enumerate">fun.enumerate</a>.
+     See <a href="https://luafun.github.io/transformations.html#fun.enumerate">fun.enumerate</a>.
 
 
 
@@ -1240,8 +1235,7 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>intersperse ()</strong>
     </dt>
     <dd>
-
- See <a href="https://luafun.github.io/transformations.html#fun.intersperse">fun.intersperse</a>.
+     See <a href="https://luafun.github.io/transformations.html#fun.intersperse">fun.intersperse</a>.
 
 
 
@@ -1251,7 +1245,7 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 </dd>
 </dl>
-    <h2><a name="Compositions"></a>Compositions </h2>
+    <h2 class="section-header "><a name="Compositions"></a>Compositions </h2>
 
     <dl class="function">
     <dt>
@@ -1259,10 +1253,10 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>zip (...)</strong>
     </dt>
     <dd>
-    Return a new iterator where i-th return value contains the i-th element
- from each of the iterators.  The returned iterator is truncated in length to
- the length of the shortest iterator. For multi-return iterators only the
- first variable is used.
+    Return a new iterator where i-th return value contains the
+ i-th element from each of the iterators.  The returned iterator
+ is truncated in length to the length of the shortest iterator.
+ For multi-return iterators only the first variable is used.
  See <a href="https://luafun.github.io/compositions.html#fun.zip">fun.zip</a>.
 
 
@@ -1293,13 +1287,14 @@ gen.map(w, gen.rands(1, 10):take(50))
     </dt>
     <dd>
     A cycled version of an iterator.
- Make a new iterator that returns elements from <code>{gen, param, state}</code> iterator
- until the end and then "restart" iteration using a saved clone of <code>{gen,
- param, state}</code>. The returned iterator is constant space and no return values
- are buffered. Instead of that the function make a clone of the source <code>{gen,
- param, state}</code> iterator. Therefore, the source iterator must be pure
- functional to make an indentical clone. Infinity iterators are supported,
- but are not recommended.
+ Make a new iterator that returns elements from
+ <code>{gen, param, state}</code> iterator until the end and then "restart"
+ iteration using a saved clone of <code>{gen, param, state}</code>. The
+ returned iterator is constant space and no return values are
+ buffered. Instead of that the function make a clone of the
+ source <code>{gen, param, state}</code> iterator. Therefore, the source
+ iterator must be pure functional to make an indentical clone.
+ Infinity iterators are supported, but are not recommended.
  See <a href="https://luafun.github.io/compositions.html#fun.cycle">fun.cycle</a>.
 
 
@@ -1329,11 +1324,13 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>chain (...)</strong>
     </dt>
     <dd>
-    Make an iterator that returns elements from the first iterator until it is
- exhausted, then proceeds to the next iterator, until all of the iterators are
- exhausted.  Used for treating consecutive iterators as a single iterator.
- Infinity iterators are supported, but are not recommended.
+    Make an iterator that returns elements from the first iterator
+ until it is exhausted, then proceeds to the next iterator,
+ until all of the iterators are exhausted.  Used for treating
+ consecutive iterators as a single iterator. Infinity iterators
+ are supported, but are not recommended.
  See <a href="https://luafun.github.io/compositions.html#fun.chain">fun.chain</a>.
+ from right).
 
 
     <h3>Parameters:</h3>
@@ -1350,27 +1347,27 @@ gen.map(w, gen.rands(1, 10):take(50))
     <h3>Returns:</h3>
     <ol>
 
-        an iterator, a consecutive iterator from sources (left from right).
+        an iterator, a consecutive iterator from sources (left
     </ol>
 
 
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt; fun.each(<span class="global">print</span>, fun.chain(fun.range(<span class="number">5</span>, <span class="number">1</span>, -<span class="number">1</span>), fun.range(<span class="number">1</span>, <span class="number">5</span>)))
- <span class="number">5</span>
- <span class="number">4</span>
- <span class="number">3</span>
- <span class="number">2</span>
- <span class="number">1</span>
- <span class="number">1</span>
- <span class="number">2</span>
- <span class="number">3</span>
- <span class="number">4</span>
- <span class="number">5</span>
- <span class="comment">---
-</span> ...</pre>
+        <pre class="example">&gt; fun.<span class="function-name">each</span>(<span class="global">print</span>, fun.<span class="function-name">chain</span>(
+&gt;   fun.<span class="function-name">range</span>(<span class="number">5</span>, <span class="number">1</span>, -<span class="number">1</span>), fun.<span class="function-name">range</span>(<span class="number">1</span>, <span class="number">5</span>)))
+<span class="number">5</span>
+<span class="number">4</span>
+<span class="number">3</span>
+<span class="number">2</span>
+<span class="number">1</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="number">4</span>
+<span class="number">5</span>
+<span class="comment">---
+</span>...</pre>
     </ul>
 
 </dd>
@@ -1379,18 +1376,19 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>cycle_times (...)</strong>
     </dt>
     <dd>
-    (TODO) Cycles between several generators on a rotating schedule.
- Takes a flat series of [time, generator] pairs.
+    Cycles between several generators on a rotating schedule.
+ Takes a flat series of [time, generator] pairs. Emits from the
+ first generator for <code>time</code> seconds, then from the second
+ generator for <code>time</code> seconds, and so on, restarting from the
+ first generator after all generators were used. State of every
+ generator is preserved from cycle to cycle. The iterator stops
+ when one of the generators is exhausted.
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">...</span>
-
-<ul>
-    <li>an iterators</li>
-</ul>
-
+         a flat series of [time, generator] pairs.
         </li>
     </ul>
 
@@ -1402,6 +1400,19 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; gen.<span class="function-name">each</span>(<span class="global">print</span>, gen.<span class="function-name">cycle_times</span>(
+&gt;   <span class="number">0.1</span>, gen.<span class="function-name">duplicate</span>(<span class="string">'a'</span>),
+&gt;   <span class="number">0.1</span>, gen.<span class="function-name">duplicate</span>(<span class="string">'b'</span>))
+&gt; )
+a
+a
+a
+b
+b
+...</pre>
+    </ul>
 
 </dd>
     <dt>
@@ -1409,13 +1420,8 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>mix (...)</strong>
     </dt>
     <dd>
-    (TODO) A random mixture of several generators.  Takes a collection of generators
- and chooses between them uniformly.</p>
-
-<p> To be precise, a mix behaves like a sequence of one-time, randomly selected
- generators from the given collection. This is efficient and prevents
- multiple generators from competing for the next slot, making it hard to
- control the mixture of operations.
+    A random mixture of a number generators.  Takes a collection of
+ generators and chooses between them uniformly.
 
 
     <h3>Parameters:</h3>
@@ -1437,6 +1443,22 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; molly.gen.<span class="function-name">range</span>(<span class="number">1</span>, <span class="number">5</span>):<span class="function-name">mix</span>(molly.gen.<span class="function-name">range</span>(<span class="number">5</span>, <span class="number">10</span>)):<span class="function-name">totable</span>()
+<span class="comment">---
+</span>- - <span class="number">1</span>
+  - <span class="number">5</span>
+  - <span class="number">2</span>
+  - <span class="number">3</span>
+  - <span class="number">6</span>
+  - <span class="number">7</span>
+  - <span class="number">4</span>
+  - <span class="number">8</span>
+  - <span class="number">9</span>
+  - <span class="number">5</span>
+  - <span class="number">10</span></pre>
+    </ul>
 
 </dd>
     <dt>
@@ -1444,19 +1466,17 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>flip_flop (a, b)</strong>
     </dt>
     <dd>
-    (TODO) Emits an operation from generator A, then B, then A again, then B again,
- etc.  Stops as soon as any gen is exhausted.
+    Emits an operation from generator A, then B, then A again,
+ then B again, etc.  Stops as soon as any generator is exhausted.
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">a</span>
-            <span class="types"><span class="type">number</span></span>
-         generator A.
+         a generator.
         </li>
         <li><span class="parameter">b</span>
-            <span class="types"><span class="type">number</span></span>
-         generator B.
+         a generator.
         </li>
     </ul>
 
@@ -1468,10 +1488,19 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; gen.<span class="function-name">each</span>(<span class="global">print</span>, gen.<span class="function-name">flip_flop</span>(
+&gt;   gen.<span class="function-name">range</span>(<span class="number">1</span>, <span class="number">2</span>), gen.<span class="function-name">duplicate</span>(<span class="string">'x'</span>)))
+<span class="number">1</span>
+x
+<span class="number">2</span>
+x</pre>
+    </ul>
 
 </dd>
 </dl>
-    <h2><a name="Special_generators"></a>Special generators </h2>
+    <h2 class="section-header "><a name="Special_generators"></a>Special generators </h2>
 
     <dl class="function">
     <dt>
@@ -1479,8 +1508,9 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>log ()</strong>
     </dt>
     <dd>
-    (TODO) A generator which, when asked for an operation, logs a message and yields
-  nil.  Occurs only once; use <code>repeat</code> to repeat.
+    A generator which, when asked for an operation, logs
+ a message and yields <code>nil</code>.  Occurs only once; use <code>repeat</code> to
+ repeat.
 
 
 
@@ -1492,6 +1522,15 @@ gen.map(w, gen.rands(1, 10):take(50))
 
 
 
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example">&gt; molly.gen.<span class="function-name">iter</span>({<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>}):<span class="function-name">log</span>()
+[INFO  <span class="number">2024</span>-<span class="number">07</span>-<span class="number">07</span> <span class="number">11</span>:<span class="number">38</span>:<span class="number">47</span>:<span class="number">119933</span>]: <span class="number">1</span>
+<span class="comment">---
+</span>- null
+...
+<span class="comment">--</span></pre>
+    </ul>
 
 </dd>
     <dt>
@@ -1499,7 +1538,8 @@ gen.map(w, gen.rands(1, 10):take(50))
     <strong>stagger (dt)</strong>
     </dt>
     <dd>
-    (TODO) Operations from that generator are scheduled at uniformly random intervals
+    (TODO) Operations from that generator are scheduled at
+ uniformly random intervals
  between <code>0</code> to <code>2 * (dt seconds)</code>.
 
 
@@ -1547,22 +1587,23 @@ gen.map(w, gen.rands(1, 10):take(50))
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- &gt;  <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.time_limit(gen.range(<span class="number">1</span>, <span class="number">100</span>), <span class="number">0.0001</span>) <span class="keyword">do</span> <span class="global">print</span>(v) <span class="keyword">end</span>
- <span class="number">1</span>
- <span class="number">2</span>
- <span class="number">3</span>
- <span class="number">4</span>
- <span class="number">5</span>
- <span class="number">6</span>
- <span class="number">7</span>
- <span class="number">8</span>
- <span class="number">9</span>
- <span class="number">10</span>
- <span class="number">11</span>
- <span class="number">12</span>
- <span class="comment">---
-</span> ...</pre>
+        <pre class="example">&gt;  <span class="keyword">for</span> _it, v <span class="keyword">in</span> gen.<span class="function-name">time_limit</span>(gen.<span class="function-name">range</span>(<span class="number">1</span>, <span class="number">100</span>), <span class="number">0.0001</span>) <span class="keyword">do</span>
+&gt;    <span class="global">print</span>(v)
+&gt;  <span class="keyword">end</span>
+<span class="number">1</span>
+<span class="number">2</span>
+<span class="number">3</span>
+<span class="number">4</span>
+<span class="number">5</span>
+<span class="number">6</span>
+<span class="number">7</span>
+<span class="number">8</span>
+<span class="number">9</span>
+<span class="number">10</span>
+<span class="number">11</span>
+<span class="number">12</span>
+<span class="comment">---
+</span>...</pre>
     </ul>
 
 </dd>
@@ -1572,7 +1613,8 @@ gen.map(w, gen.rands(1, 10):take(50))
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

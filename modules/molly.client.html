@@ -26,6 +26,7 @@
 <br/>
 <h1>molly</h1>
 
+
 <ul>
   <li><a href="../index.html">Index</a></li>
 </ul>
@@ -33,32 +34,33 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
+<li><a href="#Local_Functions">Local Functions</a></li>
 </ul>
 
 
 <h2>Modules</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
-  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
-  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
-  <li><a href="../modules/molly.history.html">molly.history</a></li>
-  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
-  <li><a href="../modules/molly.op.html">molly.op</a></li>
-  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+<ul class="nowrap">
   <li><strong>molly.client</strong></li>
-  <li><a href="../modules/molly.html">molly</a></li>
-  <li><a href="../modules/molly.db.html">molly.db</a></li>
-  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
   <li><a href="../modules/molly.thread_coroutine.html">molly.thread_coroutine</a></li>
-  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
-  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.thread_fiber.html">molly.thread_fiber</a></li>
+  <li><a href="../modules/molly.db.html">molly.db</a></li>
+  <li><a href="../modules/molly.gen.html">molly.gen</a></li>
+  <li><a href="../modules/molly.history.html">molly.history</a></li>
+  <li><a href="../modules/molly.html">molly</a></li>
   <li><a href="../modules/molly.log.html">molly.log</a></li>
+  <li><a href="../modules/molly.nemesis.html">molly.nemesis</a></li>
+  <li><a href="../modules/molly.op.html">molly.op</a></li>
+  <li><a href="../modules/molly.runner.html">molly.runner</a></li>
+  <li><a href="../modules/molly.tests.html">molly.tests</a></li>
+  <li><a href="../modules/molly.thread.html">molly.thread</a></li>
+  <li><a href="../modules/molly.utils.html">molly.utils</a></li>
 </ul>
 <h2>Topics</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="">
   <li><a href="../topics/README.md.html">README</a></li>
 </ul>
 <h2>Examples</h2>
-<ul class="$(kind=='Topics' and '' or 'nowrap'">
+<ul class="nowrap">
   <li><a href="../examples/sqlite-rw-register.lua.html">sqlite-rw-register.lua</a></li>
   <li><a href="../examples/sqlite-list-append.lua.html">sqlite-list-append.lua</a></li>
 </ul>
@@ -69,9 +71,27 @@
 
 <h1>Module <code>molly.client</code></h1>
 <p>Module with default Molly client.</p>
-<p>
+<p> A client is executed by a thread pool in a number of stages:
+ open a connection, set up the DB, invoke operations, tear down
+ and close. When a runner passes <code>opts.barriers</code>
+ (see <a href="../modules/molly.thread.html#">molly.thread</a>), threads synchronize at stage
+ boundaries: no thread runs operations until every thread opened
+ a connection and set up the DB, and no thread tears down until
+ every thread finished operations. Only <code>open</code>, <code>setup</code> and
+ <code>invoke</code> boundaries are synchronized; threads tear down and
+ close connections independently after the last barrier.</p>
 
-</p>
+<p> An operation that crashed a client is recorded as an <code>info</code>
+ operation (an indeterminate state) and the process is
+ restarted, as in Jepsen. A client that is not reusable is
+ reopened before the next operation; see the <code>reusable</code>
+ method below.</p>
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/molly.gen.html#">molly.gen</a></li>
+         <li><a href="../modules/molly.tests.html#">molly.tests</a></li>
+         <li><a href="../modules/molly.thread.html#">molly.thread</a></li>
+    </ul>
 
 
 <h2><a href="#Functions">Functions</a></h2>
@@ -81,12 +101,22 @@
 	<td class="summary">Function that returns a default client implementation.</td>
 	</tr>
 </table>
+<h2><a href="#Local_Functions">Local Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#run_client">run_client (thread_id, opts)</a></td>
+	<td class="summary">
+
+</td>
+	</tr>
+</table>
 
 <br/>
 <br/>
 
 
-    <h2><a name="Functions"></a>Functions</h2>
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
     <dl class="function">
     <dt>
     <a name = "new"></a>
@@ -95,31 +125,61 @@
     <dd>
     Function that returns a default client implementation. </p>
 
-<p> Default implementation of a client defines open, setup, teardown and close
- methods with empty implementation that always returns true.</p>
+<p> Default implementation of a client defines open, setup,
+ teardown and close methods with empty implementation that
+ always returns true.</p>
 
 <p> Client must implement the following methods:</p>
 
-<p> <strong>open</strong> - function that open a connection to a database instance. Function
- must return a boolean value, true in case of success and false otherwise.</p>
+<p> <strong>open</strong> - function that open a connection to a database
+ instance. Function must raise an error on failure. Two
+ arguments are passed to the function:
+   - <code>address</code> - an 'address' of the remote node
+   - <code>client_data</code> - a table with client's data</p>
 
-<p> <strong>setup</strong> - function that set up a database instance. Function must return a
- boolean value, true in case of success and false otherwise.</p>
+<p> <strong>setup</strong> - function that set up a database instance. Function
+ must raise an error on failure. A single argument is passed
+ to the function:
+   - <code>client_data</code> - a table with client's data</p>
 
-<p> <strong>invoke</strong> - function that accept an operation and invoke it on database
- instance, function should process user-defined types of operations and
- execute intended actions on databases. Function must return an operation
- after invokation.</p>
+<p> <strong>invoke</strong> - function that accept an operation and invoke it
+ on database instance, function should process user-defined
+ types of operations and execute intended actions on databases.
+ Function must return an operation after invocation.
+ Two arguments are passed to the function:
+   - <a href="../modules/molly.op.html">op</a> - an operation generated by a test generator
+   - <code>client_data</code> - a table with client's data</p>
 
-<p> <strong>teardown</strong> - function that tear down a database instance. Function must
- return a boolean value, true in case of success and false otherwise.</p>
+<p> An <code>invoke</code> that raises an error crashes the client. The
+ operation is recorded in a history as <code>info</code> (an indeterminate
+ state: it may or may not have taken place) and the process is
+ restarted. See <code>reusable</code> below.</p>
 
-<p> <strong>close</strong> - function that close connection to a database instance. Function
- must return a boolean value, true in case of success and false otherwise.</p>
+<p> <strong>teardown</strong> - function that tear down a database instance.
+ Function must raise an error on failure. Single argument is
+ passed to the function:
+   - <code>client_data</code> - a table with client's data</p>
 
-<p> In general it is recommended to raise an error in case of fatal errors like
- failed database setup, teardown or connection and set status of operation to
- 'fail' when key is not found in database table etc.
+<p> <strong>close</strong> - function that close connection to a database
+ instance. Function must raise an error on failure. Single
+ argument is passed to the function:
+   - <code>client_data</code> - a table with client's data</p>
+
+<p> <strong>reusable</strong> - optional function that reports whether a client
+ survives a crashed invocation without a restart. A single
+ argument is passed to the function:
+   - <code>client_data</code> - a table with client's data
+ A client is not reusable by default, as in Jepsen: after a
+ crashed <code>invoke</code> (or an <code>invoke</code> that returned <code>info</code>) the
+ connection is reopened with <code>close</code> and <code>open</code> before the next
+ operation. A failed reconnect is recorded as a <code>fail</code>
+ operation and retried on the next operation.</p>
+
+<p> In general it is recommended to raise an error in case of fatal
+ errors like failed database setup, teardown or connection and
+ set status of operation to 'fail' when key is not found in
+ database table etc. A returned <code>false</code> is not treated as a
+ failure and does not abort a run.
 
 
 
@@ -130,15 +190,53 @@
     </ol>
 
 
+    <h3>See also:</h3>
+    <ul>
+         <li><a href="../modules/molly.tests.html#">molly.tests</a></li>
+         <li><a href="../modules/molly.gen.html#">molly.gen</a></li>
+         <li><a href="../modules/molly.op.html#">molly.op</a></li>
+    </ul>
 
     <h3>Usage:</h3>
     <ul>
-        <pre class="example">
- <span class="keyword">local</span> client = <span class="global">require</span>(<span class="string">'molly'</span>).client.new()
- client.invoke = <span class="keyword">function</span>(op)
-     <span class="keyword">return</span> <span class="keyword">true</span>
- <span class="keyword">end</span></pre>
+        <pre class="example"><span class="keyword">local</span> client = <span class="global">require</span>(<span class="string">'molly'</span>).client.<span class="function-name">new</span>()
+client.invoke = <span class="keyword">function</span>(op)
+    <span class="keyword">return</span> <span class="keyword">true</span>
+<span class="keyword">end</span></pre>
     </ul>
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Local_Functions"></a>Local Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "run_client"></a>
+    <strong>run_client (thread_id, opts)</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">thread_id</span>
+
+
+
+        </li>
+        <li><span class="parameter">opts</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
 
 </dd>
 </dl>
@@ -147,7 +245,8 @@
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.2</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-10-22 11:22:25 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
