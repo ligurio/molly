@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Removed
+
+### Fixed
+
+[Unreleased]: https://github.com/ligurio/molly/compare/0.2.0...HEAD
+
+## [0.2.0] - 2026-10-22
+
+### Added
+
 - A `log()` iterator.
 - A `mix()` iterator.
 - A CAS-register generator.
@@ -101,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   wall-clock time (`clock.realtime`) instead of deriving the
   fraction from CPU time; the sub-second part has a fixed width.
 
-[Unreleased]: https://github.com/ligurio/molly/compare/0.1.0...HEAD
+[0.2.0]: https://github.com/ligurio/molly/compare/0.1.0...0.2.0
 
 ## 0.1.0
 
