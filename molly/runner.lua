@@ -61,6 +61,44 @@
 -- finished operations. Threads tear down and close connections
 -- independently after the last barrier.
 --
+--### Test Summary
+--
+-- When a test finishes, `run_test()` logs a summary. The same
+-- values are available in a table returned by the internal
+-- `summary()` function. Each number in the summary means the
+-- following:
+--
+-- - **Total planned requests** (`ops_planned`) is a number of
+--   operations of type `invoke` in the history, that is requests
+--   actually issued by client processes. It is not a number of
+--   operations a generator was asked to produce.
+-- - **Total completed requests** (`ops_completed`) is a number of
+--   operations of type `ok`, `fail` or `info`, that is operations
+--   that got a result. An `info` operation is a completion too.
+--   It includes nemesis `info` operations that have no matching
+--   `invoke`, so `ops_completed` may be greater than
+--   `ops_planned`.
+-- - **Total unfinished requests** (`ops_unfinished`) is a number
+--   of client invocations without a matching completion, that is
+--   `#history:pending()`. It is not necessarily
+--   `ops_planned` - `ops_completed`, because `ops_completed`
+--   also counts nemesis `info` operations. For a history without
+--   nemesis operations the equality holds.
+-- - **Requests per sec** (`rps`) is an average number of
+--   completed operations per second:
+--   `ops_completed / total_time`, rounded down, where
+--   `total_time` is a monotonic wall-clock duration. It is not
+--   logged when it cannot be calculated: when no operations
+--   completed or when the duration is not positive. The number of
+--   completed operations includes nemesis completions.
+--
+-- Planned requests are always logged at the debug level.
+-- Completed requests and requests per second are logged at the
+-- debug level only when RPS can be calculated. Unfinished
+-- requests are logged as a warning with their processes, indices
+-- and operations when there are any, otherwise as a debug message
+-- with zero.
+--
 -- @see molly.thread
 
 local checks = require('molly.dev_checks')
@@ -82,8 +120,9 @@ local has_json, _ = pcall(require, 'molly.json')
 --
 -- @number total_time Test duration in seconds.
 -- @table history History of a completed test.
--- @return table with `ops_planned`, `ops_completed` and `rps`
--- (`rps` is nil when it cannot be calculated).
+-- @return table with `ops_planned`, `ops_completed`,
+-- `ops_unfinished` and `rps` (`rps` is nil when it cannot be
+-- calculated).
 --
 -- @function summary
 local function summary(total_time, history)
@@ -91,6 +130,7 @@ local function summary(total_time, history)
 
     local ops_completed = history:ops_completed()
     local ops_planned = history:ops_planned()
+    local ops_unfinished = #history:pending()
     local rps
     if ops_completed ~= 0 and total_time > 0 then
         rps = math.floor(ops_completed / total_time)
@@ -98,6 +138,7 @@ local function summary(total_time, history)
     return {
         ops_planned = ops_planned,
         ops_completed = ops_completed,
+        ops_unfinished = ops_unfinished,
         rps = rps,
     }
 end
@@ -119,6 +160,18 @@ local function print_summary(total_time, history, opts)
         log.debug('Total completed requests: %-35s',
             tostring(stats.ops_completed))
         log.debug('Requests per sec: %-35s', tostring(stats.rps))
+    end
+    if stats.ops_unfinished > 0 then
+        log.warn('Total unfinished requests: %s',
+            tostring(stats.ops_unfinished))
+        for _, operation in ipairs(history:pending()) do
+            log.warn('  process %s index %s %s is unfinished',
+                tostring(operation.process),
+                tostring(operation.index),
+                tostring(operation.f))
+        end
+    else
+        log.debug('Total unfinished requests: %-35s', tostring(0))
     end
 end
 
@@ -302,8 +355,10 @@ local function run_test(workload, opts)
 
     -- Every collected history must be well-formed. Log the
     -- findings and fail the run when it is not. A non-monotonic
-    -- time is only a warning. History reports are written above,
-    -- so an invalid history can still be inspected.
+    -- time is only a warning, and invocations without completions
+    -- are legal pending operations, as in Jepsen. History reports
+    -- are written above, so an invalid history can still be
+    -- inspected.
     local valid, findings = history:is_well_formed()
     gen_lib.iter(findings or {}):each(function(item)
         local write = item.severity == 'warning' and log.warn or log.error

@@ -18,4 +18,9 @@ tparam_alias('table', 'table')
 tparam_alias('integer', 'integer')
 tparam_alias('boolean', 'boolean')
 
+-- EmmyLua annotations are not LuaDoc tags.
+custom_tags = {
+    { 'async', hidden = true },
+}
+
 -- vim: ft=lua:

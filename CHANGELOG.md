@@ -35,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   finished operations.
 - An optional `reusable` client method that reports whether a
   client survives a crashed invocation without a restart.
+- A `history:pending()` method that returns invocations without a
+  completion (unfinished operations of client processes).
+- An `ops_unfinished` field in a test summary and a warning that
+  lists processes and indices of unfinished operations.
 - A public `history:is_well_formed()` method that validates an
   operation history against the structure and semantics from the
   Jepsen history documentation.
@@ -88,6 +92,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   A non-reusable client is reopened before the next operation and
   a failed reconnect is recorded as a `fail` operation.
 - An `info` operation counts as a completed operation.
+- An invalid result of a client `invoke` (not a table, a type
+  other than `ok`, `info` or `fail`, or a mismatched process or
+  `f`) is recorded as an `info` operation and restarts the
+  process instead of leaving a dangling `invoke` and aborting a
+  run, as in Jepsen. An error raised by `reusable` or `close`
+  during a client reopen is recorded as `info` and restarts the
+  process too.
+- A dangling `invoke` at the end of a history is treated as a
+  legal pending operation, as in Jepsen, instead of making the
+  history invalid. A test with unfinished operations completes
+  successfully and reports them in the summary.
 - Worker errors and `false` results returned by `open`, `setup`,
   `teardown` and `close` are propagated from a thread pool to
   `run_test()`.

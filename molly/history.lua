@@ -176,8 +176,13 @@ end
 --   unique (error) and strictly ascending (error); a duplicate is
 --   reported once;
 -- - `time` is present and is a numeric integer (error) and
---   monotonic (warning);
--- - no `invoke` is left without a completion at the end (error).
+--   monotonic (warning).
+--
+-- An `invoke` left without a completion at the end of the
+-- history is a legal pending state, not an error, as in Jepsen:
+-- the operation may still be running or the run was aborted.
+-- Checkers treat such an operation as possibly applied. See
+-- `pending`.
 --
 -- "Numeric" means a Lua number or a numeric cdata value (for
 -- example, a Tarantool 64-bit monotonic clock). Warnings do not
@@ -245,12 +250,9 @@ local function is_well_formed(x)
         add_error(findings, 'history is not a dense array', nil)
     end
 
-    -- A history must not contain dangling invocations without a
-    -- completion.
-    for process, invoke_op in pairs(state.pending) do
-        add_error(findings, ('process %s has a dangling invoke')
-            :format(tostring(process)), invoke_op)
-    end
+    -- A dangling invocation at the end of a history is a legal
+    -- pending state, as in Jepsen, so it is not reported as an
+    -- error here.
 
     local ok = true
     for _, item in ipairs(findings) do
@@ -291,8 +293,14 @@ local function to_json(self)
     return json.encode(self.history)
 end
 
--- Get a table with completed operations in a history.
--- @return table
+-- Get a number of completed operations in a history.
+--
+-- An operation is completed when its type is `ok`, `fail` or
+-- `info`; an `info` operation is a completion as well. The count
+-- includes completions of nemesis processes, which have no
+-- matching `invoke` operation.
+--
+-- @return number
 -- @function ops_completed
 local function ops_completed(self)
     dev_checks('<history>')
@@ -300,13 +308,62 @@ local function ops_completed(self)
     return gen.filter(op.is_completed, self.history):length()
 end
 
--- Get a table with planned operations in a history.
--- @return table
+-- Get a number of planned operations in a history.
+--
+-- An operation is planned when its type is `invoke`, that is a
+-- client process has started (and possibly finished) it. The
+-- count is not a number of operations a generator was asked to
+-- produce. Nemesis processes are recorded as `info`, so they do
+-- not add planned operations.
+--
+-- @return number
 -- @function ops_planned
 local function ops_planned(self)
     dev_checks('<history>')
 
     return gen.filter(op.is_planned, self.history):length()
+end
+
+-- Get a list of unfinished operations in a history.
+--
+-- An invocation is unfinished when a client process (an integer
+-- process identifier) has an `invoke` without a matching `ok`,
+-- `fail` or `info`. Such a process is either still running the
+-- operation or the run was aborted. In the Jepsen history format
+-- an unfinished invocation is a legal pending state rather than
+-- an error, and checkers treat it as an operation that may have
+-- been applied.
+--
+-- Non-integer (nemesis) processes are ignored: their operations
+-- are recorded as `info` and do not follow the client lifecycle.
+-- The result is sorted by operation index.
+--
+-- @return table
+-- @function pending
+local function pending(self)
+    dev_checks('<history>')
+
+    local open = {}
+    for _, operation in ipairs(self.history) do
+        local process = operation.process
+        if type(process) == 'number' then
+            if operation.type == 'invoke' then
+                open[process] = operation
+            else
+                open[process] = nil
+            end
+        end
+    end
+
+    local result = {}
+    for _, operation in pairs(open) do
+        table.insert(result, operation)
+    end
+    table.sort(result, function(a, b)
+        return (a.index or 0) < (b.index or 0)
+    end)
+
+    return result
 end
 
 -- Add an operation to a history.
@@ -323,6 +380,7 @@ mt = {
     __type = '<history>',
     __index = {
         add = add,
+        pending = pending,
         ops_planned = ops_planned,
         ops_completed = ops_completed,
         to_json = to_json,

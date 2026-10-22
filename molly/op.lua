@@ -72,6 +72,11 @@ local dev_checks = require('molly.dev_checks')
 local pprint = require('molly.json').encode
 
 -- Define whether operation is in planned state.
+--
+-- Only an `invoke` operation is planned; it is recorded when a
+-- client process starts an operation. See
+-- `molly.op.is_completed`.
+--
 -- @table op Operation.
 -- @return boolean
 --
@@ -82,6 +87,11 @@ local function is_planned(op)
 end
 
 -- Define whether operation is in completed state.
+--
+-- Operations of type `ok`, `fail` and `info` are completed; an
+-- `info` operation means an indeterminate result. See
+-- `molly.op.is_planned`.
+--
 -- @table op Operation.
 -- @return boolean
 --

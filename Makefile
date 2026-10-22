@@ -29,7 +29,7 @@ DEV ?= OFF
 all: check test
 
 doc:
-	@ldoc -c $(PROJECT_DIR)/doc/config.ld -v \
+	@ldoc --fatalwarnings -c $(PROJECT_DIR)/doc/config.ld -v \
               -d $(PROJECT_DIR)/doc/html/ \
                  $(PROJECT_DIR)/molly
 
